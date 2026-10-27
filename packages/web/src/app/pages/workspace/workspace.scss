@@ -9,22 +9,31 @@
   width: 264px;
 }
 
+// The header floats over the document area; the area runs under it to the window's
+// top, right and bottom edges, so a scrolled sheet slides under the glass and blurs.
+// The sidebar stays a boundary: the area starts at its right edge.
 .document-column {
-  display: flex;
+  position: relative;
   flex: 1;
-  flex-direction: column;
-  gap: var(--cvc-gap);
   min-width: 0;
 }
 
+.header {
+  position: relative;
+  z-index: 1;
+}
+
 .document-area {
-  flex: 1;
-  min-height: 0;
+  position: absolute;
+  inset: calc(-1 * var(--cvc-gap));
+  // Space the content keeps clear at the top: the shell's padding, the header, a gap.
+  --cvc-canvas-inset-top: calc(2 * var(--cvc-gap) + var(--cvc-header-height, 0px));
 }
 
 .empty {
-  margin: 48px auto 0;
   max-width: 420px;
+  margin: 0 auto;
+  padding-top: calc(var(--cvc-canvas-inset-top) + 48px);
   color: var(--bs-secondary-color);
   text-align: center;
 }

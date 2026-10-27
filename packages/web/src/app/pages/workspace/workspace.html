@@ -4,8 +4,8 @@
   [selectedId]="selectedId()"
   (selectCv)="selectedId.set($event)"
 />
-<div class="document-column">
-  <cvc-document-header [cv]="selectedCv()" [(mode)]="mode" />
+<div class="document-column" [style.--cvc-header-height.px]="headerHeight()">
+  <cvc-document-header class="header" [cv]="selectedCv()" [(mode)]="mode" />
   <main class="document-area">
     @if (documentSrc(); as src) {
       <cvc-document-canvas [src]="src" [mode]="mode()" />

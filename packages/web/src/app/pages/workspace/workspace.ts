@@ -1,4 +1,15 @@
-import { ChangeDetectionStrategy, Component, computed, inject, linkedSignal, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  DestroyRef,
+  ElementRef,
+  afterNextRender,
+  computed,
+  inject,
+  linkedSignal,
+  signal,
+  viewChild,
+} from '@angular/core';
 import { CvApi } from '../../api/cv-api';
 import { toCvListItem } from '../../api/to-cv-list-item';
 import { DocumentCanvas } from '../../layout/document-canvas/document-canvas';
@@ -35,4 +46,22 @@ export class Workspace {
   });
 
   protected readonly mode = signal<PreviewMode>('visual');
+
+  /** Height of the floating header; the document area keeps this much clear at the top. */
+  protected readonly headerHeight = signal(0);
+  private readonly header = viewChild.required<DocumentHeader, ElementRef<HTMLElement>>(DocumentHeader, {
+    read: ElementRef,
+  });
+
+  constructor() {
+    const destroyRef = inject(DestroyRef);
+    afterNextRender(() => {
+      const element = this.header().nativeElement;
+      const observer = new ResizeObserver(() =>
+        this.headerHeight.set(element.getBoundingClientRect().height),
+      );
+      observer.observe(element);
+      destroyRef.onDestroy(() => observer.disconnect());
+    });
+  }
 }
