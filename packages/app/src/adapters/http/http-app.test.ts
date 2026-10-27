@@ -12,8 +12,8 @@ function setup() {
       return () => {};
     },
   };
-  const { app } = createHttpApp(repository);
-  return { app, notify: () => notify() };
+  const { app, close } = createHttpApp(repository);
+  return { app, close, notify: () => notify() };
 }
 
 describe('HTTP API v1', () => {
@@ -52,5 +52,15 @@ describe('HTTP API v1', () => {
     notify();
     expect(await read()).toContain('event: cvs-changed');
     controller.abort();
+  });
+
+  it('ends open event streams on close', async () => {
+    const { app, close } = setup();
+    const response = await app.request('/api/v1/events');
+    const reader = (response.body as ReadableStream<Uint8Array>).getReader();
+    await reader.read(); // "ready"
+
+    close();
+    expect((await reader.read()).done).toBe(true);
   });
 });
