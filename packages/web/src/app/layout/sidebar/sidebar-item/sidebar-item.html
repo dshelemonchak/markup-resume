@@ -1,0 +1,16 @@
+<button
+  type="button"
+  class="item"
+  [class.selected]="selected()"
+  [attr.aria-current]="selected() ? 'true' : null"
+  (click)="selectCv.emit(item().id)"
+>
+  <span class="status" [class]="item().status" aria-hidden="true"></span>
+  <span class="text">
+    <span class="title">{{ item().title }}</span>
+    <span class="subtitle">{{ item().subtitle }}</span>
+  </span>
+  @if (item().pinned) {
+  <i class="bi bi-pin-angle pin" role="img" aria-label="Pinned"></i>
+  }
+</button>

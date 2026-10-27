@@ -1,0 +1,7 @@
+<cvc-sidebar
+  class="sidebar"
+  [items]="cvs()"
+  [selectedId]="selectedId()"
+  (selectCv)="selectedId.set($event)"
+/>
+<main class="document-area"></main>

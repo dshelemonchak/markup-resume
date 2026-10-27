@@ -1,0 +1,65 @@
+<aside cvc-glass-panel class="sidebar" aria-label="CVs">
+  <div class="brand">
+    <span class="logo" aria-hidden="true"></span>
+    <span class="name">cv-kit</span>
+  </div>
+
+  <!-- Placeholder: import is not implemented yet. -->
+  <button type="button" class="btn btn-outline-secondary btn-sm import">
+    <i class="bi bi-plus-lg" aria-hidden="true"></i>
+    Import HTML
+  </button>
+
+  <!-- Placeholder: search is not implemented yet. -->
+  <div>
+    <label for="cv-search" class="visually-hidden">Search CVs</label>
+    <input
+      id="cv-search"
+      type="search"
+      class="form-control form-control-sm search"
+      placeholder="Search CVs"
+    />
+  </div>
+
+  <nav class="lists" aria-label="CV list">
+    @if (pinned().length) {
+    <section class="group" aria-labelledby="sidebar-pinned">
+      <h2 id="sidebar-pinned" class="group-title">Pinned</h2>
+      <ul class="items">
+        @for (item of pinned(); track item.id) {
+        <li>
+          <cvc-sidebar-item
+            [item]="item"
+            [selected]="item.id === selectedId()"
+            (selectCv)="selectCv.emit($event)"
+          />
+        </li>
+        }
+      </ul>
+    </section>
+    }
+
+    <section class="group" aria-labelledby="sidebar-all">
+      <h2 id="sidebar-all" class="group-title">All CVs</h2>
+      <ul class="items">
+        @for (item of others(); track item.id) {
+        <li>
+          <cvc-sidebar-item
+            [item]="item"
+            [selected]="item.id === selectedId()"
+            (selectCv)="selectCv.emit($event)"
+          />
+        </li>
+        } @empty {
+        <li class="empty">No CVs yet</li>
+        }
+      </ul>
+    </section>
+  </nav>
+
+  <!-- Placeholder: the real connection state comes from the server later. -->
+  <div class="connection">
+    <span class="dot" aria-hidden="true"></span>
+    Claude connected · MCP
+  </div>
+</aside>

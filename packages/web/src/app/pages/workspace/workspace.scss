@@ -1,0 +1,15 @@
+:host {
+  display: flex;
+  gap: var(--cvc-gap);
+  height: 100%;
+}
+
+.sidebar {
+  flex: none;
+  width: 264px;
+}
+
+.document-area {
+  flex: 1;
+  min-width: 0;
+}
