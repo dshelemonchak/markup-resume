@@ -12,7 +12,8 @@
     "format:check": "prettier --check .",
     "typecheck": "pnpm -r --parallel typecheck",
     "test": "pnpm -r test",
-    "check": "pnpm lint && pnpm format:check && pnpm typecheck && pnpm test"
+    "check": "pnpm lint && pnpm format:check && pnpm typecheck && pnpm test",
+    "seed": "pnpm --filter @cv-kit/app seed"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

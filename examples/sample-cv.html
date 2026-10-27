@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="en" data-cv-mode="visual">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Alex Morgan – Frontend Engineer CV</title>
+    <meta name="author" content="Alex Morgan" />
+    <meta name="cv:title" content="Sample — Frontend Engineer" />
+    <!-- Fictional person. Sample document for the UI until real CVs come from the server. -->
+    <style>
+      :root {
+        --cv-ink: #111;
+        --cv-meta: #555;
+        --cv-text: #333;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      @page {
+        size: A4;
+        margin: 0;
+      }
+
+      body {
+        margin: 0;
+        background: #fff;
+        color: var(--cv-ink);
+        font:
+          10pt/1.45 'Inter',
+          -apple-system,
+          'Helvetica Neue',
+          Arial,
+          sans-serif;
+      }
+
+      h1,
+      h2,
+      h3,
+      p,
+      ul {
+        margin: 0;
+      }
+
+      ul {
+        padding-left: 1.2em;
+      }
+
+      a {
+        color: inherit;
+      }
+
+      .page {
+        width: 210mm;
+        min-height: 297mm;
+        padding: 16mm;
+      }
+
+      .cv-header .name {
+        font-size: 22pt;
+        line-height: 1.2;
+      }
+
+      .cv-header .headline {
+        margin-top: 2pt;
+        color: var(--cv-meta);
+      }
+
+      h2 {
+        margin-bottom: 6pt;
+        font-size: 11pt;
+      }
+
+      section + section {
+        margin-top: 14pt;
+      }
+
+      #summary {
+        margin-top: 14pt;
+      }
+
+      .columns {
+        display: grid;
+        grid-template-columns: 52mm 1fr;
+        gap: 10mm;
+        margin-top: 14pt;
+      }
+
+      .contact-list,
+      .skill-list,
+      .language-list {
+        padding: 0;
+        list-style: none;
+        color: var(--cv-text);
+      }
+
+      .skill-group + .skill-group {
+        margin-top: 8pt;
+      }
+
+      .skill-group h3 {
+        font-size: 10pt;
+        font-weight: 600;
+      }
+
+      .project + .project {
+        margin-top: 12pt;
+      }
+
+      .project-header .dates,
+      .project-header .project-domain {
+        color: var(--cv-meta);
+      }
+
+      .project-header .role {
+        font-size: 10pt;
+      }
+
+      .achievements {
+        margin-top: 4pt;
+        color: var(--cv-text);
+      }
+
+      /* ATS mode: one column, logical order, no decoration. */
+      html[data-cv-mode='ats'] .columns {
+        display: block;
+      }
+
+      html[data-cv-mode='ats'] .columns section {
+        margin-top: 14pt;
+      }
+
+      html[data-cv-mode='ats'] h2 {
+        text-transform: uppercase;
+      }
+    </style>
+  </head>
+  <body>
+    <main class="page cv">
+      <header class="cv-header" id="header" data-cv-section="header">
+        <h1 class="name">Alex Morgan</h1>
+        <p class="headline">Frontend Engineer · Lisbon · Remote</p>
+      </header>
+
+      <section id="summary" data-cv-section="summary">
+        <h2>Summary</h2>
+        <p>
+          Frontend engineer with 5 years of experience building data-heavy web applications in Angular and
+          TypeScript. Focused on accessible interfaces, reusable component libraries and predictable
+          application state.
+        </p>
+      </section>
+
+      <div class="columns">
+        <aside class="sidebar">
+          <section id="contacts" data-cv-section="contacts">
+            <h2>Contacts</h2>
+            <ul class="contact-list">
+              <li data-contact="email">
+                <a href="mailto:alex.morgan@example.com">alex.morgan@example.com</a>
+              </li>
+              <li data-contact="website"><a href="https://example.com">example.com</a></li>
+            </ul>
+          </section>
+
+          <section id="skills" data-cv-section="skills">
+            <h2>Skills</h2>
+            <div class="skill-group" data-skill-group="frontend">
+              <h3>Frontend</h3>
+              <ul class="skill-list">
+                <li>Angular</li>
+                <li>TypeScript</li>
+                <li>RxJS</li>
+                <li>SCSS</li>
+              </ul>
+            </div>
+            <div class="skill-group" data-skill-group="practices">
+              <h3>Practices</h3>
+              <ul class="skill-list">
+                <li>Accessibility</li>
+                <li>Component libraries</li>
+                <li>Unit testing</li>
+              </ul>
+            </div>
+          </section>
+
+          <section id="languages" data-cv-section="languages">
+            <h2>Languages</h2>
+            <ul class="language-list">
+              <li data-language="en">English (C1)</li>
+              <li data-language="pt">Portuguese (Native)</li>
+            </ul>
+          </section>
+        </aside>
+
+        <div class="main-column">
+          <section id="experience" data-cv-section="experience">
+            <h2>Experience</h2>
+            <article class="project" data-project="analytics">
+              <header class="project-header">
+                <p class="dates">
+                  <time datetime="2022-03">March 2022</time> – <time datetime="2026-09">September 2026</time>
+                </p>
+                <h3 class="role">Frontend Engineer</h3>
+                <p class="project-domain">Example Analytics · Reporting platform</p>
+              </header>
+              <ul class="achievements">
+                <li data-achievement="component-library">
+                  Built a shared library of form and table components used across three products.
+                </li>
+                <li data-achievement="accessibility">
+                  Led keyboard and screen-reader fixes for the main reporting views.
+                </li>
+              </ul>
+            </article>
+
+            <article class="project" data-project="booking">
+              <header class="project-header">
+                <p class="dates">
+                  <time datetime="2020-01">January 2020</time> – <time datetime="2022-02">February 2022</time>
+                </p>
+                <h3 class="role">Junior Frontend Developer</h3>
+                <p class="project-domain">Example Travel · Booking web app</p>
+              </header>
+              <ul class="achievements">
+                <li data-achievement="checkout">Implemented the multi-step checkout with validated forms.</li>
+              </ul>
+            </article>
+          </section>
+
+          <section id="education" data-cv-section="education">
+            <h2>Education</h2>
+            <p>BSc Computer Science, Example University, 2016 – 2019</p>
+          </section>
+        </div>
+      </div>
+    </main>
+  </body>
+</html>
