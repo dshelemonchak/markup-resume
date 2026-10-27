@@ -4,10 +4,10 @@
       <h1 class="title">{{ cv.title }}</h1>
       <span class="file">{{ cv.id }}.html</span>
       @if (badge(); as badge) {
-        <span class="badge rounded-pill" [class]="badge.css">{{ badge.text }}</span>
+        <span class="badge" [class]="badge.css">{{ badge.text }}</span>
       }
     } @else {
-      <h1 class="title text-body-secondary">No CV selected</h1>
+      <h1 class="title empty-title">No CV selected</h1>
     }
 
     <!-- Placeholder: real notices come from the server (ADR-0013). -->
@@ -71,7 +71,11 @@
           <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>
           Roll back
         </button>
-        <button type="button" class="btn btn-outline-secondary dropdown-toggle" aria-label="Revision history">
+        <button
+          type="button"
+          class="btn btn-outline-secondary revisions-toggle"
+          aria-label="Revision history"
+        >
           rev 12
         </button>
       </div>

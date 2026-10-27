@@ -1,0 +1,38 @@
+// Bootstrap Icons font for the UI (ADR-0007), with rules only for the icons in use.
+// To add an icon: look up its code point in
+// node_modules/bootstrap-icons/font/bootstrap-icons.json (decimal, write it in hex here).
+// The font file loads only when an icon is first shown, so it is not part of the initial bundle.
+
+$icons: (
+  'arrow-counterclockwise': '\f117',
+  'dash-lg': '\f63b',
+  'download': '\f30a',
+  'info-circle': '\f431',
+  'pin-angle': '\f4eb',
+  'plus-lg': '\f64d',
+);
+
+@font-face {
+  font-display: block;
+  font-family: 'bootstrap-icons';
+  src: url('../../node_modules/bootstrap-icons/font/fonts/bootstrap-icons.woff2') format('woff2');
+}
+
+.bi::before {
+  display: inline-block;
+  font-family: 'bootstrap-icons' !important;
+  font-style: normal;
+  font-weight: normal !important;
+  font-variant: normal;
+  line-height: 1;
+  text-transform: none;
+  vertical-align: -0.125em;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+@each $name, $code in $icons {
+  .bi-#{$name}::before {
+    content: $code;
+  }
+}

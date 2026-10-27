@@ -29,8 +29,13 @@
                 "input": "public"
               }
             ],
-            "styles": ["node_modules/bootstrap-icons/font/bootstrap-icons.min.css", "src/styles.scss"],
-            "polyfills": ["@angular/localize/init"]
+            "styles": ["src/styles.scss"],
+            "polyfills": ["@angular/localize/init"],
+            "stylePreprocessorOptions": {
+              "sass": {
+                "silenceDeprecations": ["import"]
+              }
+            }
           },
           "configurations": {
             "production": {

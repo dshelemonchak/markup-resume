@@ -40,3 +40,13 @@
   display: flex;
   gap: 8px;
 }
+
+.title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 500;
+}
+
+.muted {
+  color: var(--bs-secondary-color);
+}

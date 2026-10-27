@@ -1,0 +1,32 @@
+// Bootstrap, only the parts the UI uses (ADR-0015). To use another component, add its
+// partial here; the full list is in node_modules/bootstrap/scss/bootstrap.scss.
+//
+// Bootstrap 5.3 is built on Sass @import, so it is loaded that way; the "import"
+// deprecation is silenced in angular.json. The utilities API is deliberately not
+// loaded: layout and spacing are written as component SCSS.
+
+// Configuration: required by every part below.
+@import 'bootstrap/scss/functions';
+@import 'bootstrap/scss/variables';
+@import 'bootstrap/scss/variables-dark';
+@import 'bootstrap/scss/maps';
+@import 'bootstrap/scss/mixins';
+
+// Base: CSS custom properties (--bs-*) and the reset.
+@import 'bootstrap/scss/root';
+@import 'bootstrap/scss/reboot';
+
+// Components.
+@import 'bootstrap/scss/buttons';
+@import 'bootstrap/scss/button-group';
+@import 'bootstrap/scss/forms/labels';
+@import 'bootstrap/scss/forms/form-control';
+@import 'bootstrap/scss/forms/form-select';
+@import 'bootstrap/scss/forms/form-check'; // includes .btn-check
+@import 'bootstrap/scss/forms/form-range';
+@import 'bootstrap/scss/forms/input-group';
+@import 'bootstrap/scss/badge';
+
+// Helpers.
+@import 'bootstrap/scss/helpers/color-bg'; // .text-bg-*
+@import 'bootstrap/scss/helpers/visually-hidden';

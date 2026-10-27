@@ -30,3 +30,18 @@
   text-align: center;
   font-variant-numeric: tabular-nums;
 }
+
+.card-title {
+  margin-bottom: 8px;
+  font-size: 1.25rem;
+  font-weight: 500;
+}
+
+.description {
+  color: var(--bs-secondary-color);
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+}
