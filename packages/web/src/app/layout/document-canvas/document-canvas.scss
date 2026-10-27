@@ -1,0 +1,67 @@
+:host {
+  position: relative;
+  display: block;
+  height: 100%;
+}
+
+// Scroll area. A block (not flex) container with an auto-margined sheet, so a zoomed-in
+// sheet wider than the area can be scrolled to its left edge.
+.viewport {
+  position: absolute;
+  inset: 0;
+  overflow: auto;
+  padding: 24px;
+}
+
+.sheet {
+  position: relative;
+  margin: 0 auto;
+  overflow: hidden;
+  border-radius: 2px;
+  background: #fff;
+  box-shadow:
+    0 12px 40px rgb(15 23 42 / 0.14),
+    0 1px 3px rgb(15 23 42 / 0.08);
+}
+
+// The iframe keeps the document's real size; the sheet around it takes the scaled size.
+.frame {
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: block;
+  border: 0;
+  transform-origin: 0 0;
+}
+
+.zoom {
+  position: absolute;
+  right: 20px;
+  bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  padding: 4px;
+
+  .btn {
+    min-width: 36px;
+    height: 36px;
+    padding: 0 8px;
+  }
+
+  .level {
+    min-width: 60px;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .fit[aria-pressed='true'] {
+    background: rgb(15 23 42 / 0.08);
+  }
+}
+
+.divider {
+  width: 1px;
+  height: 20px;
+  margin: 0 4px;
+  background: rgb(15 23 42 / 0.12);
+}
