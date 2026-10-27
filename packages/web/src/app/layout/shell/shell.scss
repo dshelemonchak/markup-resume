@@ -2,7 +2,9 @@
   position: relative;
   display: block;
   height: 100dvh;
-  overflow: hidden;
+  // clip, not hidden: the glows overhang the edges, and a hidden-overflow box can still be
+  // scrolled by the browser (focus, scrollIntoView), which shifted the whole UI.
+  overflow: clip;
   background: var(--cvc-surface-base);
 }
 
