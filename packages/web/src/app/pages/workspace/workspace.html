@@ -4,4 +4,7 @@
   [selectedId]="selectedId()"
   (selectCv)="selectedId.set($event)"
 />
-<main class="document-area"></main>
+<div class="document-column">
+  <cvc-document-header [cv]="selectedCv()" [(mode)]="mode" />
+  <main class="document-area"></main>
+</div>

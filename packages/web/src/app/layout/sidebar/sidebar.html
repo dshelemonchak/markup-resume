@@ -23,35 +23,35 @@
 
   <nav class="lists" aria-label="CV list">
     @if (pinned().length) {
-    <section class="group" aria-labelledby="sidebar-pinned">
-      <h2 id="sidebar-pinned" class="group-title">Pinned</h2>
-      <ul class="items">
-        @for (item of pinned(); track item.id) {
-        <li>
-          <cvc-sidebar-item
-            [item]="item"
-            [selected]="item.id === selectedId()"
-            (selectCv)="selectCv.emit($event)"
-          />
-        </li>
-        }
-      </ul>
-    </section>
+      <section class="group" aria-labelledby="sidebar-pinned">
+        <h2 id="sidebar-pinned" class="group-title">Pinned</h2>
+        <ul class="items">
+          @for (item of pinned(); track item.id) {
+            <li>
+              <cvc-sidebar-item
+                [item]="item"
+                [selected]="item.id === selectedId()"
+                (selectCv)="selectCv.emit($event)"
+              />
+            </li>
+          }
+        </ul>
+      </section>
     }
 
     <section class="group" aria-labelledby="sidebar-all">
       <h2 id="sidebar-all" class="group-title">All CVs</h2>
       <ul class="items">
         @for (item of others(); track item.id) {
-        <li>
-          <cvc-sidebar-item
-            [item]="item"
-            [selected]="item.id === selectedId()"
-            (selectCv)="selectCv.emit($event)"
-          />
-        </li>
+          <li>
+            <cvc-sidebar-item
+              [item]="item"
+              [selected]="item.id === selectedId()"
+              (selectCv)="selectCv.emit($event)"
+            />
+          </li>
         } @empty {
-        <li class="empty">No CVs yet</li>
+          <li class="empty">No CVs yet</li>
         }
       </ul>
     </section>

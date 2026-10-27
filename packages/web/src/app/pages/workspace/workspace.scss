@@ -9,7 +9,15 @@
   width: 264px;
 }
 
+.document-column {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: var(--cvc-gap);
+  min-width: 0;
+}
+
 .document-area {
   flex: 1;
-  min-width: 0;
+  min-height: 0;
 }

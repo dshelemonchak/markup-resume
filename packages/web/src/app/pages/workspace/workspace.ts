@@ -1,4 +1,6 @@
-import { ChangeDetectionStrategy, Component, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, signal } from '@angular/core';
+import { DocumentHeader } from '../../layout/document-header/document-header';
+import type { PreviewMode } from '../../layout/document-header/preview-mode';
 import type { CvListItem } from '../../layout/sidebar/cv-list-item';
 import { Sidebar } from '../../layout/sidebar/sidebar';
 
@@ -41,10 +43,10 @@ const STUB_CVS: readonly CvListItem[] = [
   },
 ];
 
-/** Main screen: sidebar on the left, the selected CV on the right (not built yet). */
+/** Main screen: sidebar on the left; top bar and the selected CV (not built yet) on the right. */
 @Component({
   selector: 'cvc-workspace',
-  imports: [Sidebar],
+  imports: [DocumentHeader, Sidebar],
   templateUrl: './workspace.html',
   styleUrl: './workspace.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -52,4 +54,8 @@ const STUB_CVS: readonly CvListItem[] = [
 export class Workspace {
   protected readonly cvs = signal(STUB_CVS);
   protected readonly selectedId = signal<string | null>(STUB_CVS[0]?.id ?? null);
+  protected readonly selectedCv = computed(
+    () => this.cvs().find((cv) => cv.id === this.selectedId()) ?? null,
+  );
+  protected readonly mode = signal<PreviewMode>('visual');
 }

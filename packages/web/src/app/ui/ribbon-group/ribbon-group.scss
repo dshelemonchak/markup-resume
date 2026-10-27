@@ -1,0 +1,23 @@
+:host {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 6px;
+  padding: 0 14px;
+  border-right: 1px solid rgb(15 23 42 / 0.08);
+}
+
+:host(:last-child) {
+  border-right: 0;
+}
+
+.control {
+  display: flex;
+  gap: 6px;
+}
+
+.caption {
+  font-size: 11px;
+  color: var(--bs-secondary-color);
+  text-align: center;
+}

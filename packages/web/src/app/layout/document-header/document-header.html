@@ -1,0 +1,80 @@
+<header cvc-glass-panel class="header">
+  <div class="title-row">
+    @if (cv(); as cv) {
+      <h1 class="title">{{ cv.title }}</h1>
+      <span class="file">{{ cv.id }}.html</span>
+      @if (badge(); as badge) {
+        <span class="badge rounded-pill" [class]="badge.css">{{ badge.text }}</span>
+      }
+    } @else {
+      <h1 class="title text-body-secondary">No CV selected</h1>
+    }
+
+    <!-- Placeholder: real notices come from the server (ADR-0013). -->
+    <div class="notice">
+      <i class="bi bi-info-circle" aria-hidden="true"></i>
+      Claude updated Summary · rev 12 · 2 min ago
+    </div>
+
+    <!-- Placeholder: export is not implemented yet. -->
+    <button type="button" class="btn btn-primary btn-sm export">
+      <i class="bi bi-download" aria-hidden="true"></i>
+      Export PDF
+    </button>
+  </div>
+
+  <div class="ribbon">
+    <cvc-ribbon-group label="View">
+      <div class="btn-group btn-group-sm">
+        <input
+          type="radio"
+          class="btn-check"
+          name="preview-mode"
+          id="preview-mode-visual"
+          [checked]="mode() === 'visual'"
+          (change)="mode.set('visual')"
+        />
+        <label class="btn btn-outline-secondary" for="preview-mode-visual">Visual</label>
+        <input
+          type="radio"
+          class="btn-check"
+          name="preview-mode"
+          id="preview-mode-ats"
+          [checked]="mode() === 'ats'"
+          (change)="mode.set('ats')"
+        />
+        <label class="btn btn-outline-secondary" for="preview-mode-ats">ATS</label>
+      </div>
+    </cvc-ribbon-group>
+
+    <!-- Placeholder: width editing is not implemented yet; ATS output is always A4. -->
+    <cvc-ribbon-group [label]="isAts() ? 'A4 in ATS' : 'Page width'">
+      <div class="input-group input-group-sm page-width">
+        <label class="input-group-text" for="page-width">W</label>
+        <input id="page-width" type="text" class="form-control" value="210" [disabled]="isAts()" />
+        <span class="input-group-text">mm</span>
+      </div>
+    </cvc-ribbon-group>
+
+    <!-- Placeholder: font selection is not implemented yet. -->
+    <cvc-ribbon-group label="Font">
+      <label for="font-family" class="visually-hidden">Font family</label>
+      <select id="font-family" class="form-select form-select-sm font">
+        <option>Inter</option>
+      </select>
+    </cvc-ribbon-group>
+
+    <!-- Placeholder: revisions are not implemented yet (ADR-0013). -->
+    <cvc-ribbon-group label="Revisions">
+      <div class="btn-group btn-group-sm">
+        <button type="button" class="btn btn-outline-secondary">
+          <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>
+          Roll back
+        </button>
+        <button type="button" class="btn btn-outline-secondary dropdown-toggle" aria-label="Revision history">
+          rev 12
+        </button>
+      </div>
+    </cvc-ribbon-group>
+  </div>
+</header>

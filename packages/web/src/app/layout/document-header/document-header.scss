@@ -1,0 +1,54 @@
+:host {
+  display: block;
+}
+
+.title-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 20px;
+  border-bottom: 1px solid rgb(15 23 42 / 0.07);
+}
+
+.title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.file {
+  color: var(--bs-secondary-color);
+}
+
+.notice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: auto;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgb(231 241 255 / 0.85);
+  color: var(--bs-primary-text-emphasis);
+  font-size: 13px;
+}
+
+.export {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.ribbon {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 8px 12px 6px;
+}
+
+.page-width {
+  width: 120px;
+}
+
+.font {
+  width: 140px;
+}
