@@ -6,5 +6,17 @@
 />
 <div class="document-column">
   <cvc-document-header [cv]="selectedCv()" [(mode)]="mode" />
-  <main class="document-area"></main>
+  <main class="document-area">
+    @if (documentSrc(); as src) {
+      <cvc-document-canvas [src]="src" [mode]="mode()" />
+    } @else if (loadError()) {
+      <p class="empty">
+        The local server is not reachable. Start it with <code>docker compose up -d app</code>.
+      </p>
+    } @else {
+      <p class="empty">
+        No CVs yet. Add one to <code>data/cvs/&lt;id&gt;/document.html</code> or run <code>pnpm seed</code>.
+      </p>
+    }
+  </main>
 </div>

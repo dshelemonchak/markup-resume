@@ -21,3 +21,10 @@
   flex: 1;
   min-height: 0;
 }
+
+.empty {
+  margin: 48px auto 0;
+  max-width: 420px;
+  color: var(--bs-secondary-color);
+  text-align: center;
+}
