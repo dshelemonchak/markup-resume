@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "cv-kit": {
+      "command": "docker",
+      "args": ["compose", "run", "--rm", "-T", "mcp"]
+    }
+  }
+}

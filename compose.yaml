@@ -5,6 +5,7 @@
 #   docker compose exec dev pnpm check           lint, format, typecheck, tests
 #   docker compose up -d app                     API on http://localhost:3000/api/v1
 #   docker compose up web                        Angular dev server on http://localhost:4200 (proxies /api to app)
+#   docker compose run --rm -T mcp               MCP server on stdio, started by Claude (see .mcp.json)
 # A database service is added when a database adapter exists (ADR-0012).
 
 x-workspace: &workspace
@@ -41,3 +42,18 @@ services:
       - app
     ports:
       - '4200:4200'
+
+  # MCP server for Claude (ADR-0003). Not started by `up`: Claude runs it per session with
+  #   docker compose run --rm -T mcp
+  # -T: no pseudo-TTY, which would rewrite line endings and break JSON-RPC on stdout.
+  # Claude Code picks it up from .mcp.json. For Claude Desktop (Chat), add to
+  # ~/Library/Application Support/Claude/claude_desktop_config.json, with absolute paths because
+  # GUI apps start without your shell's PATH or working directory:
+  #   "mcpServers": { "cv-kit": {
+  #     "command": "/Applications/Docker.app/Contents/Resources/bin/docker",
+  #     "args": ["compose", "-f", "/absolute/path/to/CV/compose.yaml", "run", "--rm", "-T", "mcp"] } }
+  mcp:
+    <<: *workspace
+    profiles: [mcp]
+    command: node packages/app/src/mcp.ts
+    stdin_open: true
