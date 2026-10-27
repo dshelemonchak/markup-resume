@@ -1,0 +1,16 @@
+{
+  "name": "@cv-kit/styles",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Style library for CV documents: design tokens, layouts, components, fonts and icons.",
+  "type": "module",
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --passWithNoTests"
+  },
+  "devDependencies": {
+    "@types/node": "^24.19.2",
+    "typescript": "~6.0.3",
+    "vitest": "^5.0.5"
+  }
+}

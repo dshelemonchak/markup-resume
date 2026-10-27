@@ -1,0 +1,31 @@
+# --- Personal data: never commit (ADR-0012) ---
+/data/
+/cvs/
+/reference/
+/output/
+/incoming/
+/history/
+candidate-facts.md
+*-audit.md
+
+# --- Dependencies and build output ---
+node_modules/
+dist/
+coverage/
+.pnpm-store/
+
+# --- Tooling / OS ---
+.DS_Store
+*.log
+.env
+.env.*
+.idea/
+.vscode/
+
+# --- Project documentation: kept private for now ---
+/docs/
+
+# --- Angular ---
+.angular/
+out-tsc/
+__screenshots__/

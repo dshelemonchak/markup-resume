@@ -1,0 +1,15 @@
+.git
+**/node_modules
+.pnpm-store
+**/dist
+**/.angular
+**/coverage
+data
+reference
+docs
+output
+cvs
+incoming
+history
+.env
+.env.*

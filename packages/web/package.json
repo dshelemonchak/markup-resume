@@ -1,0 +1,35 @@
+{
+  "name": "@cv-kit/web",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Angular UI: CV viewer and, later, the editor. Client of the /api/v1 HTTP API.",
+  "scripts": {
+    "ng": "ng",
+    "start": "ng serve",
+    "build": "ng build",
+    "typecheck": "ngc -p tsconfig.app.json --noEmit && tsc -p tsconfig.spec.json --noEmit",
+    "test": "ng test --watch=false"
+  },
+  "dependencies": {
+    "@angular/common": "^22.2.0",
+    "@angular/compiler": "^22.2.0",
+    "@angular/core": "^22.2.0",
+    "@angular/forms": "^22.2.0",
+    "@angular/localize": "^22.2.3",
+    "@angular/platform-browser": "^22.2.0",
+    "@angular/router": "^22.2.0",
+    "@ng-bootstrap/ng-bootstrap": "^21.0.0",
+    "@popperjs/core": "^2.11.8",
+    "bootstrap": "^5.3.8",
+    "rxjs": "~7.8.0",
+    "tslib": "^2.3.0"
+  },
+  "devDependencies": {
+    "@angular/build": "^22.2.4",
+    "@angular/cli": "^22.2.4",
+    "@angular/compiler-cli": "^22.2.0",
+    "jsdom": "^30.0.0",
+    "typescript": "~6.0.3",
+    "vitest": "^5.0.0"
+  }
+}

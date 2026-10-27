@@ -1,0 +1,22 @@
+packages:
+  - packages/*
+
+# Keep the store inside the bind-mounted workspace so pnpm can hard-link
+# into node_modules (same filesystem) when running in Docker.
+storeDir: .pnpm-store
+
+# Dependency build scripts are blocked unless listed here (supply-chain safety).
+allowBuilds:
+  # Native helpers used by the Angular CLI.
+  '@parcel/watcher': true
+  esbuild: true
+  lmdb: true
+  # Optional speed-up for msgpackr: no linux-arm64 prebuild, and the image has no
+  # C toolchain. msgpackr falls back to its pure-JS implementation.
+  msgpackr-extract: false
+
+# pnpm refuses packages younger than its minimum release age; these were too
+# recent when the workspace was initialised.
+minimumReleaseAgeExclude:
+  - '@boundaries/elements@3.3.0'
+  - eslint-plugin-boundaries@7.4.0

@@ -1,0 +1,30 @@
+# Development environment. Usage:
+#   docker compose up -d dev                     start the toolbox container
+#   docker compose exec dev pnpm install         install dependencies
+#   docker compose exec dev pnpm check           lint, format, typecheck, tests
+#   docker compose up web                        Angular dev server on http://localhost:4200
+# Services for the API/MCP server and a database are added when they exist (ADR-0012).
+
+x-workspace: &workspace
+  build:
+    context: .
+    target: dev
+  image: cv-kit:dev
+  working_dir: /workspace
+  volumes:
+    - .:/workspace
+    - ./data:/data
+  environment:
+    CV_DATA_DIR: /data
+  # Chromium needs more shared memory than Docker's 64 MB default.
+  shm_size: 1gb
+
+services:
+  dev:
+    <<: *workspace
+
+  web:
+    <<: *workspace
+    command: pnpm --filter @cv-kit/web start --host 0.0.0.0 --port 4200
+    ports:
+      - '4200:4200'
