@@ -4,7 +4,7 @@ import { Shell } from './layout/shell/shell';
 
 @Component({
   imports: [RouterOutlet, Shell],
-  selector: 'cv-root',
+  selector: 'cvc-root',
   styleUrl: './app.scss',
   templateUrl: './app.html',
   changeDetection: ChangeDetectionStrategy.OnPush,

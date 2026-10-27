@@ -3,7 +3,7 @@
   display: block;
   height: 100dvh;
   overflow: hidden;
-  background: var(--cv-surface-base);
+  background: var(--cvc-surface-base);
 }
 
 // Decorative glows: they give the frosted-glass panels something to blur.
@@ -18,7 +18,7 @@
   left: -120px;
   width: 620px;
   height: 620px;
-  background: var(--cv-glow-primary);
+  background: var(--cvc-glow-primary);
   filter: blur(80px);
 }
 
@@ -27,12 +27,12 @@
   bottom: -220px;
   width: 700px;
   height: 700px;
-  background: var(--cv-glow-secondary);
+  background: var(--cvc-glow-secondary);
   filter: blur(90px);
 }
 
 .content {
   position: relative;
   height: 100%;
-  padding: var(--cv-gap);
+  padding: var(--cvc-gap);
 }

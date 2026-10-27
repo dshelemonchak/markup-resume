@@ -1,0 +1,12 @@
+:host {
+  background: var(--cvc-glass-bg);
+  backdrop-filter: var(--cvc-glass-blur);
+  -webkit-backdrop-filter: var(--cvc-glass-blur);
+  border: 1px solid var(--cvc-glass-border);
+  border-radius: var(--cvc-glass-radius);
+  box-shadow: var(--cvc-glass-shadow);
+}
+
+:host(.compact) {
+  border-radius: var(--cvc-glass-radius-compact);
+}

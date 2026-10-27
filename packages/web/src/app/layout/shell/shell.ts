@@ -5,7 +5,7 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
  * that every screen of the tool sits on. Content is projected into it.
  */
 @Component({
-  selector: 'cv-shell',
+  selector: 'cvc-shell',
   templateUrl: './shell.html',
   styleUrl: './shell.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

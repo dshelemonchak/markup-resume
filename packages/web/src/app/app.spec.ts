@@ -13,6 +13,6 @@ describe('App', () => {
   it('renders the router outlet inside the shell', async () => {
     const fixture = TestBed.createComponent(App);
     await fixture.whenStable();
-    expect((fixture.nativeElement as HTMLElement).querySelector('cv-shell router-outlet')).not.toBeNull();
+    expect((fixture.nativeElement as HTMLElement).querySelector('cvc-shell router-outlet')).not.toBeNull();
   });
 });

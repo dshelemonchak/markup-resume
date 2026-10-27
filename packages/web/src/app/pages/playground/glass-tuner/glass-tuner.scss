@@ -1,0 +1,42 @@
+:host {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  width: 300px;
+  max-height: calc(100dvh - 48px);
+  overflow: auto;
+}
+
+.tuner {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+}
+
+.param-head {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+
+  .form-label {
+    margin: 0;
+  }
+
+  output {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+.snippet {
+  margin: 0;
+  padding: 8px;
+  border-radius: 8px;
+  background: rgb(15 23 42 / 0.06);
+  font-size: 11px;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+}

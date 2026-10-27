@@ -1,0 +1,32 @@
+<section cvc-glass-panel class="tuner" aria-labelledby="glass-tuner-title">
+  <h2 id="glass-tuner-title" class="h6">Glass tuning <span class="text-body-secondary">(temporary)</span></h2>
+
+  @for (param of params; track param.name) {
+  <div class="param">
+    <div class="param-head">
+      <label class="form-label" [for]="param.name">{{ param.label }}</label>
+      <output [for]="param.name">{{ values()[param.name] }}{{ param.unit }}</output>
+    </div>
+    <input
+      #range
+      type="range"
+      class="form-range"
+      [id]="param.name"
+      [min]="param.min"
+      [max]="param.max"
+      [step]="param.step"
+      [value]="values()[param.name]"
+      (input)="set(param.name, range.value)"
+    />
+  </div>
+  }
+
+  <pre class="snippet"><code>{{ snippet() }}</code></pre>
+
+  <div class="actions">
+    <button type="button" class="btn btn-primary btn-sm" (click)="copy()">
+      {{ copied() ? 'Copied' : 'Copy SCSS' }}
+    </button>
+    <button type="button" class="btn btn-outline-secondary btn-sm" (click)="reset()">Reset to theme</button>
+  </div>
+</section>
