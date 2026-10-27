@@ -1,0 +1,20 @@
+// Design tokens of the tool's UI (not the CVs), from the cv-kit UI design canvas.
+// Components read them as CSS custom properties.
+:root {
+  // App background and its two blurred colour glows.
+  --cv-surface-base: #eef1f6;
+  --cv-glow-opacity: 0.3;
+  --cv-glow-primary: rgb(13 110 253 / var(--cv-glow-opacity));
+  --cv-glow-secondary: rgb(111 66 193 / var(--cv-glow-opacity));
+
+  // Frosted-glass panels.
+  --cv-glass-opacity: 0.7;
+  --cv-glass-bg: rgb(255 255 255 / var(--cv-glass-opacity));
+  --cv-glass-border: rgb(255 255 255 / 0.75);
+  --cv-glass-blur: blur(20px) saturate(160%);
+  --cv-glass-shadow: 0 8px 32px rgb(15 23 42 / 0.08);
+  --cv-glass-radius: 16px;
+
+  // Layout rhythm.
+  --cv-gap: 12px;
+}

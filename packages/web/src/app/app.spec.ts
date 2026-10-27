@@ -1,15 +1,18 @@
 import { TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 import { App } from './app';
 
 describe('App', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [App],
+      providers: [provideRouter([])],
     }).compileComponents();
   });
 
-  it('should create the app', () => {
+  it('renders the router outlet inside the shell', async () => {
     const fixture = TestBed.createComponent(App);
-    expect(fixture.componentInstance).toBeTruthy();
+    await fixture.whenStable();
+    expect((fixture.nativeElement as HTMLElement).querySelector('cv-shell router-outlet')).not.toBeNull();
   });
 });

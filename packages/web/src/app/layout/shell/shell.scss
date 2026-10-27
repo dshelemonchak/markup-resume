@@ -1,0 +1,38 @@
+:host {
+  position: relative;
+  display: block;
+  height: 100dvh;
+  overflow: hidden;
+  background: var(--cv-surface-base);
+}
+
+// Decorative glows: they give the frosted-glass panels something to blur.
+.glow {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.glow-primary {
+  top: -160px;
+  left: -120px;
+  width: 620px;
+  height: 620px;
+  background: var(--cv-glow-primary);
+  filter: blur(80px);
+}
+
+.glow-secondary {
+  right: -140px;
+  bottom: -220px;
+  width: 700px;
+  height: 700px;
+  background: var(--cv-glow-secondary);
+  filter: blur(90px);
+}
+
+.content {
+  position: relative;
+  height: 100%;
+  padding: var(--cv-gap);
+}
