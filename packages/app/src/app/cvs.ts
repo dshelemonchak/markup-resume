@@ -1,4 +1,4 @@
-import { type CvRepository, type CvSummary, isValidCvId } from '../domain/index.ts';
+import { checkCvDocument, type CvRepository, type CvSummary, isValidCvId } from '../domain/index.ts';
 
 /** All CVs, most recently changed first. */
 export async function listCvs(repository: CvRepository): Promise<readonly CvSummary[]> {
@@ -16,4 +16,37 @@ export async function getCvDocument(repository: CvRepository, id: string): Promi
   if (!isValidCvId(id)) return { kind: 'invalid-id' };
   const html = await repository.getDocument(id);
   return html === null ? { kind: 'not-found' } : { kind: 'found', html };
+}
+
+/** Upper bound for one document, in UTF-8 bytes. Real CVs are tens of kilobytes; this stops runaway output. */
+export const MAX_CV_DOCUMENT_BYTES = 2 * 1024 * 1024;
+
+export type SaveCvDocumentResult =
+  | { readonly kind: 'saved' }
+  | { readonly kind: 'unchanged' }
+  | { readonly kind: 'invalid-id' }
+  | { readonly kind: 'not-found' }
+  | { readonly kind: 'too-large'; readonly bytes: number; readonly limitBytes: number }
+  | { readonly kind: 'invalid-document'; readonly problems: readonly string[] };
+
+/**
+ * Replaces the document of an existing CV. Checks that need no I/O run first; a document identical to the
+ * stored one is not written, so it adds no history entry.
+ */
+export async function saveCvDocument(
+  repository: CvRepository,
+  id: string,
+  html: string,
+): Promise<SaveCvDocumentResult> {
+  if (!isValidCvId(id)) return { kind: 'invalid-id' };
+  const bytes = new TextEncoder().encode(html).byteLength;
+  if (bytes > MAX_CV_DOCUMENT_BYTES) return { kind: 'too-large', bytes, limitBytes: MAX_CV_DOCUMENT_BYTES };
+  const problems = checkCvDocument(html);
+  if (problems.length > 0) return { kind: 'invalid-document', problems };
+
+  const current = await repository.getDocument(id);
+  if (current === null) return { kind: 'not-found' };
+  if (current === html) return { kind: 'unchanged' };
+  await repository.save(id, html);
+  return { kind: 'saved' };
 }
