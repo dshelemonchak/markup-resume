@@ -5,6 +5,11 @@ export interface CvRepository {
   list(): Promise<readonly CvSummary[]>;
   /** The document's HTML, or null when no CV has this id. */
   getDocument(id: CvId): Promise<string | null>;
+  /**
+   * Replaces the document of an existing CV. The write is atomic: readers see either the old or the new
+   * document, never a partial one. Rejects when no CV has this id; creating CVs is a separate operation.
+   */
+  save(id: CvId, html: string): Promise<void>;
   /** Calls the listener whenever any CV is added, changed or removed. Returns an unsubscribe function. */
   watch(listener: () => void): () => void;
 }

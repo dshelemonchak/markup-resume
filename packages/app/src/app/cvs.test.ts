@@ -6,6 +6,7 @@ function fakeRepository(cvs: CvSummary[], documents: Record<string, string> = {}
   return {
     list: () => Promise.resolve(cvs),
     getDocument: (id) => Promise.resolve(documents[id] ?? null),
+    save: () => Promise.resolve(),
     watch: () => () => {},
   };
 }

@@ -1,4 +1,4 @@
-import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
@@ -42,6 +42,43 @@ describe('FsCvRepository', () => {
     expect(await repository.getDocument('sample')).toBe('<html>sample</html>');
     expect(await repository.getDocument('missing')).toBeNull();
     expect(await repository.getDocument('../outside')).toBeNull();
+  });
+
+  describe('save', () => {
+    const historyDir = () => join(dataDir, 'cvs', 'sample', 'history');
+
+    it('replaces the document and keeps the previous version in history', async () => {
+      await addCv('sample', '<p>v1</p>');
+      await repository.save('sample', '<p>v2</p>');
+
+      expect(await repository.getDocument('sample')).toBe('<p>v2</p>');
+      const history = await readdir(historyDir());
+      expect(history).toHaveLength(1);
+      expect(await readFile(join(historyDir(), history[0]!), 'utf8')).toBe('<p>v1</p>');
+    });
+
+    it('keeps only the newest versions, up to the history limit', async () => {
+      repository = new FsCvRepository(dataDir, { historyLimit: 2 });
+      await addCv('sample', '<p>v1</p>');
+      for (const version of ['v2', 'v3', 'v4', 'v5']) await repository.save('sample', `<p>${version}</p>`);
+
+      const history = (await readdir(historyDir())).sort();
+      const contents = await Promise.all(history.map((name) => readFile(join(historyDir(), name), 'utf8')));
+      expect(contents).toEqual(['<p>v3</p>', '<p>v4</p>']);
+      expect(await repository.getDocument('sample')).toBe('<p>v5</p>');
+    });
+
+    it('leaves no temp files behind', async () => {
+      await addCv('sample', '<p>v1</p>');
+      await repository.save('sample', '<p>v2</p>');
+      expect((await readdir(join(dataDir, 'cvs', 'sample'))).sort()).toEqual(['document.html', 'history']);
+    });
+
+    it('rejects unknown and invalid ids without creating anything', async () => {
+      await expect(repository.save('missing', '<p></p>')).rejects.toThrow();
+      await expect(repository.save('../outside', '<p></p>')).rejects.toThrow('Invalid CV id');
+      expect(await readdir(join(dataDir, 'cvs'))).toEqual([]);
+    });
   });
 
   it('notifies once per burst of changes', async () => {

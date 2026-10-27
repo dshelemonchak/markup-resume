@@ -7,6 +7,7 @@ function setup() {
   const repository: CvRepository = {
     list: () => Promise.resolve([{ id: 'sample', title: 'Sample', updatedAt: '2026-10-27T00:00:00.000Z' }]),
     getDocument: (id) => Promise.resolve(id === 'sample' ? '<html><body>CV</body></html>' : null),
+    save: () => Promise.resolve(),
     watch: (listener) => {
       notify = listener;
       return () => {};
