@@ -1,3 +1,4 @@
+import { setTimeout as sleep } from 'node:timers/promises';
 import { Hono } from 'hono';
 import { streamSSE } from 'hono/streaming';
 import { getCvDocument, listCvs } from '../../app/index.ts';
@@ -11,12 +12,14 @@ const HEARTBEAT_MS = 25_000;
  *   GET /api/v1/cvs/:id/document    the CV's HTML, as stored
  *   GET /api/v1/events              server-sent events: "cvs-changed" when any CV changes
  *
- * Returns the app and a close function that stops watching the storage.
+ * Returns the app and a close function that stops watching the storage and ends open
+ * event streams, so the HTTP server can shut down without waiting for clients.
  */
 export function createHttpApp(repository: CvRepository): { app: Hono; close: () => void } {
   // One storage watcher for all event-stream clients.
   const listeners = new Set<() => void>();
   const stopWatching = repository.watch(() => listeners.forEach((listener) => listener()));
+  const shutdown = new AbortController();
 
   const app = new Hono().basePath('/api/v1');
 
@@ -46,13 +49,24 @@ export function createHttpApp(repository: CvRepository): { app: Hono; close: () 
         listeners.delete(notify);
       });
       await stream.writeSSE({ event: 'ready', data: '{}' });
-      while (!stream.aborted) {
-        await stream.sleep(HEARTBEAT_MS);
-        if (!stream.aborted) await stream.writeSSE({ event: 'ping', data: '{}' });
+      try {
+        while (!stream.aborted) {
+          // Unlike stream.sleep, this wait ends at once on shutdown.
+          await sleep(HEARTBEAT_MS, undefined, { signal: shutdown.signal });
+          if (!stream.aborted) await stream.writeSSE({ event: 'ping', data: '{}' });
+        }
+      } catch (error) {
+        if (!shutdown.signal.aborted) throw error;
       }
+      // Returning ends the response; streamSSE closes the stream.
       listeners.delete(notify);
     }),
   );
 
-  return { app, close: stopWatching };
+  const close = () => {
+    shutdown.abort();
+    stopWatching();
+  };
+
+  return { app, close };
 }
