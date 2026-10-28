@@ -51,4 +51,23 @@ describe('DocumentHeader', () => {
     expect(ats.querySelector('[aria-label="A4 in ATS"]')).not.toBeNull();
     expect(ats.querySelector<HTMLInputElement>('#preview-mode-ats')!.checked).toBe(true);
   });
+
+  it('asks for an export, and waits while one runs', async () => {
+    const { fixture, root } = await render(CV);
+    let asked = 0;
+    fixture.componentInstance.exportPdf.subscribe(() => asked++);
+    const button = () => root.querySelector<HTMLButtonElement>('.export')!;
+    button().click();
+    expect(asked).toBe(1);
+
+    fixture.componentRef.setInput('exporting', true);
+    await fixture.whenStable();
+    expect(button().disabled).toBe(true);
+    expect(button().textContent).toContain('Exporting');
+  });
+
+  it('cannot export without a selected CV', async () => {
+    const { root } = await render(null);
+    expect(root.querySelector<HTMLButtonElement>('.export')!.disabled).toBe(true);
+  });
 });

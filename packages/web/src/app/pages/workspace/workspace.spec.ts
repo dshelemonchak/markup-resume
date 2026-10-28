@@ -171,4 +171,43 @@ describe('Workspace', () => {
     vi.useRealTimers();
     expect(FakeEventSource.created).toBe(before);
   });
+
+  it('shows what the PDF check found, and downloads the PDF anyway on request', async () => {
+    Object.assign(HTMLDialogElement.prototype, {
+      showModal(this: HTMLDialogElement) {
+        this.open = true;
+      },
+      close(this: HTMLDialogElement) {
+        this.open = false;
+      },
+    });
+    const click = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
+    // jsdom has no object URLs.
+    Object.assign(URL, { createObjectURL: () => 'blob:pdf', revokeObjectURL: () => {} });
+    const { fixture, http, root } = await render();
+
+    root.querySelector<HTMLButtonElement>('cvc-document-header .export')!.click();
+    http
+      .expectOne('/api/v1/cvs/first/pdf')
+      .flush(new Blob([JSON.stringify({ error: 'pdf-check-failed', problems: ['Order is off.'] })]), {
+        status: 422,
+        statusText: 'Unprocessable',
+      });
+    await fixture.whenStable();
+    expect(root.querySelector('cvc-export-report dialog')!.hasAttribute('open')).toBe(true);
+    expect(root.querySelector('cvc-export-report .problems')!.textContent).toContain('Order is off.');
+
+    [...root.querySelectorAll<HTMLButtonElement>('cvc-export-report button')]
+      .find((button) => button.textContent.includes('Download anyway'))!
+      .click();
+    http.expectOne('/api/v1/cvs/first/pdf?force=1').flush(new Blob(['%PDF-']), {
+      headers: {
+        'Content-Disposition': `attachment; filename="First.pdf"; filename*=UTF-8''First%20%E2%80%93%20CV.pdf`,
+      },
+    });
+    await fixture.whenStable();
+    expect(click).toHaveBeenCalledOnce();
+    expect((click.mock.contexts[0] as HTMLAnchorElement).download).toBe('First – CV.pdf');
+    vi.restoreAllMocks();
+  });
 });

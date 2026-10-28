@@ -1,5 +1,6 @@
-import { httpResource } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse, httpResource } from '@angular/common/http';
 import { DestroyRef, Injectable, effect, inject, signal } from '@angular/core';
+import { firstValueFrom } from 'rxjs';
 
 const API = '/api/v1';
 /** A server that hangs counts as unreachable after this long, instead of loading forever. */
@@ -27,6 +28,13 @@ export interface ClaudeSessionDto {
   readonly connectedAt: string;
   readonly lastActivityAt: string | null;
 }
+
+/** What exporting a CV to PDF came to. */
+export type PdfExport =
+  | { readonly kind: 'downloaded' }
+  /** The PDF check found problems, so the file was not handed out (ask again with force to get it anyway). */
+  | { readonly kind: 'problems'; readonly problems: readonly string[] }
+  | { readonly kind: 'failed'; readonly message: string };
 
 /** Shape of GET /api/v1/setup. */
 export interface SetupDto {
@@ -102,7 +110,51 @@ export class CvApi {
     });
   }
 
+  private readonly http = inject(HttpClient);
+
+  /**
+   * Prints the CV to PDF on the server and saves the file to the user's downloads. A PDF that fails the
+   * server's check is only handed out when forced.
+   */
+  async exportPdf(id: string, force = false): Promise<PdfExport> {
+    const url = `${API}/cvs/${encodeURIComponent(id)}/pdf${force ? '?force=1' : ''}`;
+    try {
+      const response = await firstValueFrom(
+        this.http.get(url, { responseType: 'blob', observe: 'response' }),
+      );
+      saveFile(
+        response.body ?? new Blob(),
+        fileName(response.headers.get('Content-Disposition')) ?? `${id}.pdf`,
+      );
+      return { kind: 'downloaded' };
+    } catch (error) {
+      if (error instanceof HttpErrorResponse && error.status === 422 && error.error instanceof Blob) {
+        const body = JSON.parse(await error.error.text()) as { problems: string[] };
+        return { kind: 'problems', problems: body.problems };
+      }
+      return { kind: 'failed', message: error instanceof HttpErrorResponse ? error.message : String(error) };
+    }
+  }
+
   documentUrl(id: string, revision: number): string {
     return `${API}/cvs/${encodeURIComponent(id)}/document?v=${revision}`;
   }
+}
+
+/** The file name from Content-Disposition, preferring the UTF-8 one (filename*). */
+function fileName(header: string | null): string | null {
+  const utf8 = /filename\*=UTF-8''([^;]+)/i.exec(header ?? '')?.[1];
+  if (utf8) return decodeURIComponent(utf8);
+  return /filename="([^"]+)"/i.exec(header ?? '')?.[1] ?? null;
+}
+
+/** Hands a file to the browser's download, as a link with the download attribute would. */
+function saveFile(file: Blob, name: string): void {
+  const url = URL.createObjectURL(file);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = name;
+  link.click();
+  // The download has started from the URL by now; a moment later it can go.
+  setTimeout(() => URL.revokeObjectURL(url), 1_000);
 }

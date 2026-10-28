@@ -115,6 +115,44 @@ describe('HTTP API v1', () => {
     }
   });
 
+  describe('PDF export', () => {
+    const pdfOptions = (text: string): HttpAppOptions => ({
+      pdf: {
+        renderCv: () =>
+          Promise.resolve({
+            pdf: new Uint8Array([37, 80, 68, 70]),
+            page: { title: 'Alex – CV', blocks: ['Hello world'], links: [] },
+          }),
+        inspectPdf: () => Promise.resolve({ fonts: [], text, links: [] }),
+      },
+    });
+
+    it('downloads a PDF that passes the check, named after the title', async () => {
+      const response = await setup(pdfOptions('Hello world')).app.request('/api/v1/cvs/sample/pdf');
+      expect(response.status).toBe(200);
+      expect(response.headers.get('content-type')).toBe('application/pdf');
+      expect(response.headers.get('content-disposition')).toBe(
+        `attachment; filename="Alex _ CV.pdf"; filename*=UTF-8''Alex%20%E2%80%93%20CV.pdf`,
+      );
+      expect(new Uint8Array(await response.arrayBuffer())).toEqual(new Uint8Array([37, 80, 68, 70]));
+    });
+
+    it('holds back a PDF with problems, unless forced', async () => {
+      const { app } = setup(pdfOptions('Hello'));
+      const held = await app.request('/api/v1/cvs/sample/pdf');
+      expect(held.status).toBe(422);
+      const body = (await held.json()) as { error: string; problems: string[] };
+      expect(body.error).toBe('pdf-check-failed');
+      expect(body.problems.length).toBeGreaterThan(0);
+      expect((await app.request('/api/v1/cvs/sample/pdf?force=1')).status).toBe(200);
+    });
+
+    it('answers 404 for a missing CV and 501 when PDF export is not set up', async () => {
+      expect((await setup(pdfOptions('')).app.request('/api/v1/cvs/missing/pdf')).status).toBe(404);
+      expect((await setup().app.request('/api/v1/cvs/sample/pdf')).status).toBe(501);
+    });
+  });
+
   describe('Claude presence', () => {
     async function open(app: ReturnType<typeof setup>['app'], path: string) {
       const response = await app.request(path);

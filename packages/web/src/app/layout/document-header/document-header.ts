@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, input, model } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, model, output } from '@angular/core';
 import { DummyMark } from '../../ui/dummy-mark/dummy-mark';
 import { GlassPanel } from '../../ui/glass-panel/glass-panel';
 import { RibbonGroup } from '../../ui/ribbon-group/ribbon-group';
@@ -13,8 +13,8 @@ const STATUS_BADGE: Record<CvListItemStatus, { readonly text: string; readonly c
 
 /**
  * Top bar of the workspace: the selected CV's title row and the settings ribbon.
- * Working now: the title row and the Visual / ATS switch. The Claude notice, Export PDF,
- * page width, font and revisions are placeholders.
+ * Working now: the title row, Export PDF and the Visual / ATS switch. The Claude notice, page width,
+ * font and revisions are placeholders.
  */
 @Component({
   selector: 'cvc-document-header',
@@ -26,6 +26,9 @@ const STATUS_BADGE: Record<CvListItemStatus, { readonly text: string; readonly c
 export class DocumentHeader {
   readonly cv = input<CvListItem | null>(null);
   readonly mode = model<PreviewMode>('visual');
+  /** An export is running: the button waits. */
+  readonly exporting = input(false);
+  readonly exportPdf = output();
 
   protected readonly badge = computed(() => {
     const cv = this.cv();

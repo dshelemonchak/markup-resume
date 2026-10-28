@@ -1,0 +1,36 @@
+<dialog #dialog class="dialog" closedby="any" aria-labelledby="export-report-title">
+  <div class="content">
+    <div class="head">
+      <h2 id="export-report-title" class="title">
+        {{ failure() ? 'The export failed' : 'The PDF does not read like the page' }}
+      </h2>
+      <button type="button" class="btn btn-sm close" aria-label="Close" (click)="close()">
+        <i class="bi bi-x-lg" aria-hidden="true"></i>
+      </button>
+    </div>
+
+    @if (failure(); as failure) {
+      <p class="intro">No PDF was made. Is the server running? See <code>docker compose logs app</code>.</p>
+      <p class="failure">{{ failure }}</p>
+    } @else {
+      <p class="intro">
+        Copied or parsed (by an ATS, for example), its text would come out differently from what you see. The
+        file was not downloaded.
+      </p>
+      <ul class="problems">
+        @for (problem of problems(); track $index) {
+          <li>{{ problem }}</li>
+        }
+      </ul>
+    }
+
+    <div class="actions">
+      @if (!failure()) {
+        <button type="button" class="btn btn-outline-secondary btn-sm" (click)="download()">
+          Download anyway
+        </button>
+      }
+      <button type="button" class="btn btn-primary btn-sm" (click)="close()">Close</button>
+    </div>
+  </div>
+</dialog>

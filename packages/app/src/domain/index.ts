@@ -9,6 +9,16 @@ export {
   type MarkupSchema,
   type ParseMarkup,
 } from './cv-markup.ts';
+export {
+  checkPdf,
+  type InspectPdf,
+  type PageLink,
+  type PageSnapshot,
+  type PdfFacts,
+  type PdfFont,
+  type RenderCv,
+  type RenderedCv,
+} from './cv-pdf.ts';
 export type { CvRepository } from './cv-repository.ts';
 export {
   checkTemplateMarkup,

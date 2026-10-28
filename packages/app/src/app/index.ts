@@ -12,3 +12,4 @@ export {
   type SaveCvDocumentResult,
 } from './cvs.ts';
 export { type ClaudeSession, ClaudeSessions } from './claude-sessions.ts';
+export { exportCvPdf, type ExportCvPdfResult, type PdfExportServices, pdfFileName } from './export-pdf.ts';

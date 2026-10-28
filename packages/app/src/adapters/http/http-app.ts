@@ -3,7 +3,13 @@ import { join } from 'node:path';
 import { setTimeout as sleep } from 'node:timers/promises';
 import { type Context, Hono } from 'hono';
 import { type SSEStreamingApi, streamSSE } from 'hono/streaming';
-import { ClaudeSessions, getCvDocument, listCvs } from '../../app/index.ts';
+import {
+  ClaudeSessions,
+  exportCvPdf,
+  getCvDocument,
+  listCvs,
+  type PdfExportServices,
+} from '../../app/index.ts';
 import type { CvRepository } from '../../domain/index.ts';
 import { desktopExtension } from './desktop-extension.ts';
 
@@ -20,12 +26,16 @@ export interface HttpAppOptions {
   /** Folders of the style library's fonts and icons, which template styles load by URL (ADR-0007). */
   readonly fontsDir?: string;
   readonly iconsDir?: string;
+  /** Printing to PDF and checking it; without it, PDF export answers 501. */
+  readonly pdf?: Omit<PdfExportServices, 'repository'>;
 }
 
 /**
  * Versioned HTTP API (ADR-0011), v1:
  *   GET  /api/v1/cvs                              list of CVs
  *   GET  /api/v1/cvs/:id/document                 the CV's HTML, as stored
+ *   GET  /api/v1/cvs/:id/pdf[?force=1]            the CV printed to PDF and checked (ADR-0009); a PDF with
+ *                                                 problems comes back as 422 with the list, unless forced
  *   GET  /api/v1/events                           server-sent events: "cvs-changed" when any CV changes,
  *                                                 "claude-changed" when a Claude session comes, goes or acts
  *   GET  /api/v1/setup                            what the UI needs to show how to connect Claude
@@ -66,6 +76,26 @@ export function createHttpApp(
         return c.html(result.html, 200, {
           // Even when the URL is opened directly, scripts in a CV never run (ADR-0002).
           'Content-Security-Policy': 'sandbox allow-same-origin',
+          'Cache-Control': 'no-store',
+        });
+    }
+  });
+
+  app.get('/cvs/:id/pdf', async (c) => {
+    if (!options.pdf) return c.json({ error: 'pdf-unavailable' }, 501);
+    const result = await exportCvPdf({ repository, ...options.pdf }, c.req.param('id'));
+    switch (result.kind) {
+      case 'invalid-id':
+        return c.json({ error: 'invalid-id' }, 400);
+      case 'not-found':
+        return c.json({ error: 'not-found' }, 404);
+      case 'exported':
+        if (result.problems.length > 0 && c.req.query('force') !== '1') {
+          return c.json({ error: 'pdf-check-failed', problems: result.problems }, 422);
+        }
+        return c.body(new Uint8Array(result.pdf), 200, {
+          'Content-Type': 'application/pdf',
+          'Content-Disposition': attachment(result.fileName),
           'Cache-Control': 'no-store',
         });
     }
@@ -126,6 +156,12 @@ export function createHttpApp(
   };
 
   return { app, close };
+}
+
+/** Content-Disposition for a download: an ASCII fallback name, and the real one for browsers that read it. */
+function attachment(fileName: string): string {
+  const ascii = fileName.replace(/[^\x20-\x7e]/g, '_').replace(/["\\]/g, '_');
+  return `attachment; filename="${ascii}"; filename*=UTF-8''${encodeURIComponent(fileName)}`;
 }
 
 /** A file from an asset folder, or 404 for a name that is not a plain asset file or does not exist. */

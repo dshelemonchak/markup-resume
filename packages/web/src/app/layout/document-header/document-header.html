@@ -16,10 +16,19 @@
       Claude updated Summary · rev 12 · 2 min ago
     </div>
 
-    <!-- Placeholder: export is not implemented yet. -->
-    <button type="button" class="btn btn-primary btn-sm export" cvcDummy>
-      <i class="bi bi-download" aria-hidden="true"></i>
-      Export PDF
+    <button
+      type="button"
+      class="btn btn-primary btn-sm export"
+      [disabled]="!cv() || exporting()"
+      (click)="exportPdf.emit()"
+    >
+      @if (exporting()) {
+        <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+        Exporting…
+      } @else {
+        <i class="bi bi-download" aria-hidden="true"></i>
+        Export PDF
+      }
     </button>
   </div>
 

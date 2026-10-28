@@ -7,6 +7,11 @@
   [claude]="claudeStatus()"
   (connectClaude)="connectClaude.open()"
 />
+<cvc-export-report
+  [problems]="exportProblems()"
+  [failure]="exportFailure()"
+  (downloadAnyway)="exportPdf(true)"
+/>
 <cvc-connect-claude
   #connectClaude
   [projectDir]="hostProjectDir()"
@@ -21,7 +26,13 @@
   [style.--cvc-header-height.px]="headerHeight()"
   [style.--cvc-footer-height.px]="footerHeight()"
 >
-  <cvc-document-header class="header" [cv]="selectedCv()" [(mode)]="mode" />
+  <cvc-document-header
+    class="header"
+    [cv]="selectedCv()"
+    [(mode)]="mode"
+    [exporting]="exporting()"
+    (exportPdf)="exportPdf()"
+  />
   <main class="document-area">
     @if (documentSrc(); as src) {
       <cvc-document-canvas

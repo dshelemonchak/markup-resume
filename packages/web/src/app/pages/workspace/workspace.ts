@@ -19,6 +19,7 @@ import { DocumentCanvas } from '../../layout/document-canvas/document-canvas';
 import type { DocumentInfo } from '../../layout/document-canvas/document-info';
 import { DocumentFooter } from '../../layout/document-footer/document-footer';
 import { DocumentHeader } from '../../layout/document-header/document-header';
+import { ExportReport } from '../../layout/export-report/export-report';
 import type { PreviewMode } from '../../layout/document-header/preview-mode';
 import type { CvListState } from '../../layout/sidebar/cv-list-item';
 import { Sidebar } from '../../layout/sidebar/sidebar';
@@ -28,7 +29,7 @@ import type { ZoomSetting } from '../../ui/zoom-control/zoom';
 /** Main screen: CVs from the local server on the left; top bar, the selected CV and the status bar on the right. */
 @Component({
   selector: 'cvc-workspace',
-  imports: [ConnectClaude, DocumentCanvas, DocumentFooter, DocumentHeader, PinchZoom, Sidebar],
+  imports: [ConnectClaude, DocumentCanvas, DocumentFooter, DocumentHeader, ExportReport, PinchZoom, Sidebar],
   templateUrl: './workspace.html',
   styleUrl: './workspace.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -75,6 +76,11 @@ export class Workspace {
     return id ? this.api.documentUrl(id, this.api.revision()) : null;
   });
 
+  protected readonly exporting = signal(false);
+  protected readonly exportProblems = signal<readonly string[]>([]);
+  protected readonly exportFailure = signal<string | null>(null);
+  private readonly exportReport = viewChild.required(ExportReport);
+
   protected readonly mode = signal<PreviewMode>('visual');
   protected readonly zoom = signal<ZoomSetting>('fit');
   protected readonly documentInfo = signal<DocumentInfo | null>(null);
@@ -88,6 +94,22 @@ export class Workspace {
   private readonly footer = viewChild.required<DocumentFooter, ElementRef<HTMLElement>>(DocumentFooter, {
     read: ElementRef,
   });
+
+  /** Exports the selected CV; when the PDF check finds problems, shows them instead (unless forced). */
+  protected async exportPdf(force = false): Promise<void> {
+    const id = this.selectedId();
+    if (!id || this.exporting()) return;
+    this.exporting.set(true);
+    try {
+      const result = await this.api.exportPdf(id, force);
+      if (result.kind === 'downloaded') return;
+      this.exportProblems.set(result.kind === 'problems' ? result.problems : []);
+      this.exportFailure.set(result.kind === 'failed' ? result.message : null);
+      this.exportReport().open();
+    } finally {
+      this.exporting.set(false);
+    }
+  }
 
   constructor() {
     const destroyRef = inject(DestroyRef);
