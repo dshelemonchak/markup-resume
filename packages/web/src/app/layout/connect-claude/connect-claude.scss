@@ -1,0 +1,79 @@
+.dialog {
+  width: min(560px, calc(100vw - 32px));
+  max-height: calc(100vh - 32px);
+  padding: 0;
+  border: 0;
+  border-radius: 16px;
+  background: var(--bs-body-bg);
+  color: var(--bs-body-color);
+  box-shadow:
+    0 24px 64px rgb(15 23 42 / 0.2),
+    0 1px 3px rgb(15 23 42 / 0.08);
+
+  &::backdrop {
+    background: rgb(15 23 42 / 0.25);
+    backdrop-filter: blur(2px);
+  }
+}
+
+.content {
+  padding: 20px 24px 24px;
+  font-size: 14px;
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.intro {
+  color: var(--bs-secondary-color);
+}
+
+.section {
+  margin-top: 20px;
+
+  p {
+    margin: 0;
+  }
+}
+
+.section-title {
+  margin: 0 0 6px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.steps {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0 0 12px;
+  padding-left: 20px;
+}
+
+.block {
+  margin-top: 8px;
+}
+
+.manual {
+  margin-top: 12px;
+
+  summary {
+    color: var(--bs-secondary-color);
+    font-size: 13px;
+    cursor: pointer;
+  }
+
+  .steps {
+    margin-top: 8px;
+  }
+}

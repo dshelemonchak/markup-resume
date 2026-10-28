@@ -1,0 +1,16 @@
+<pre><code #code>{{ text() }}</code></pre>
+<button type="button" class="btn btn-sm copy" (click)="copy()">
+  @switch (state()) {
+    @case ('copied') {
+      <i class="bi bi-check-lg" aria-hidden="true"></i>
+      Copied
+    }
+    @case ('selected') {
+      Press ⌘C
+    }
+    @default {
+      <i class="bi bi-copy" aria-hidden="true"></i>
+      Copy
+    }
+  }
+</button>

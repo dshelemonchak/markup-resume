@@ -32,6 +32,9 @@ services:
     environment:
       CV_DATA_DIR: /data
       PORT: '3000'
+      # Where the project lives on the host, for the "Connect Claude" hint in the UI.
+      # PWD is the folder compose was started from, normally the project folder.
+      HOST_PROJECT_DIR: ${PWD:-}
     ports:
       - '3000:3000'
 
@@ -46,12 +49,12 @@ services:
   # MCP server for Claude (ADR-0003). Not started by `up`: Claude runs it per session with
   #   docker compose run --rm -T mcp
   # -T: no pseudo-TTY, which would rewrite line endings and break JSON-RPC on stdout.
-  # Claude Code picks it up from .mcp.json. For Claude Desktop (Chat), add to
-  # ~/Library/Application Support/Claude/claude_desktop_config.json, with absolute paths because
+  # Claude Code picks it up from .mcp.json. For Claude Desktop (Chat), the UI's "Connect Claude"
+  # dialog gives the entry for Settings → Developer → Edit Config, with absolute paths because
   # GUI apps start without your shell's PATH or working directory:
   #   "mcpServers": { "cv-kit": {
-  #     "command": "/Applications/Docker.app/Contents/Resources/bin/docker",
-  #     "args": ["compose", "-f", "/absolute/path/to/CV/compose.yaml", "run", "--rm", "-T", "mcp"] } }
+  #     "command": "<output of `which docker`>",
+  #     "args": ["compose", "--project-directory", "/absolute/path/to/CV", "run", "--rm", "-T", "mcp"] } }
   mcp:
     <<: *workspace
     profiles: [mcp]

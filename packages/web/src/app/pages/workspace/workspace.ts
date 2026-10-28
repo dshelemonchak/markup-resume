@@ -12,6 +12,7 @@ import {
 } from '@angular/core';
 import { CvApi } from '../../api/cv-api';
 import { toCvListItem } from '../../api/to-cv-list-item';
+import { ConnectClaude } from '../../layout/connect-claude/connect-claude';
 import { DocumentCanvas } from '../../layout/document-canvas/document-canvas';
 import type { DocumentInfo } from '../../layout/document-canvas/document-info';
 import { DocumentFooter } from '../../layout/document-footer/document-footer';
@@ -24,7 +25,7 @@ import type { ZoomSetting } from '../../ui/zoom-control/zoom';
 /** Main screen: CVs from the local server on the left; top bar, the selected CV and the status bar on the right. */
 @Component({
   selector: 'cvc-workspace',
-  imports: [DocumentCanvas, DocumentFooter, DocumentHeader, PinchZoom, Sidebar],
+  imports: [ConnectClaude, DocumentCanvas, DocumentFooter, DocumentHeader, PinchZoom, Sidebar],
   templateUrl: './workspace.html',
   styleUrl: './workspace.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -34,6 +35,7 @@ export class Workspace {
 
   protected readonly cvs = computed(() => (this.api.cvs.value() ?? []).map(toCvListItem));
   protected readonly loadError = computed(() => this.api.cvs.error() !== undefined);
+  protected readonly hostProjectDir = computed(() => this.api.setup.value()?.hostProjectDir ?? null);
 
   /** Keeps the user's choice while it still exists after a reload; otherwise the first CV. */
   protected readonly selectedId = linkedSignal<readonly { id: string }[], string | null>({

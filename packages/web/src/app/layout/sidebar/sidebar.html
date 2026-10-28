@@ -57,9 +57,8 @@
     </section>
   </nav>
 
-  <!-- Placeholder: the real connection state comes from the server later. -->
-  <div class="connection" cvcDummy>
-    <span class="dot" aria-hidden="true"></span>
-    Claude connected · MCP
-  </div>
+  <button type="button" class="btn btn-sm connection" (click)="connectClaude.emit()">
+    <i class="bi bi-plug" aria-hidden="true"></i>
+    Connect Claude
+  </button>
 </aside>

@@ -1,0 +1,52 @@
+<dialog #dialog class="dialog" closedby="any" aria-labelledby="connect-claude-title">
+  <div class="content">
+    <div class="head">
+      <h2 id="connect-claude-title" class="title">Connect Claude</h2>
+      <button type="button" class="btn btn-sm close" aria-label="Close" (click)="close()">
+        <i class="bi bi-x-lg" aria-hidden="true"></i>
+      </button>
+    </div>
+
+    <p class="intro">
+      cv-kit gives Claude tools to list, read and write your CVs. Claude starts the server itself through
+      Docker, so keep Docker Desktop running.
+    </p>
+
+    <section class="section" aria-labelledby="connect-claude-code">
+      <h3 id="connect-claude-code" class="section-title">Claude Code</h3>
+      <p>
+        Open this project folder in Claude Code. It finds the cv-kit server in <code>.mcp.json</code> and asks
+        once to enable it.
+      </p>
+    </section>
+
+    <section class="section" aria-labelledby="connect-claude-desktop">
+      <h3 id="connect-claude-desktop" class="section-title">Claude Desktop</h3>
+      <p>
+        Paste this prompt into Claude Code: it can edit files on this Mac and sets everything up. The Claude
+        Desktop chat cannot change its own config.
+      </p>
+      <cvc-copy-block class="block" [text]="prompt()" />
+
+      <details class="manual">
+        <summary>Set up manually</summary>
+        <ol class="steps">
+          <li>Open <strong>Settings → Developer → Edit Config</strong>.</li>
+          <li>
+            Add the block below inside the file's outer <code>{{ '{ }' }}</code
+            >, next to what is already there, separated by a comma. If <code>"mcpServers"</code> exists, add
+            just the <code>"cv-kit"</code> entry to it.
+          </li>
+          <li>
+            Replace <code>{{ dockerPlaceholder }}</code> with the output of <code>which docker</code>.
+            @if (!projectDir()) {
+              Replace <code>{{ projectPlaceholder }}</code> with this project's folder.
+            }
+          </li>
+          <li>Quit Claude Desktop (⌘Q) and open it again.</li>
+        </ol>
+        <cvc-copy-block [text]="config()" />
+      </details>
+    </section>
+  </div>
+</dialog>

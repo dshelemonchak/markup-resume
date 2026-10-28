@@ -3,7 +3,9 @@
   [items]="cvs()"
   [selectedId]="selectedId()"
   (selectCv)="selectedId.set($event)"
+  (connectClaude)="connectClaude.open()"
 />
+<cvc-connect-claude #connectClaude [projectDir]="hostProjectDir()" />
 <div
   class="document-column"
   cvcPinchZoom

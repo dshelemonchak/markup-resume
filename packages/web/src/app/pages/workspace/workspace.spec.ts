@@ -43,6 +43,7 @@ describe('Workspace', () => {
     const http = TestBed.inject(HttpTestingController);
     TestBed.tick(); // issue the list request (the app stays unstable until it is answered)
     http.expectOne('/api/v1/cvs').flush(CVS);
+    http.expectOne('/api/v1/setup').flush({ hostProjectDir: '/Users/me/CV' });
     await fixture.whenStable();
     const root = fixture.nativeElement as HTMLElement;
     const frameSrc = () => root.querySelector('cvc-document-canvas iframe')?.getAttribute('src');
@@ -56,6 +57,11 @@ describe('Workspace', () => {
       'Second',
     ]);
     expect(frameSrc()).toBe('/api/v1/cvs/first/document?v=0');
+  });
+
+  it('puts the host project folder into the Connect Claude dialog', async () => {
+    const { root } = await render();
+    expect(root.querySelector('cvc-connect-claude pre')!.textContent).toContain('/Users/me/CV');
   });
 
   it('keeps the selection and reloads list and preview when the server reports a change', async () => {

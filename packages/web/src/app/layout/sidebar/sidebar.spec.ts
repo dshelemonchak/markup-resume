@@ -45,4 +45,12 @@ describe('Sidebar', () => {
     root.querySelectorAll<HTMLButtonElement>('cvc-sidebar-item button')[2]!.click();
     expect(emitted).toEqual(['c']);
   });
+
+  it('asks to show how to connect Claude', async () => {
+    const { fixture, root } = await render(ITEMS);
+    let asked = 0;
+    fixture.componentInstance.connectClaude.subscribe(() => asked++);
+    root.querySelector<HTMLButtonElement>('.connection')!.click();
+    expect(asked).toBe(1);
+  });
 });

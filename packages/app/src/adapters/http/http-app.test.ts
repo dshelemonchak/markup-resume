@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest';
 import type { CvRepository } from '../../domain/index.ts';
-import { createHttpApp } from './http-app.ts';
+import { type HttpAppOptions, createHttpApp } from './http-app.ts';
 
-function setup() {
+function setup(options?: HttpAppOptions) {
   let notify = () => {};
   const repository: CvRepository = {
     list: () => Promise.resolve([{ id: 'sample', title: 'Sample', updatedAt: '2026-10-27T00:00:00.000Z' }]),
@@ -13,7 +13,7 @@ function setup() {
       return () => {};
     },
   };
-  const { app, close } = createHttpApp(repository);
+  const { app, close } = createHttpApp(repository, options);
   return { app, close, notify: () => notify() };
 }
 
@@ -39,6 +39,13 @@ describe('HTTP API v1', () => {
     const { app } = setup();
     expect((await app.request('/api/v1/cvs/Bad_Id/document')).status).toBe(400);
     expect((await app.request('/api/v1/cvs/missing/document')).status).toBe(404);
+  });
+
+  it('tells the UI where the project lives on the host, if known', async () => {
+    const known = await setup({ hostProjectDir: '/Users/me/CV' }).app.request('/api/v1/setup');
+    expect(await known.json()).toEqual({ hostProjectDir: '/Users/me/CV' });
+    const unknown = await setup().app.request('/api/v1/setup');
+    expect(await unknown.json()).toEqual({ hostProjectDir: null });
   });
 
   it('streams a change event when storage changes', async () => {

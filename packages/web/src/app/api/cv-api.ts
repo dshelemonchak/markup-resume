@@ -13,6 +13,12 @@ export interface CvSummaryDto {
   readonly updatedAt: string;
 }
 
+/** Shape of GET /api/v1/setup. */
+export interface SetupDto {
+  /** Project folder on the host; null when the server does not know it. */
+  readonly hostProjectDir: string | null;
+}
+
 /**
  * Client of the local server's CV API. Keeps the list fresh: the server's event stream
  * ("cvs-changed") reloads the list and bumps `revision`, which the document URL carries
@@ -21,6 +27,7 @@ export interface CvSummaryDto {
 @Injectable({ providedIn: 'root' })
 export class CvApi {
   readonly cvs = httpResource<readonly CvSummaryDto[]>(() => `${API}/cvs`);
+  readonly setup = httpResource<SetupDto>(() => `${API}/setup`);
   /** Increases on every change notification from the server. */
   readonly revision = signal(0);
 

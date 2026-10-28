@@ -11,11 +11,20 @@ const HEARTBEAT_MS = 25_000;
  *   GET /api/v1/cvs                 list of CVs
  *   GET /api/v1/cvs/:id/document    the CV's HTML, as stored
  *   GET /api/v1/events              server-sent events: "cvs-changed" when any CV changes
+ *   GET /api/v1/setup               what the UI needs to show how to connect Claude
  *
  * Returns the app and a close function that stops watching the storage and ends open
  * event streams, so the HTTP server can shut down without waiting for clients.
  */
-export function createHttpApp(repository: CvRepository): { app: Hono; close: () => void } {
+export interface HttpAppOptions {
+  /** Project folder on the host, when the server runs in a container; null if unknown. */
+  readonly hostProjectDir?: string | null;
+}
+
+export function createHttpApp(
+  repository: CvRepository,
+  options: HttpAppOptions = {},
+): { app: Hono; close: () => void } {
   // One storage watcher for all event-stream clients.
   const listeners = new Set<() => void>();
   const stopWatching = repository.watch(() => listeners.forEach((listener) => listener()));
@@ -40,6 +49,8 @@ export function createHttpApp(repository: CvRepository): { app: Hono; close: () 
         });
     }
   });
+
+  app.get('/setup', (c) => c.json({ hostProjectDir: options.hostProjectDir ?? null }));
 
   app.get('/events', (c) =>
     streamSSE(c, async (stream) => {
