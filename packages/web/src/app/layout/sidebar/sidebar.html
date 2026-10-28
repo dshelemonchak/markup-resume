@@ -51,7 +51,20 @@
             />
           </li>
         } @empty {
-          <li class="empty">No CVs yet</li>
+          @switch (listState()) {
+            @case ('loading') {
+              <li class="empty">Loading…</li>
+            }
+            @case ('unreachable') {
+              <li class="empty error">Server not reachable</li>
+            }
+            @case ('failed') {
+              <li class="empty error">Could not load the CVs</li>
+            }
+            @default {
+              <li class="empty">No CVs yet</li>
+            }
+          }
         }
       </ul>
     </section>

@@ -15,3 +15,9 @@ export interface CvListItem {
   readonly status: CvListItemStatus;
   readonly pinned: boolean;
 }
+
+/**
+ * Where the list stands: still loading, the server cannot be reached, the server failed to answer, or loaded
+ * (and maybe empty).
+ */
+export type CvListState = 'loading' | 'unreachable' | 'failed' | 'ready';

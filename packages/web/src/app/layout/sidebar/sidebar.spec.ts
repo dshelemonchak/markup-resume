@@ -31,6 +31,20 @@ describe('Sidebar', () => {
     expect(titles(root, 'sidebar-all')).toEqual(['Other one', 'Other two']);
   });
 
+  it('says why the list is empty', async () => {
+    const { fixture, root } = await render([]);
+    const empty = () => root.querySelector('.empty')!.textContent.trim();
+    expect(empty()).toBe('No CVs yet');
+    for (const [state, text] of [
+      ['loading', 'Loading…'],
+      ['unreachable', 'Server not reachable'],
+    ] as const) {
+      fixture.componentRef.setInput('listState', state);
+      await fixture.whenStable();
+      expect(empty()).toBe(text);
+    }
+  });
+
   it('hides the pinned group when nothing is pinned', async () => {
     const { root } = await render(ITEMS.filter((item) => !item.pinned));
     expect(root.querySelector('[aria-labelledby="sidebar-pinned"]')).toBeNull();

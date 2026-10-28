@@ -4,10 +4,14 @@ import { TestBed } from '@angular/core/testing';
 import { Workspace } from './workspace';
 
 class FakeEventSource {
+  static readonly CLOSED = 2;
   static last: FakeEventSource | undefined;
+  static created = 0;
+  readyState = 1;
   private readonly listeners = new Map<string, () => void>();
   constructor() {
     FakeEventSource.last = this;
+    FakeEventSource.created++;
   }
   addEventListener(type: string, listener: () => void): void {
     this.listeners.set(type, listener);
@@ -95,5 +99,76 @@ describe('Workspace', () => {
     ]);
     await fixture.whenStable();
     expect(root.querySelector('.connection')!.getAttribute('aria-label')).toBe('Claude Desktop connected');
+  });
+
+  it('tells loading from an unreachable server, and recovers when the server is back', async () => {
+    const fixture = TestBed.createComponent(Workspace);
+    const http = TestBed.inject(HttpTestingController);
+    const root = fixture.nativeElement as HTMLElement;
+    const message = () => root.querySelector('.document-area .empty')?.textContent ?? '';
+    TestBed.tick(); // the requests are pending, so the app is not stable yet
+    expect(message()).toContain('Loading CVs');
+
+    http.expectOne('/api/v1/cvs').error(new ProgressEvent('error'));
+    http.expectOne('/api/v1/setup').error(new ProgressEvent('error'));
+    http.expectOne('/api/v1/claude/sessions').error(new ProgressEvent('error'));
+    await fixture.whenStable();
+    expect(message()).toContain('not reachable');
+    expect(root.querySelector('cvc-sidebar .empty')!.textContent).toContain('Server not reachable');
+
+    // The dev proxy answers the event stream with 502 while the server is down: EventSource gives up, so
+    // the app opens a new one after a pause, and its "ready" means the server is back.
+    vi.useFakeTimers();
+    const before = FakeEventSource.created;
+    FakeEventSource.last!.readyState = FakeEventSource.CLOSED;
+    FakeEventSource.last!.emit('error');
+    vi.advanceTimersByTime(2_000);
+    vi.useRealTimers();
+    expect(FakeEventSource.created).toBe(before + 1);
+    FakeEventSource.last!.emit('ready');
+    TestBed.tick();
+    http.expectOne('/api/v1/cvs').flush(CVS);
+    http.expectOne('/api/v1/setup').flush({ hostProjectDir: null });
+    http.expectOne('/api/v1/claude/sessions').flush([]);
+    await fixture.whenStable();
+    expect(root.querySelectorAll('cvc-sidebar-item')).toHaveLength(2);
+  });
+
+  it('reports a failing server apart from an unreachable one, and tries again by itself', async () => {
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+    try {
+      const fixture = TestBed.createComponent(Workspace);
+      const http = TestBed.inject(HttpTestingController);
+      const root = fixture.nativeElement as HTMLElement;
+      const settle = async () => {
+        await vi.advanceTimersByTimeAsync(0);
+        TestBed.tick();
+      };
+      TestBed.tick();
+      http.expectOne('/api/v1/cvs').flush('boom', { status: 500, statusText: 'Server Error' });
+      http.expectOne('/api/v1/setup').flush({ hostProjectDir: null });
+      http.expectOne('/api/v1/claude/sessions').flush([]);
+      await settle();
+      expect(root.querySelector('cvc-sidebar .empty')!.textContent).toContain('Could not load the CVs');
+      expect(root.querySelector('.document-area .empty')!.textContent).toContain('could not load');
+
+      await vi.advanceTimersByTimeAsync(5_000);
+      TestBed.tick();
+      http.expectOne('/api/v1/cvs').flush(CVS);
+      await settle();
+      expect(root.querySelectorAll('cvc-sidebar-item')).toHaveLength(2);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('leaves a dropped event stream to the browser while it is still retrying', async () => {
+    await render();
+    const before = FakeEventSource.created;
+    vi.useFakeTimers();
+    FakeEventSource.last!.emit('error'); // readyState stays CONNECTING: EventSource retries itself
+    vi.advanceTimersByTime(10_000);
+    vi.useRealTimers();
+    expect(FakeEventSource.created).toBe(before);
   });
 });

@@ -1,6 +1,7 @@
 <cvc-sidebar
   class="sidebar"
   [items]="cvs()"
+  [listState]="listState()"
   [selectedId]="selectedId()"
   (selectCv)="selectedId.set($event)"
   [claude]="claudeStatus()"
@@ -29,9 +30,17 @@
         [(zoom)]="zoom"
         (documentInfo)="documentInfo.set($event)"
       />
-    } @else if (loadError()) {
+    } @else if (listState() === 'loading') {
+      <p class="empty">Loading CVs…</p>
+    } @else if (listState() === 'unreachable') {
       <p class="empty">
-        The local server is not reachable. Start it with <code>docker compose up -d app</code>.
+        The local server is not reachable. Start it with <code>docker compose up -d app</code>; the list comes
+        back by itself.
+      </p>
+    } @else if (listState() === 'failed') {
+      <p class="empty">
+        The server could not load the CVs; see <code>docker compose logs app</code>. Trying again every few
+        seconds.
       </p>
     } @else {
       <p class="empty">

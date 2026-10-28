@@ -1,3 +1,4 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import {
   ChangeDetectionStrategy,
   Component,
@@ -19,6 +20,7 @@ import type { DocumentInfo } from '../../layout/document-canvas/document-info';
 import { DocumentFooter } from '../../layout/document-footer/document-footer';
 import { DocumentHeader } from '../../layout/document-header/document-header';
 import type { PreviewMode } from '../../layout/document-header/preview-mode';
+import type { CvListState } from '../../layout/sidebar/cv-list-item';
 import { Sidebar } from '../../layout/sidebar/sidebar';
 import { PinchZoom } from '../../ui/zoom-control/pinch-zoom';
 import type { ZoomSetting } from '../../ui/zoom-control/zoom';
@@ -34,14 +36,26 @@ import type { ZoomSetting } from '../../ui/zoom-control/zoom';
 export class Workspace {
   private readonly api = inject(CvApi);
 
-  protected readonly cvs = computed(() => (this.api.cvs.value() ?? []).map(toCvListItem));
-  protected readonly loadError = computed(() => this.api.cvs.error() !== undefined);
-  protected readonly hostProjectDir = computed(() => this.api.setup.value()?.hostProjectDir ?? null);
+  // value() throws while a resource is in its error state (server down), so read it only when there is one.
+  protected readonly cvs = computed(() =>
+    (this.api.cvs.hasValue() ? this.api.cvs.value() : []).map(toCvListItem),
+  );
+  protected readonly listState = computed<CvListState>(() => {
+    const cvs = this.api.cvs;
+    const error = cvs.error();
+    if (error !== undefined) return isUnreachable(error) ? 'unreachable' : 'failed';
+    return cvs.hasValue() ? 'ready' : 'loading';
+  });
+  protected readonly hostProjectDir = computed(() =>
+    this.api.setup.hasValue() ? this.api.setup.value().hostProjectDir : null,
+  );
   protected readonly desktopExtensionUrl = this.api.desktopExtensionUrl;
 
   /** Ticks so that "2 min ago" stays current. */
   private readonly now = signal(new Date());
-  private readonly claudeSessions = computed(() => this.api.claudeSessions.value() ?? []);
+  private readonly claudeSessions = computed(() =>
+    this.api.claudeSessions.hasValue() ? this.api.claudeSessions.value() : [],
+  );
   protected readonly claudeStatus = computed(() => claudeStatus(this.claudeSessions(), this.now()));
   protected readonly claudeSessionLines = computed(() =>
     claudeSessionLines(this.claudeSessions(), this.now()),
@@ -90,4 +104,12 @@ export class Workspace {
       destroyRef.onDestroy(() => observer.disconnect());
     });
   }
+}
+
+/**
+ * No answer at all (status 0: refused, dropped or timed out), or the dev proxy's answer for a server that is
+ * down. Any other error comes from a running server.
+ */
+function isUnreachable(error: Error): boolean {
+  return !(error instanceof HttpErrorResponse) || [0, 502, 503, 504].includes(error.status);
 }

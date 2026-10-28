@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, input, output } from '@an
 import { DummyMark } from '../../ui/dummy-mark/dummy-mark';
 import { GlassPanel } from '../../ui/glass-panel/glass-panel';
 import type { ClaudeStatus } from '../connect-claude/claude-status';
-import type { CvListItem } from './cv-list-item';
+import type { CvListItem, CvListState } from './cv-list-item';
 import { SidebarItem } from './sidebar-item/sidebar-item';
 
 /**
@@ -20,6 +20,8 @@ import { SidebarItem } from './sidebar-item/sidebar-item';
 })
 export class Sidebar {
   readonly items = input.required<readonly CvListItem[]>();
+  /** Says why the list is empty: not loaded yet, server down, or really no CVs. */
+  readonly listState = input<CvListState>('ready');
   readonly selectedId = input<string | null>(null);
   readonly claude = input<ClaudeStatus>({
     connected: false,
