@@ -55,6 +55,7 @@ export class DocumentCanvas {
   private readonly loaded = signal(false);
   protected readonly contentHeight = signal<number>(PAGE.height);
   private readonly font = signal<string | null>(null);
+  private stopWatchingSize: (() => void) | undefined;
 
   protected readonly scale = computed(() => {
     const zoom = this.zoom();
@@ -85,22 +86,47 @@ export class DocumentCanvas {
     });
 
     effect(() => this.documentInfo.emit(this.info()));
+    destroyRef.onDestroy(() => this.stopWatchingSize?.());
   }
 
   protected onLoad(): void {
     this.loaded.set(true);
     this.applyMode(this.mode());
+    this.watchSize();
   }
 
-  /** Switches the document's mode, then measures it: height for the frame, pages and font. */
+  /** Switches the document's mode, then measures it. */
   private applyMode(mode: PreviewMode): void {
     const document = this.frame().nativeElement.contentDocument;
     if (!document?.documentElement) return;
     document.documentElement.setAttribute('data-cv-mode', mode);
-    this.contentHeight.set(Math.max(PAGE.height, document.documentElement.scrollHeight));
+    this.measure(document);
+  }
+
+  /**
+   * Height for the frame, and the font. The frame must be at least as tall as the document, or the document
+   * scrolls inside it: a vertical scrollbar, which then takes width and adds a horizontal one. scrollHeight
+   * rounds a fractional height down, so the layout height is rounded up instead.
+   */
+  private measure(document: Document): void {
+    const root = document.documentElement;
+    const height = Math.max(root.scrollHeight, Math.ceil(root.getBoundingClientRect().height));
+    this.contentHeight.set(Math.max(PAGE.height, height));
     const view = document.defaultView;
     this.font.set(
       view && document.body ? primaryFontFamily(view.getComputedStyle(document.body).fontFamily) : null,
     );
+  }
+
+  /** Measures again whenever the document's size changes after load, e.g. when its web fonts arrive. */
+  private watchSize(): void {
+    this.stopWatchingSize?.();
+    const document = this.frame().nativeElement.contentDocument;
+    const view = document?.defaultView;
+    if (!document || !view || !('ResizeObserver' in view)) return;
+    // The observer of the frame's own window: the document lives there.
+    const observer = new view.ResizeObserver(() => this.measure(document));
+    observer.observe(document.documentElement);
+    this.stopWatchingSize = () => observer.disconnect();
   }
 }

@@ -41,4 +41,19 @@ describe('DocumentCanvas', () => {
     expect(root.querySelector<HTMLElement>('.sheet')!.style.width).toBe(`${794 * 1.5}px`);
     expect(reported.at(-1)).toEqual({ pages: 1, font: null, scale: 1.5 });
   });
+
+  it('makes the frame as tall as the document, rounding a fractional height up so it never scrolls inside', async () => {
+    const { fixture, root } = await render();
+    const frame = root.querySelector('iframe')!;
+    // jsdom loads no frame content: give the frame a document.
+    const document = window.document.implementation.createHTMLDocument('CV');
+    Object.defineProperty(frame, 'contentDocument', { value: document });
+    const page = document.documentElement;
+    // A layout height of 1124.59 px, which scrollHeight reports as 1124.
+    Object.defineProperty(page, 'scrollHeight', { value: 1124, configurable: true });
+    page.getBoundingClientRect = () => ({ height: 1124.59 }) as DOMRect;
+    frame.dispatchEvent(new Event('load'));
+    await fixture.whenStable();
+    expect(frame.style.height).toBe('1125px');
+  });
 });
