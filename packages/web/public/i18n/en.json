@@ -1,0 +1,148 @@
+{
+  "app": {
+    "name": "Markup Résumé"
+  },
+  "sidebar": {
+    "label": "CVs",
+    "importHtml": "Import HTML",
+    "search": "Search CVs",
+    "listLabel": "CV list",
+    "pinned": "Pinned",
+    "allCvs": "All CVs",
+    "empty": {
+      "loading": "Loading…",
+      "unreachable": "Server not reachable",
+      "failed": "Could not load the CVs",
+      "none": "No CVs yet"
+    }
+  },
+  "sidebarItem": {
+    "pinned": "Pinned"
+  },
+  "claude": {
+    "connect": "Connect Claude",
+    "sessions": "{{ count }} Claude sessions",
+    "connected": "{{ label }} connected",
+    "connectedLastUsed": "{{ label }} connected, last used {{ lastUsed }}",
+    "client": {
+      "claudeAi": "Claude Desktop",
+      "claudeCode": "Claude Code"
+    }
+  },
+  "timeAgo": {
+    "justNow": "just now",
+    "minutes": "{{ count }} min ago",
+    "hours": "{{ count }} h ago",
+    "days": "{{ count }} d ago"
+  },
+  "workspace": {
+    "loading": "Loading CVs…",
+    "unreachable": "The local server is not reachable. Start it with <code>docker compose up -d app</code>; the list comes back by itself.",
+    "failed": "The server could not load the CVs; see <code>docker compose logs app</code>. Trying again every few seconds.",
+    "empty": "No CVs yet. Add one to <code>data/cvs/&lt;id&gt;/document.html</code> or run <code>docker compose exec dev pnpm seed</code>."
+  },
+  "header": {
+    "noCv": "No CV selected",
+    "notice": "Claude updated Summary · rev 12 · 2 min ago",
+    "export": "Export PDF",
+    "exporting": "Exporting…",
+    "status": {
+      "valid": "Valid",
+      "warning": "Warnings",
+      "notExported": "Not exported"
+    },
+    "view": "View",
+    "visual": "Visual",
+    "ats": "ATS",
+    "pageWidth": "Page width",
+    "pageWidthAts": "A4 in ATS",
+    "widthShort": "W",
+    "millimetres": "mm",
+    "font": "Font",
+    "fontFamily": "Font family",
+    "revisions": "Revisions",
+    "rollBack": "Roll back",
+    "revisionHistory": "Revision history",
+    "revision": "rev {{ number }}"
+  },
+  "footer": {
+    "validation": "0 errors · 2 warnings",
+    "pages": "{{ count }} pages",
+    "page": "1 page",
+    "pageSize": "{{ pages }} · {{ size }}",
+    "widthMm": "{{ width }} mm",
+    "exported": "Exported 14:32",
+    "report": "Validation report"
+  },
+  "zoom": {
+    "label": "Zoom",
+    "out": "Zoom out",
+    "in": "Zoom in",
+    "level": "Zoom level, reset to 100%",
+    "fit": "Fit"
+  },
+  "copyBlock": {
+    "copy": "Copy",
+    "copied": "Copied",
+    "pressToCopy": "Press ⌘C"
+  },
+  "canvas": {
+    "title": "CV preview"
+  },
+  "dialog": {
+    "close": "Close"
+  },
+  "exportReport": {
+    "title": {
+      "problems": "The PDF does not read like the page",
+      "failed": "The export failed"
+    },
+    "intro": {
+      "problems": "Copied or parsed (by an ATS, for example), its text would come out differently from what you see. The file was not downloaded.",
+      "failed": "No PDF was made. Is the server running? See <code>docker compose logs app</code>."
+    },
+    "downloadAnyway": "Download anyway"
+  },
+  "pdfProblem": {
+    "fontType3": "The font {{ font }} is drawn as shapes (Type 3): its text cannot be copied or searched.",
+    "fontNotEmbedded": "The font {{ font }} is not embedded: the PDF looks different elsewhere.",
+    "fontNoUnicode": "The font {{ font }} has no Unicode map: its text copies as garbage.",
+    "wordsMissing": "Words of the page that the PDF text does not have: {{ words }}.",
+    "wordsExtra": "Words in the PDF text that the page does not have: {{ words }}.",
+    "blockOutOfOrder": "\"{{ block }}\" comes earlier in the PDF text than on the page: the reading order is off.",
+    "blockSplit": "\"{{ block }}\" does not come out of the PDF in one piece: other text cuts into it.",
+    "linkNotClickable": "The link \"{{ text }}\" ({{ href }}) cannot be clicked in the PDF.",
+    "moreWords": "{{ list }} and {{ count }} more",
+    "moreProblems": "…and {{ count }} more problems."
+  },
+  "connectClaude": {
+    "title": "Connect Claude",
+    "intro": "Markup Résumé gives Claude tools to list, read and write your CVs. Claude starts the server itself through Docker, so keep Docker Desktop running.",
+    "connectedNow": "Connected now",
+    "lastUsed": "last used {{ time }}",
+    "noToolCalls": "no tool calls yet",
+    "code": {
+      "title": "Claude Code",
+      "text": "Open this project folder in Claude Code. It finds the Markup Résumé server in <code>.mcp.json</code> and asks once to enable it."
+    },
+    "desktop": {
+      "title": "Claude Desktop",
+      "download": "Download extension",
+      "stepOpen": "Open <code>markup-resume.mcpb</code> from Downloads, or drag it into <strong>Settings → Extensions</strong> in Claude Desktop.",
+      "stepInstall": "Check the project folder Claude Desktop asks for, and install."
+    },
+    "withCode": {
+      "summary": "Set up with Claude Code",
+      "text": "Paste this prompt into Claude Code in a terminal: it can edit files on this Mac and sets everything up. The Claude Desktop chat cannot change its own config, and the Code tab of Claude Desktop closes with the app, which has to quit for the change to stick."
+    },
+    "manual": {
+      "summary": "Set up manually",
+      "stepOpen": "Open <strong>Settings → Developer → Edit Config</strong> to find the file, and open it in an editor.",
+      "stepQuit": "Quit Claude Desktop (⌘Q) before editing: while it runs, it rewrites the file and drops new entries.",
+      "stepAdd": "Add the block below inside the file's outer <code>{ }</code>, next to what is already there, separated by a comma. If <code>\"mcpServers\"</code> exists, add just the <code>\"markup-resume\"</code> entry to it.",
+      "stepDocker": "Replace <code>{{ docker }}</code> with the output of <code>which docker</code>.",
+      "stepProject": "Replace <code>{{ project }}</code> with this project's folder.",
+      "stepSave": "Save the file and open Claude Desktop again."
+    }
+  }
+}

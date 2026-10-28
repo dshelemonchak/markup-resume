@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
+import { TranslocoPipe } from '@jsverse/transloco';
 import { DummyMark } from '../../ui/dummy-mark/dummy-mark';
 import { GlassPanel } from '../../ui/glass-panel/glass-panel';
 import type { ClaudeStatus } from '../claude-status';
@@ -13,7 +14,7 @@ import { SidebarItem } from '../sidebar-item/sidebar-item';
  */
 @Component({
   selector: 'mr-sidebar',
-  imports: [DummyMark, GlassPanel, SidebarItem],
+  imports: [DummyMark, GlassPanel, SidebarItem, TranslocoPipe],
   templateUrl: './sidebar.html',
   styleUrl: './sidebar.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

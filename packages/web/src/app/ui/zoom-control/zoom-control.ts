@@ -1,4 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, input, model } from '@angular/core';
+import { TranslocoPipe } from '@jsverse/transloco';
+import { injectTranslate } from '../../i18n/i18n';
 import { type ZoomSetting, canZoom, stepZoom } from '../zoom';
 
 /**
@@ -8,12 +10,13 @@ import { type ZoomSetting, canZoom, stepZoom } from '../zoom';
  */
 @Component({
   selector: 'mr-zoom-control',
+  imports: [TranslocoPipe],
   templateUrl: './zoom-control.html',
   styleUrl: './zoom-control.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: {
     role: 'group',
-    'aria-label': 'Zoom',
+    '[attr.aria-label]': 'label()',
   },
 })
 export class ZoomControl {
@@ -21,6 +24,10 @@ export class ZoomControl {
   /** Scale currently applied, 1 = 100%. */
   readonly scale = input.required<number>();
 
+  private readonly translate = injectTranslate();
+
+  /** t(zoom.label) */
+  protected readonly label = computed(() => this.translate('zoom.label'));
   protected readonly percent = computed(() => Math.round(this.scale() * 100));
   protected readonly canZoomIn = computed(() => canZoom(this.scale(), 1));
   protected readonly canZoomOut = computed(() => canZoom(this.scale(), -1));

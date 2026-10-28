@@ -22,43 +22,63 @@ export interface ClaudeStatus {
   readonly lastUsed: string | null;
 }
 
+type Translate = (key: string, params?: Record<string, unknown>) => string;
+
+/**
+ * t(claude.connect, claude.sessions, claude.connected, claude.connectedLastUsed, claude.client.claudeAi,
+ * claude.client.claudeCode, timeAgo.justNow, timeAgo.minutes, timeAgo.hours, timeAgo.days)
+ */
+
+/** Names of the Claude apps by the client name they send in the MCP handshake. */
 const CLIENT_NAMES: Readonly<Record<string, string>> = {
-  'claude-ai': 'Claude Desktop',
-  'claude-code': 'Claude Code',
+  'claude-ai': 'claude.client.claudeAi',
+  'claude-code': 'claude.client.claudeCode',
 };
 
-export const clientName = (client: string): string => CLIENT_NAMES[client] ?? client;
+/** The app's name for a known client, or the client's own name. */
+export const clientName = (client: string, t: Translate): string => {
+  const key = CLIENT_NAMES[client];
+  return key ? t(key) : client;
+};
 
 /** "just now", "5 min ago", "3 h ago", "2 d ago". */
-export function timeAgo(iso: string, now: Date): string {
+export function timeAgo(iso: string, now: Date, t: Translate): string {
   const minutes = Math.floor((now.getTime() - Date.parse(iso)) / 60_000);
-  if (minutes < 1) return 'just now';
-  if (minutes < 60) return `${minutes} min ago`;
+  if (minutes < 1) return t('timeAgo.justNow');
+  if (minutes < 60) return t('timeAgo.minutes', { count: minutes });
   const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours} h ago`;
-  return `${Math.floor(hours / 24)} d ago`;
+  if (hours < 24) return t('timeAgo.hours', { count: hours });
+  return t('timeAgo.days', { count: Math.floor(hours / 24) });
 }
 
-export function claudeSessionLines(sessions: readonly ClaudeSessionDto[], now: Date): ClaudeSessionLine[] {
+export function claudeSessionLines(
+  sessions: readonly ClaudeSessionDto[],
+  now: Date,
+  t: Translate,
+): ClaudeSessionLine[] {
   return sessions.map((session) => ({
     id: session.id,
-    name: clientName(session.client),
-    lastUsed: session.lastActivityAt ? timeAgo(session.lastActivityAt, now) : null,
+    name: clientName(session.client, t),
+    lastUsed: session.lastActivityAt ? timeAgo(session.lastActivityAt, now, t) : null,
   }));
 }
 
-export function claudeStatus(sessions: readonly ClaudeSessionDto[], now: Date): ClaudeStatus {
+export function claudeStatus(sessions: readonly ClaudeSessionDto[], now: Date, t: Translate): ClaudeStatus {
   const [first] = sessions;
   if (!first) {
-    return { connected: false, label: 'Connect Claude', description: 'Connect Claude', lastUsed: null };
+    const connect = t('claude.connect');
+    return { connected: false, label: connect, description: connect, lastUsed: null };
   }
-  const label = sessions.length === 1 ? clientName(first.client) : `${sessions.length} Claude sessions`;
+  const label =
+    sessions.length === 1 ? clientName(first.client, t) : t('claude.sessions', { count: sessions.length });
   const latest = sessions
     .map((session) => session.lastActivityAt)
     .filter((time): time is string => time !== null)
     .sort()
     .at(-1);
-  const lastUsed = latest ? timeAgo(latest, now) : null;
-  const description = `${label} connected${lastUsed ? `, last used ${lastUsed}` : ''}`;
+  const lastUsed = latest ? timeAgo(latest, now, t) : null;
+  const description = lastUsed
+    ? t('claude.connectedLastUsed', { label, lastUsed })
+    : t('claude.connected', { label });
   return { connected: true, label, description, lastUsed };
 }

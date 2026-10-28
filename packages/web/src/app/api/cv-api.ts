@@ -30,10 +30,20 @@ export interface ClaudeSessionDto {
 }
 
 /** What exporting a CV to PDF came to. */
+/**
+ * One problem of the PDF check, as GET /api/v1/cvs/:id/pdf reports it. Mirrors PdfProblem in
+ * packages/app/src/domain/cv-pdf.ts.
+ */
+export type PdfProblemDto =
+  | { readonly code: 'font-type3' | 'font-not-embedded' | 'font-no-unicode'; readonly font: string }
+  | { readonly code: 'words-missing' | 'words-extra'; readonly words: readonly string[] }
+  | { readonly code: 'block-out-of-order' | 'block-split'; readonly block: string }
+  | { readonly code: 'link-not-clickable'; readonly text: string; readonly href: string };
+
 export type PdfExport =
   | { readonly kind: 'downloaded' }
   /** The PDF check found problems, so the file was not handed out (ask again with force to get it anyway). */
-  | { readonly kind: 'problems'; readonly problems: readonly string[] }
+  | { readonly kind: 'problems'; readonly problems: readonly PdfProblemDto[] }
   | { readonly kind: 'failed'; readonly message: string };
 
 /** Shape of GET /api/v1/setup. */
@@ -129,7 +139,7 @@ export class CvApi {
       return { kind: 'downloaded' };
     } catch (error) {
       if (error instanceof HttpErrorResponse && error.status === 422 && error.error instanceof Blob) {
-        const body = JSON.parse(await error.error.text()) as { problems: string[] };
+        const body = JSON.parse(await error.error.text()) as { problems: PdfProblemDto[] };
         return { kind: 'problems', problems: body.problems };
       }
       return { kind: 'failed', message: error instanceof HttpErrorResponse ? error.message : String(error) };

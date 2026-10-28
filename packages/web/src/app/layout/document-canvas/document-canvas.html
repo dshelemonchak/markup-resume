@@ -3,7 +3,7 @@
     <iframe
       #frame
       class="frame"
-      title="CV preview"
+      [title]="'canvas.title' | transloco"
       sandbox="allow-same-origin"
       [src]="safeSrc()"
       [style.width.px]="pageWidth"

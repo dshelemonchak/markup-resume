@@ -1,27 +1,36 @@
 <dialog #dialog class="dialog" closedby="any" aria-labelledby="connect-claude-title">
   <div class="content">
     <div class="head">
-      <h2 id="connect-claude-title" class="title">Connect Claude</h2>
-      <button type="button" class="btn btn-sm close" aria-label="Close" (click)="close()">
+      <h2 id="connect-claude-title" class="title">{{ 'connectClaude.title' | transloco }}</h2>
+      <button
+        type="button"
+        class="btn btn-sm close"
+        [attr.aria-label]="'dialog.close' | transloco"
+        (click)="close()"
+      >
         <i class="bi bi-x-lg" aria-hidden="true"></i>
       </button>
     </div>
 
-    <p class="intro">
-      Markup Résumé gives Claude tools to list, read and write your CVs. Claude starts the server itself
-      through Docker, so keep Docker Desktop running.
-    </p>
+    <p class="intro">{{ 'connectClaude.intro' | transloco }}</p>
 
     @if (sessions().length) {
       <section class="section" aria-labelledby="connect-claude-connected">
-        <h3 id="connect-claude-connected" class="section-title">Connected now</h3>
+        <h3 id="connect-claude-connected" class="section-title">
+          {{ 'connectClaude.connectedNow' | transloco }}
+        </h3>
         <ul class="sessions">
           @for (session of sessions(); track session.id) {
             <li>
               <span class="dot" aria-hidden="true"></span>
               {{ session.name }}
               <span class="last-used">
-                · {{ session.lastUsed ? 'last used ' + session.lastUsed : 'no tool calls yet' }}
+                ·
+                @if (session.lastUsed; as time) {
+                  {{ 'connectClaude.lastUsed' | transloco: { time } }}
+                } @else {
+                  {{ 'connectClaude.noToolCalls' | transloco }}
+                }
               </span>
             </li>
           }
@@ -30,60 +39,46 @@
     }
 
     <section class="section" aria-labelledby="connect-claude-code">
-      <h3 id="connect-claude-code" class="section-title">Claude Code</h3>
-      <p>
-        Open this project folder in Claude Code. It finds the Markup Résumé server in
-        <code>.mcp.json</code> and asks once to enable it.
-      </p>
+      <h3 id="connect-claude-code" class="section-title">{{ 'connectClaude.code.title' | transloco }}</h3>
+      <p [innerHTML]="'connectClaude.code.text' | transloco"></p>
     </section>
 
     <section class="section" aria-labelledby="connect-claude-desktop">
-      <h3 id="connect-claude-desktop" class="section-title">Claude Desktop</h3>
+      <h3 id="connect-claude-desktop" class="section-title">
+        {{ 'connectClaude.desktop.title' | transloco }}
+      </h3>
       <a class="btn btn-primary btn-sm download" [href]="extensionUrl()" download="markup-resume.mcpb">
         <i class="bi bi-download" aria-hidden="true"></i>
-        Download extension
+        {{ 'connectClaude.desktop.download' | transloco }}
       </a>
       <ol class="steps">
-        <li>
-          Open <code>markup-resume.mcpb</code> from Downloads, or drag it into
-          <strong>Settings → Extensions</strong> in Claude Desktop.
-        </li>
-        <li>Check the project folder Claude Desktop asks for, and install.</li>
+        <li [innerHTML]="'connectClaude.desktop.stepOpen' | transloco"></li>
+        <li>{{ 'connectClaude.desktop.stepInstall' | transloco }}</li>
       </ol>
 
       <details class="manual">
-        <summary>Set up with Claude Code</summary>
-        <p>
-          Paste this prompt into Claude Code in a terminal: it can edit files on this Mac and sets everything
-          up. The Claude Desktop chat cannot change its own config, and the Code tab of Claude Desktop closes
-          with the app, which has to quit for the change to stick.
-        </p>
+        <summary>{{ 'connectClaude.withCode.summary' | transloco }}</summary>
+        <p>{{ 'connectClaude.withCode.text' | transloco }}</p>
         <mr-copy-block class="block" [text]="prompt()" />
       </details>
 
       <details class="manual">
-        <summary>Set up manually</summary>
+        <summary>{{ 'connectClaude.manual.summary' | transloco }}</summary>
         <ol class="steps">
+          <li [innerHTML]="'connectClaude.manual.stepOpen' | transloco"></li>
+          <li>{{ 'connectClaude.manual.stepQuit' | transloco }}</li>
+          <li [innerHTML]="'connectClaude.manual.stepAdd' | transloco"></li>
           <li>
-            Open <strong>Settings → Developer → Edit Config</strong> to find the file, and open it in an
-            editor.
-          </li>
-          <li>
-            Quit Claude Desktop (⌘Q) before editing: while it runs, it rewrites the file and drops new
-            entries.
-          </li>
-          <li>
-            Add the block below inside the file's outer <code>{{ '{ }' }}</code
-            >, next to what is already there, separated by a comma. If <code>"mcpServers"</code> exists, add
-            just the <code>"markup-resume"</code> entry to it.
-          </li>
-          <li>
-            Replace <code>{{ dockerPlaceholder }}</code> with the output of <code>which docker</code>.
+            <span
+              [innerHTML]="'connectClaude.manual.stepDocker' | transloco: { docker: dockerPlaceholder }"
+            ></span>
             @if (!projectDir()) {
-              Replace <code>{{ projectPlaceholder }}</code> with this project's folder.
+              <span
+                [innerHTML]="'connectClaude.manual.stepProject' | transloco: { project: projectPlaceholder }"
+              ></span>
             }
           </li>
-          <li>Save the file and open Claude Desktop again.</li>
+          <li>{{ 'connectClaude.manual.stepSave' | transloco }}</li>
         </ol>
         <mr-copy-block [text]="config()" />
       </details>

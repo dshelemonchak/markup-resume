@@ -189,13 +189,20 @@ describe('Workspace', () => {
     root.querySelector<HTMLButtonElement>('mr-document-header .export')!.click();
     http
       .expectOne('/api/v1/cvs/first/pdf')
-      .flush(new Blob([JSON.stringify({ error: 'pdf-check-failed', problems: ['Order is off.'] })]), {
-        status: 422,
-        statusText: 'Unprocessable',
-      });
+      .flush(
+        new Blob([
+          JSON.stringify({ error: 'pdf-check-failed', problems: [{ code: 'font-type3', font: 'Shapes' }] }),
+        ]),
+        {
+          status: 422,
+          statusText: 'Unprocessable',
+        },
+      );
     await fixture.whenStable();
     expect(root.querySelector('mr-export-report dialog')!.hasAttribute('open')).toBe(true);
-    expect(root.querySelector('mr-export-report .problems')!.textContent).toContain('Order is off.');
+    expect(root.querySelector('mr-export-report .problems')!.textContent).toContain(
+      'The font Shapes is drawn as shapes (Type 3)',
+    );
 
     [...root.querySelectorAll<HTMLButtonElement>('mr-export-report button')]
       .find((button) => button.textContent.includes('Download anyway'))!

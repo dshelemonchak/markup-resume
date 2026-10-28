@@ -17,8 +17,9 @@
     "format:check": "prettier --check .",
     "typecheck": "pnpm -r --parallel typecheck",
     "test": "pnpm -r test",
-    "check": "pnpm lint && pnpm format:check && pnpm typecheck && pnpm test",
-    "seed": "pnpm --filter @markup-resume/app seed"
+    "check": "pnpm lint && pnpm format:check && pnpm typecheck && pnpm i18n && pnpm test",
+    "seed": "pnpm --filter @markup-resume/app seed",
+    "i18n": "pnpm --filter @markup-resume/web i18n"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
