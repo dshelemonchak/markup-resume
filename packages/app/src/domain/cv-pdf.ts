@@ -43,15 +43,35 @@ export interface PdfFacts {
 /** Port: reads fonts, text and links out of a PDF (ADR-0009). */
 export type InspectPdf = (pdf: Uint8Array) => Promise<PdfFacts>;
 
-const MAX_LISTED = 10;
+/**
+ * What the PDF check found, as a code with its details: the UI phrases it in the user's language, so the
+ * domain holds no wording.
+ */
+export type PdfProblem =
+  /** A font drawn as shapes (Type 3): its text cannot be copied or searched. */
+  | { readonly code: 'font-type3'; readonly font: string }
+  /** A font that is not embedded: the PDF looks different on other machines. */
+  | { readonly code: 'font-not-embedded'; readonly font: string }
+  /** A font without a Unicode map: its text copies as garbage. */
+  | { readonly code: 'font-no-unicode'; readonly font: string }
+  /** Words of the page the PDF text does not have, once per missing occurrence. */
+  | { readonly code: 'words-missing'; readonly words: readonly string[] }
+  /** Words in the PDF text the page does not have, once per extra occurrence. */
+  | { readonly code: 'words-extra'; readonly words: readonly string[] }
+  /** A block that comes earlier in the PDF text than on the page: the reading order is off. */
+  | { readonly code: 'block-out-of-order'; readonly block: string }
+  /** A block that does not come out of the PDF in one piece: other text cuts into it. */
+  | { readonly code: 'block-split'; readonly block: string }
+  /** A link of the page that cannot be clicked in the PDF. */
+  | { readonly code: 'link-not-clickable'; readonly text: string; readonly href: string };
 
 /**
  * Compares a PDF with the page it was printed from, for what goes wrong when its text is copied or parsed
  * (ADR-0009): fonts that give no text back, words split or merged by letter spacing, text that is lost or
- * added, blocks that come apart or out of order (columns read across), and links that do not click. Returns
- * problems phrased for the user; an empty list means the PDF reads like the page.
+ * added, blocks that come apart or out of order (columns read across), and links that do not click. An empty
+ * list means the PDF reads like the page.
  */
-export function checkPdf(page: PageSnapshot, pdf: PdfFacts): readonly string[] {
+export function checkPdf(page: PageSnapshot, pdf: PdfFacts): readonly PdfProblem[] {
   return [
     ...checkFonts(pdf.fonts),
     ...checkWords(page, pdf),
@@ -60,29 +80,25 @@ export function checkPdf(page: PageSnapshot, pdf: PdfFacts): readonly string[] {
   ];
 }
 
-function checkFonts(fonts: readonly PdfFont[]): string[] {
-  return fonts.flatMap((font) => {
-    if (/type ?3/i.test(font.type)) {
-      return [`The font ${font.name} is drawn as shapes (Type 3): its text cannot be copied or searched.`];
-    }
-    const problems: string[] = [];
-    if (!font.embedded)
-      problems.push(`The font ${font.name} is not embedded: the PDF looks different elsewhere.`);
-    if (!font.unicode) problems.push(`The font ${font.name} has no Unicode map: its text copies as garbage.`);
+function checkFonts(fonts: readonly PdfFont[]): PdfProblem[] {
+  return fonts.flatMap((font): PdfProblem[] => {
+    if (/type ?3/i.test(font.type)) return [{ code: 'font-type3', font: font.name }];
+    const problems: PdfProblem[] = [];
+    if (!font.embedded) problems.push({ code: 'font-not-embedded', font: font.name });
+    if (!font.unicode) problems.push({ code: 'font-no-unicode', font: font.name });
     return problems;
   });
 }
 
 /** Every word of the page is in the PDF text exactly as often, and nothing else is. */
-function checkWords(page: PageSnapshot, pdf: PdfFacts): string[] {
+function checkWords(page: PageSnapshot, pdf: PdfFacts): PdfProblem[] {
   const expected = count(page.blocks.flatMap(words));
   const found = count(pdfWords(pdf.text, expected));
   const missing = difference(expected, found);
   const extra = difference(found, expected);
-  const problems: string[] = [];
-  if (missing.length > 0)
-    problems.push(`Words of the page that the PDF text does not have: ${list(missing)}.`);
-  if (extra.length > 0) problems.push(`Words in the PDF text that the page does not have: ${list(extra)}.`);
+  const problems: PdfProblem[] = [];
+  if (missing.length > 0) problems.push({ code: 'words-missing', words: missing });
+  if (extra.length > 0) problems.push({ code: 'words-extra', words: extra });
   return problems;
 }
 
@@ -90,35 +106,24 @@ function checkWords(page: PageSnapshot, pdf: PdfFacts): string[] {
  * Each block comes out of the PDF in one piece, and the blocks come in page order: a two-column layout must
  * not be read across the columns. Compared without whitespace, so line breaks inside a block do not matter.
  */
-function checkBlocks(page: PageSnapshot, pdf: PdfFacts): string[] {
+function checkBlocks(page: PageSnapshot, pdf: PdfFacts): PdfProblem[] {
   const text = squeeze(pdf.text);
-  const problems: string[] = [];
+  const problems: PdfProblem[] = [];
   let cursor = 0;
   for (const block of page.blocks) {
     const wanted = squeeze(block);
     const at = text.indexOf(wanted, cursor);
-    if (at !== -1) {
-      cursor = at + wanted.length;
-    } else if (text.includes(wanted)) {
-      problems.push(
-        `"${excerpt(block)}" comes earlier in the PDF text than on the page: the reading order is off.`,
-      );
-    } else {
-      problems.push(
-        `"${excerpt(block)}" does not come out of the PDF in one piece: other text cuts into it.`,
-      );
-    }
+    if (at !== -1) cursor = at + wanted.length;
+    else problems.push({ code: text.includes(wanted) ? 'block-out-of-order' : 'block-split', block });
   }
-  return problems.length > MAX_LISTED
-    ? [...problems.slice(0, MAX_LISTED), `…and ${problems.length - MAX_LISTED} more blocks.`]
-    : problems;
+  return problems;
 }
 
-function checkLinks(page: PageSnapshot, pdf: PdfFacts): string[] {
+function checkLinks(page: PageSnapshot, pdf: PdfFacts): PdfProblem[] {
   const clickable = new Set(pdf.links);
   return page.links
     .filter((link) => !clickable.has(link.href))
-    .map((link) => `The link "${link.text}" (${link.href}) cannot be clicked in the PDF.`);
+    .map((link) => ({ code: 'link-not-clickable', text: link.text, href: link.href }) as const);
 }
 
 /** Typography a PDF may write differently from the page, mapped to one form. */
@@ -166,15 +171,4 @@ function count(items: readonly string[]): Map<string, number> {
 /** Items with more occurrences in `a` than in `b`, each listed once per extra occurrence. */
 function difference(a: ReadonlyMap<string, number>, b: ReadonlyMap<string, number>): string[] {
   return [...a].flatMap(([item, times]) => Array<string>(Math.max(0, times - (b.get(item) ?? 0))).fill(item));
-}
-
-function list(items: readonly string[]): string {
-  const shown = items.slice(0, MAX_LISTED).map((item) => `"${item}"`);
-  return items.length > MAX_LISTED
-    ? `${shown.join(', ')} and ${items.length - MAX_LISTED} more`
-    : shown.join(', ');
-}
-
-function excerpt(text: string): string {
-  return text.length > 60 ? `${text.slice(0, 57)}…` : text;
 }

@@ -1,4 +1,11 @@
-import { checkPdf, type CvRepository, type InspectPdf, isValidCvId, type RenderCv } from '../domain/index.ts';
+import {
+  checkPdf,
+  type CvRepository,
+  type InspectPdf,
+  isValidCvId,
+  type PdfProblem,
+  type RenderCv,
+} from '../domain/index.ts';
 
 /** What exporting a CV to PDF needs: the stored CVs, a browser to print with, and a PDF reader to check with. */
 export interface PdfExportServices {
@@ -16,7 +23,7 @@ export type ExportCvPdfResult =
       /** File name for the download, from the document's <title>. */
       readonly fileName: string;
       /** What the PDF check found; empty when the PDF reads like the page. */
-      readonly problems: readonly string[];
+      readonly problems: readonly PdfProblem[];
     };
 
 /**

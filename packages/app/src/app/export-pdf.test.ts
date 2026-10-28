@@ -38,9 +38,12 @@ describe('exportCvPdf', () => {
       problems: [],
     });
     const result = await exportCvPdf(services('Hello').services, 'sample');
-    expect(result.kind === 'exported' && result.problems.some((problem) => problem.includes('"world"'))).toBe(
-      true,
-    );
+    expect(
+      result.kind === 'exported' &&
+        result.problems.some(
+          (problem) => problem.code === 'words-missing' && problem.words.includes('world'),
+        ),
+    ).toBe(true);
   });
 
   it('renders nothing for an invalid id or a missing CV', async () => {
