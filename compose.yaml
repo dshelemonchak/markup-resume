@@ -1,7 +1,7 @@
 # Development environment. Usage:
 #   docker compose up -d dev                     start the toolbox container
 #   docker compose exec dev pnpm install         install dependencies
-#   docker compose exec dev pnpm seed            put the example CV into ./data
+#   docker compose exec dev pnpm seed            put the template's example CV into ./data
 #   docker compose exec dev pnpm check           lint, format, typecheck, tests
 #   docker compose up -d app                     API on http://localhost:3000/api/v1
 #   docker compose up web                        Angular dev server on http://localhost:4200 (proxies /api to app)

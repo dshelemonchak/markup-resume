@@ -10,7 +10,7 @@
   "scripts": {
     "start": "node src/main.ts",
     "dev": "node --watch src/main.ts",
-    "seed": "node src/adapters/cli/seed.ts",
+    "seed": "node src/seed.ts",
     "typecheck": "tsc --noEmit",
     "test": "vitest run --passWithNoTests"
   },

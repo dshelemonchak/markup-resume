@@ -18,7 +18,7 @@ describe('DocumentCanvas', () => {
 
   async function render() {
     const fixture = TestBed.createComponent(DocumentCanvas);
-    fixture.componentRef.setInput('src', 'examples/sample-cv.html');
+    fixture.componentRef.setInput('src', '/api/v1/cvs/sample/document');
     await fixture.whenStable();
     return { fixture, root: fixture.nativeElement as HTMLElement };
   }
@@ -28,7 +28,7 @@ describe('DocumentCanvas', () => {
     const frame = root.querySelector('iframe')!;
     expect(frame.getAttribute('title')).toBe('CV preview');
     expect(frame.getAttribute('sandbox')).toBe('allow-same-origin');
-    expect(frame.getAttribute('src')).toBe('examples/sample-cv.html');
+    expect(frame.getAttribute('src')).toBe('/api/v1/cvs/sample/document');
   });
 
   it('applies the zoom setting as the scale and reports it', async () => {
