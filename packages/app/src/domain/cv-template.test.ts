@@ -4,6 +4,7 @@ import { type TemplateCatalog, withTemplateStyles } from './cv-template.ts';
 const catalog: TemplateCatalog = {
   refs: () => ['classic@0.0.1'],
   styles: (ref) => (ref === 'classic@0.0.1' ? 'body { color: red; }' : null),
+  guide: () => null,
 };
 
 const doc = (head: string) =>

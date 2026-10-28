@@ -46,6 +46,7 @@ export function desktopExtension(projectDir: string | null): Uint8Array<ArrayBuf
       { name: 'read_cv', description: 'Returns the full HTML document of one CV.' },
       { name: 'write_cv', description: 'Replaces the whole HTML document of an existing CV.' },
       { name: 'create_cv', description: 'Creates a new CV from a complete HTML document.' },
+      { name: 'read_template', description: "Returns a CV template's design system and an example." },
     ],
     compatibility: { platforms: ['darwin'] },
   };

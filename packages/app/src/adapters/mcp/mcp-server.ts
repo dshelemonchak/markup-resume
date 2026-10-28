@@ -27,7 +27,20 @@ export interface McpServerOptions {
 }
 
 /**
- * The MCP server for Claude (ADR-0003): four tools over the CV use cases. Transport-agnostic, so the
+ * Sent to the client in the handshake; Claude reads it before it uses any tool. The template list is filled
+ * in from the catalog.
+ */
+const instructions = (refs: readonly string[]) =>
+  [
+    'cv-kit stores CVs as standalone HTML documents and shows them to the user in the cv-kit viewer.',
+    `A CV is built on a template, named in <meta name="cv:template" content="…">; templates: ${refs.join(', ')}.`,
+    'Before you create a CV with create_cv or change one with write_cv, call read_template for its template ' +
+      'and follow those rules exactly: they list the only class names and structure the template accepts.',
+    'Never write CSS: cv-kit puts the template styles into the document itself.',
+  ].join('\n');
+
+/**
+ * The MCP server for Claude (ADR-0003): five tools over the CV use cases and templates. Transport-agnostic, so the
  * composition root connects it to stdio and tests connect it to an in-memory client.
  */
 export function createMcpServer(
@@ -35,7 +48,10 @@ export function createMcpServer(
   templates: TemplateCatalog,
   options: McpServerOptions = {},
 ): McpServer {
-  const server = new McpServer({ name: 'cv-kit', version: '0.0.0' });
+  const server = new McpServer(
+    { name: 'cv-kit', version: '0.0.0' },
+    { instructions: instructions(templates.refs()) },
+  );
 
   server.registerTool(
     'list_cvs',
@@ -127,8 +143,8 @@ export function createMcpServer(
         'Creates a new CV from a complete HTML document, under a new id. Use it when the user asks for ' +
         'a new CV, for example one tailored to a vacancy; to change an existing CV use write_cv instead. ' +
         'Never replaces an existing CV: if the id is taken, nothing is written and you can pick another. ' +
-        'The document follows the same rules as in write_cv; give it its own cv:title so the user can ' +
-        'tell it apart in the cv-kit viewer.',
+        'Build the document by the rules from read_template; the same checks as in write_cv apply. ' +
+        'Give it its own cv:title so the user can tell it apart in the cv-kit viewer.',
       inputSchema: z.object({
         id: z
           .string()
@@ -157,6 +173,30 @@ export function createMcpServer(
         case 'invalid-document':
           return rejected(result);
       }
+    },
+  );
+
+  server.registerTool(
+    'read_template',
+    {
+      title: 'Read template',
+      description:
+        "Returns a CV template's design system: the document structure, the only class names it accepts, " +
+        'the rules for the text, and a complete example document. Call it before create_cv or write_cv, ' +
+        'for the template the CV names in cv:template (or the one you will use for a new CV).',
+      inputSchema: z.object({
+        template: z.string().describe(`Template reference, one of: ${templates.refs().join(', ')}.`),
+      }),
+      annotations: { readOnlyHint: true, openWorldHint: false },
+    },
+    ({ template }) => {
+      options.onToolCall?.();
+      const guide = templates.guide(template);
+      if (!guide) {
+        return failure(`There is no template "${template}". Templates: ${templates.refs().join(', ')}.`);
+      }
+      const example = ['## Example document', '', '```html', guide.example.trimEnd(), '```'].join('\n');
+      return { content: [text(`${guide.rules.trimEnd()}\n\n${example}\n`)] };
     },
   );
 

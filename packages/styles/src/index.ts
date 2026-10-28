@@ -1,17 +1,9 @@
 // The style library (ADR-0006): CV templates with their rules for Claude, plus the fonts and icons they use.
-// Read from disk once, when the package is first imported.
+// Template files are read on every call, not cached: the MCP server runs for as long as Claude is open, and
+// an edit to a template's files must reach Claude without restarting it. A new template (a new entry in
+// TEMPLATES) still needs a restart, as does the template list in the MCP handshake.
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
-
-export interface Template {
-  /** What a document names in <meta name="cv:template">: "<name>@<semver>", e.g. "classic@0.0.1". */
-  readonly ref: string;
-  readonly css: string;
-  /** The design system for whoever writes the document (Claude): structure, classes, text rules. */
-  readonly rules: string;
-  /** A complete document on fictional data, built by the rules. */
-  readonly example: string;
-}
 
 const PACKAGE_DIR = new URL('../', import.meta.url);
 
@@ -19,20 +11,27 @@ const PACKAGE_DIR = new URL('../', import.meta.url);
 export const fontsDir = fileURLToPath(new URL('fonts/inter/', PACKAGE_DIR));
 export const iconsDir = fileURLToPath(new URL('icons/', PACKAGE_DIR));
 
-function loadTemplate(name: string, version: string): Template {
-  const read = (file: string) => readFileSync(new URL(`templates/${name}/${file}`, PACKAGE_DIR), 'utf8');
-  return {
-    ref: `${name}@${version}`,
-    css: read('template.css'),
-    rules: read('rules.md'),
-    example: read('example.html'),
-  };
-}
+/**
+ * The templates by reference: what a document names in <meta name="cv:template">, "<name>@<semver>",
+ * mapped to its folder under templates/.
+ */
+const TEMPLATES: ReadonlyMap<string, string> = new Map([['classic@0.0.1', 'classic']]);
 
-export const templates: readonly Template[] = [loadTemplate('classic', '0.0.1')];
+/** One file of a template, or null when there is no template with this reference. */
+function read(ref: string, file: 'template.css' | 'rules.md' | 'example.html'): string | null {
+  const folder = TEMPLATES.get(ref);
+  return folder ? readFileSync(new URL(`templates/${folder}/${file}`, PACKAGE_DIR), 'utf8') : null;
+}
 
 /** The templates as cv-kit's TemplateCatalog port expects them. */
 export const templateCatalog = {
-  refs: (): readonly string[] => templates.map((template) => template.ref),
-  styles: (ref: string): string | null => templates.find((template) => template.ref === ref)?.css ?? null,
+  refs: (): readonly string[] => [...TEMPLATES.keys()],
+  /** The CSS cv-kit inserts into the document. */
+  styles: (ref: string): string | null => read(ref, 'template.css'),
+  /** The design system for whoever writes the document (Claude), and a complete example built by it. */
+  guide: (ref: string): { rules: string; example: string } | null => {
+    const rules = read(ref, 'rules.md');
+    const example = read(ref, 'example.html');
+    return rules !== null && example !== null ? { rules, example } : null;
+  },
 };

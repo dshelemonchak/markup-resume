@@ -5,6 +5,7 @@ import { createCvDocument, getCvDocument, listCvs, MAX_CV_DOCUMENT_BYTES, saveCv
 const templates: TemplateCatalog = {
   refs: () => ['classic@0.0.1'],
   styles: (ref) => (ref === 'classic@0.0.1' ? 'p {}' : null),
+  guide: () => null,
 };
 
 function fakeRepository(cvs: CvSummary[], documents: Record<string, string> = {}): CvRepository {

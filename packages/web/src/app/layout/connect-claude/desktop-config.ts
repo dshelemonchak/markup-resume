@@ -34,7 +34,7 @@ export function desktopPrompt(projectDir: string | null): string {
     '3. Back up ~/Library/Application Support/Claude/claude_desktop_config.json.',
     `4. Merge this block into the file's top-level object, keeping every other key as is, with the docker path in place of ${DOCKER_PLACEHOLDER}${projectFolder}:`,
     desktopConfig(projectDir),
-    '5. Check that the server starts: run its command, send an MCP initialize and tools/list, and expect list_cvs, read_cv, write_cv and create_cv.',
+    '5. Check that the server starts: run its command, send an MCP initialize and tools/list, and expect list_cvs, read_cv, write_cv, create_cv and read_template.',
     '6. Open Claude Desktop again (open -a Claude).',
   ].join('\n');
 }

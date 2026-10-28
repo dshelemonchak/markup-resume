@@ -6,6 +6,16 @@ export interface TemplateCatalog {
   refs(): readonly string[];
   /** The template's CSS, or null when no template has this reference. */
   styles(ref: string): string | null;
+  /** How to write a document for the template (the design system), or null when there is no such template. */
+  guide(ref: string): TemplateGuide | null;
+}
+
+/** What whoever writes a CV (Claude) needs to follow a template. */
+export interface TemplateGuide {
+  /** Structure, class names and text rules, in Markdown. */
+  readonly rules: string;
+  /** A complete document on fictional data, built by the rules. */
+  readonly example: string;
 }
 
 export type TemplateStylesResult =
