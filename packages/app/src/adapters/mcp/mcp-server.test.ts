@@ -23,6 +23,11 @@ beforeEach(async () => {
       documents[id] = html;
       return Promise.resolve();
     },
+    create: (id, html) => {
+      if (id in documents) return Promise.resolve(false);
+      documents[id] = html;
+      return Promise.resolve(true);
+    },
     watch: () => () => {},
   };
   const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
@@ -43,9 +48,9 @@ function textOf(result: Awaited<ReturnType<Client['callTool']>>): string {
 }
 
 describe('MCP server', () => {
-  it('advertises the three tools with input schemas and annotations', async () => {
+  it('advertises the four tools with input schemas and annotations', async () => {
     const { tools } = await client.listTools();
-    expect(tools.map((tool) => tool.name).sort()).toEqual(['list_cvs', 'read_cv', 'write_cv']);
+    expect(tools.map((tool) => tool.name).sort()).toEqual(['create_cv', 'list_cvs', 'read_cv', 'write_cv']);
     const writeCv = tools.find((tool) => tool.name === 'write_cv')!;
     expect(writeCv.inputSchema.required).toEqual(['id', 'html']);
     expect(writeCv.annotations).toMatchObject({ destructiveHint: true, idempotentHint: true });
@@ -83,6 +88,30 @@ describe('MCP server', () => {
     expect(result.isError).toBe(true);
     expect(textOf(result)).toContain('- The document must end with </html>');
     expect(documents['sample']).toBe(doc('Sample'));
+  });
+
+  it('creates a CV under a new id, and never replaces an existing one', async () => {
+    const created = await client.callTool({
+      name: 'create_cv',
+      arguments: { id: 'fresh', html: doc('Fresh') },
+    });
+    expect(created.isError).toBeFalsy();
+    expect(documents['fresh']).toBe(doc('Fresh'));
+
+    const taken = await client.callTool({
+      name: 'create_cv',
+      arguments: { id: 'sample', html: doc('Other') },
+    });
+    expect(taken.isError).toBe(true);
+    expect(textOf(taken)).toContain('already exists');
+    expect(documents['sample']).toBe(doc('Sample'));
+  });
+
+  it('rejects a broken new document without creating it', async () => {
+    const result = await client.callTool({ name: 'create_cv', arguments: { id: 'fresh', html: '<p>cut' } });
+    expect(result.isError).toBe(true);
+    expect(textOf(result)).toContain('- The document must end with </html>');
+    expect(documents).not.toHaveProperty('fresh');
   });
 
   it('rejects arguments that do not match the input schema', async () => {

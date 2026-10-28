@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import { constants, type FSWatcher, watch } from 'node:fs';
-import { copyFile, mkdir, readFile, readdir, rename, rm, stat, writeFile } from 'node:fs/promises';
+import { copyFile, link, mkdir, readFile, readdir, rename, rm, stat, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import {
   type CvId,
@@ -71,6 +71,25 @@ export class FsCvRepository implements CvRepository {
       throw error;
     }
     await this.pruneHistory(id);
+  }
+
+  async create(id: CvId, html: string): Promise<boolean> {
+    if (!isValidCvId(id)) throw new Error(`Invalid CV id: ${JSON.stringify(id)}`);
+    const path = this.documentPath(id);
+    await mkdir(join(this.cvsDir, id), { recursive: true });
+    // Unlike rename, link never replaces the target: it fails with EEXIST, so creating is check-and-write
+    // in one step, and the complete file appears at once.
+    const temp = `${path}.${randomUUID()}.tmp`;
+    try {
+      await writeFile(temp, html, 'utf8');
+      await link(temp, path);
+      return true;
+    } catch (error) {
+      if (isAlreadyExists(error)) return false;
+      throw error;
+    } finally {
+      await rm(temp, { force: true });
+    }
   }
 
   watch(listener: () => void): () => void {

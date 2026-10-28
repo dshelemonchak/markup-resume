@@ -10,6 +10,11 @@ export interface CvRepository {
    * document, never a partial one. Rejects when no CV has this id; creating CVs is a separate operation.
    */
   save(id: CvId, html: string): Promise<void>;
+  /**
+   * Stores the document of a new CV, atomically like save. Resolves false, writing nothing, when a CV with
+   * this id already exists; the check and the write are one step, so two creates cannot both succeed.
+   */
+  create(id: CvId, html: string): Promise<boolean>;
   /** Calls the listener whenever any CV is added, changed or removed. Returns an unsubscribe function. */
   watch(listener: () => void): () => void;
 }

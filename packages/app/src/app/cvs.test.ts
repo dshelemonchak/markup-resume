@@ -1,12 +1,13 @@
 import { describe, expect, it } from 'vitest';
 import type { CvRepository, CvSummary } from '../domain/index.ts';
-import { getCvDocument, listCvs, MAX_CV_DOCUMENT_BYTES, saveCvDocument } from './cvs.ts';
+import { createCvDocument, getCvDocument, listCvs, MAX_CV_DOCUMENT_BYTES, saveCvDocument } from './cvs.ts';
 
 function fakeRepository(cvs: CvSummary[], documents: Record<string, string> = {}): CvRepository {
   return {
     list: () => Promise.resolve(cvs),
     getDocument: (id) => Promise.resolve(documents[id] ?? null),
     save: () => Promise.resolve(),
+    create: () => Promise.resolve(true),
     watch: () => () => {},
   };
 }
@@ -88,5 +89,42 @@ describe('saveCvDocument', () => {
       problems: ['The document must end with </html>; it may have been cut off.'],
     });
     expect(saves).toEqual([]);
+  });
+});
+
+describe('createCvDocument', () => {
+  const doc = '<!doctype html><html><meta name="cv:title" content="New"></html>';
+
+  function setup(existing: string[] = []) {
+    const created: string[] = [];
+    const repository: CvRepository = {
+      ...fakeRepository([]),
+      create: (id) => {
+        if (existing.includes(id)) return Promise.resolve(false);
+        created.push(id);
+        return Promise.resolve(true);
+      },
+    };
+    return { repository, created };
+  }
+
+  it('creates a CV under a free id', async () => {
+    const { repository, created } = setup();
+    expect(await createCvDocument(repository, 'fresh', doc)).toEqual({ kind: 'created' });
+    expect(created).toEqual(['fresh']);
+  });
+
+  it('reports an id that is already taken', async () => {
+    const { repository } = setup(['sample']);
+    expect(await createCvDocument(repository, 'sample', doc)).toEqual({ kind: 'already-exists' });
+  });
+
+  it('checks the id and the document before touching the repository', async () => {
+    const { repository, created } = setup();
+    expect(await createCvDocument(repository, '../secret', doc)).toEqual({ kind: 'invalid-id' });
+    expect(await createCvDocument(repository, 'fresh', doc.replace('</html>', ''))).toMatchObject({
+      kind: 'invalid-document',
+    });
+    expect(created).toEqual([]);
   });
 });

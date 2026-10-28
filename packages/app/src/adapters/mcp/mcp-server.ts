@@ -1,6 +1,12 @@
 import { type CallToolResult, McpServer } from '@modelcontextprotocol/server';
 import { z } from 'zod';
-import { getCvDocument, listCvs, MAX_CV_DOCUMENT_BYTES, saveCvDocument } from '../../app/index.ts';
+import {
+  createCvDocument,
+  getCvDocument,
+  listCvs,
+  MAX_CV_DOCUMENT_BYTES,
+  saveCvDocument,
+} from '../../app/index.ts';
 import type { CvRepository } from '../../domain/index.ts';
 
 const MIB = 1024 * 1024;
@@ -21,7 +27,7 @@ export interface McpServerOptions {
 }
 
 /**
- * The MCP server for Claude (ADR-0003): three tools over the CV use cases. Transport-agnostic, so the
+ * The MCP server for Claude (ADR-0003): four tools over the CV use cases. Transport-agnostic, so the
  * composition root connects it to stdio and tests connect it to an in-memory client.
  */
 export function createMcpServer(repository: CvRepository, options: McpServerOptions = {}): McpServer {
@@ -76,7 +82,8 @@ export function createMcpServer(repository: CvRepository, options: McpServerOpti
     {
       title: 'Write CV',
       description:
-        'Replaces the whole HTML document of an existing CV. There is no partial update: ' +
+        'Replaces the whole HTML document of an existing CV; for a new CV use create_cv. There is no ' +
+        'partial update: ' +
         'send the complete document, with every part you did not mean to change kept exactly as ' +
         'read_cv returned it. The document must start with <!doctype html>, end with </html> and keep ' +
         `<meta name="cv:title" content="…">; the size limit is ${MAX_CV_DOCUMENT_BYTES / MIB} MiB. ` +
@@ -102,14 +109,49 @@ export function createMcpServer(repository: CvRepository, options: McpServerOpti
         case 'not-found':
           return notFound(id);
         case 'too-large':
-          return failure(
-            `The document is ${(result.bytes / MIB).toFixed(2)} MiB; the limit is ` +
-              `${result.limitBytes / MIB} MiB. Nothing was saved.`,
-          );
         case 'invalid-document':
+          return rejected(result);
+      }
+    },
+  );
+
+  server.registerTool(
+    'create_cv',
+    {
+      title: 'Create CV',
+      description:
+        'Creates a new CV from a complete HTML document, under a new id. Use it when the user asks for ' +
+        'a new CV, for example one tailored to a vacancy; to change an existing CV use write_cv instead. ' +
+        'Never replaces an existing CV: if the id is taken, nothing is written and you can pick another. ' +
+        'The document follows the same rules as in write_cv; give it its own cv:title so the user can ' +
+        'tell it apart in the cv-kit viewer.',
+      inputSchema: z.object({
+        id: z
+          .string()
+          .describe(
+            'A new id: lower-case words joined by single hyphens, describing the CV, e.g. ' +
+              '"frontend-acme". Must not be in list_cvs.',
+          ),
+        html: z.string().describe('The complete HTML document of the new CV.'),
+      }),
+      annotations: { destructiveHint: false, idempotentHint: false, openWorldHint: false },
+    },
+    async ({ id, html }) => {
+      options.onToolCall?.();
+      const result = await createCvDocument(repository, id, html);
+      switch (result.kind) {
+        case 'created':
+          return { content: [text(`Created CV "${id}". The user sees it in the cv-kit viewer.`)] };
+        case 'already-exists':
           return failure(
-            ['The document was not saved:', ...result.problems.map((problem) => `- ${problem}`)].join('\n'),
+            `A CV with the id "${id}" already exists; nothing was written. Choose an id that is not in ` +
+              'list_cvs, or use write_cv if you meant to change that CV.',
           );
+        case 'invalid-id':
+          return failure(`"${id}" is not a valid CV id: use lower-case words joined by single hyphens.`);
+        case 'too-large':
+        case 'invalid-document':
+          return rejected(result);
       }
     },
   );
@@ -124,6 +166,23 @@ function text(value: string) {
 /** A tool-level error: the model sees it and can correct the call (unlike a JSON-RPC error). */
 function failure(message: string): CallToolResult {
   return { content: [text(message)], isError: true };
+}
+
+/** A document that failed the checks shared by write_cv and create_cv. */
+function rejected(
+  result:
+    | { readonly kind: 'too-large'; readonly bytes: number; readonly limitBytes: number }
+    | { readonly kind: 'invalid-document'; readonly problems: readonly string[] },
+): CallToolResult {
+  if (result.kind === 'too-large') {
+    return failure(
+      `The document is ${(result.bytes / MIB).toFixed(2)} MiB; the limit is ` +
+        `${result.limitBytes / MIB} MiB. Nothing was saved.`,
+    );
+  }
+  return failure(
+    ['The document was not saved:', ...result.problems.map((problem) => `- ${problem}`)].join('\n'),
+  );
 }
 
 function invalidId(id: string): CallToolResult {

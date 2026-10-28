@@ -20,7 +20,7 @@ export function desktopExtension(projectDir: string | null): Uint8Array<ArrayBuf
     name: 'cv-kit',
     display_name: 'cv-kit',
     version: '0.0.0',
-    description: 'List, read and write the CVs in your local cv-kit.',
+    description: 'List, read, write and create the CVs in your local cv-kit.',
     long_description:
       'Runs the cv-kit MCP server from your cv-kit project through Docker. Keep Docker Desktop running.',
     author: { name: 'cv-kit' },
@@ -45,6 +45,7 @@ export function desktopExtension(projectDir: string | null): Uint8Array<ArrayBuf
       { name: 'list_cvs', description: 'Lists the CVs stored in cv-kit.' },
       { name: 'read_cv', description: 'Returns the full HTML document of one CV.' },
       { name: 'write_cv', description: 'Replaces the whole HTML document of an existing CV.' },
+      { name: 'create_cv', description: 'Creates a new CV from a complete HTML document.' },
     ],
     compatibility: { platforms: ['darwin'] },
   };

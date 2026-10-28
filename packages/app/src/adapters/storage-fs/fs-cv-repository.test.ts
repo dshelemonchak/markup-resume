@@ -81,6 +81,38 @@ describe('FsCvRepository', () => {
     });
   });
 
+  describe('create', () => {
+    it('stores a new CV that is then listed and read like any other', async () => {
+      expect(await repository.create('fresh', '<meta name="cv:title" content="Fresh">')).toBe(true);
+      expect(await repository.getDocument('fresh')).toBe('<meta name="cv:title" content="Fresh">');
+      expect((await repository.list()).map(({ id, title }) => ({ id, title }))).toEqual([
+        { id: 'fresh', title: 'Fresh' },
+      ]);
+      expect(await readdir(join(dataDir, 'cvs', 'fresh'))).toEqual(['document.html']);
+    });
+
+    it('leaves an existing CV untouched and reports false', async () => {
+      await addCv('sample', '<p>v1</p>');
+      expect(await repository.create('sample', '<p>other</p>')).toBe(false);
+      expect(await repository.getDocument('sample')).toBe('<p>v1</p>');
+      expect(await readdir(join(dataDir, 'cvs', 'sample'))).toEqual(['document.html']);
+    });
+
+    it('lets only one of two simultaneous creates succeed', async () => {
+      const results = await Promise.all([
+        repository.create('race', '<p>a</p>'),
+        repository.create('race', '<p>b</p>'),
+      ]);
+      expect(results.filter(Boolean)).toHaveLength(1);
+      expect(await repository.getDocument('race')).toBe(results[0] ? '<p>a</p>' : '<p>b</p>');
+    });
+
+    it('rejects an invalid id without creating anything', async () => {
+      await expect(repository.create('../outside', '<p></p>')).rejects.toThrow('Invalid CV id');
+      expect(await readdir(join(dataDir, 'cvs'))).toEqual([]);
+    });
+  });
+
   it('notifies once per burst of changes', async () => {
     let calls = 0;
     const stop = repository.watch(() => calls++);
