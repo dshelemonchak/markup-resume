@@ -7,10 +7,12 @@ const doc = (title: string) => `<!doctype html><html><meta name="cv:title" conte
 
 let documents: Record<string, string>;
 let client: Client;
+let toolCalls: number;
 
 /** A real MCP client talking to the server over linked in-memory transports: the whole protocol, no stdio. */
 beforeEach(async () => {
   documents = { sample: doc('Sample') };
+  toolCalls = 0;
   const repository: CvRepository = {
     list: () =>
       Promise.resolve(
@@ -25,7 +27,10 @@ beforeEach(async () => {
   };
   const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
   client = new Client({ name: 'test-client', version: '0.0.0' });
-  await Promise.all([createMcpServer(repository).connect(serverTransport), client.connect(clientTransport)]);
+  await Promise.all([
+    createMcpServer(repository, { onToolCall: () => toolCalls++ }).connect(serverTransport),
+    client.connect(clientTransport),
+  ]);
 });
 
 afterEach(async () => {
@@ -83,5 +88,12 @@ describe('MCP server', () => {
   it('rejects arguments that do not match the input schema', async () => {
     const result = await client.callTool({ name: 'write_cv', arguments: { id: 'sample' } });
     expect(result.isError).toBe(true);
+  });
+
+  it('reports every tool call', async () => {
+    await client.callTool({ name: 'list_cvs', arguments: {} });
+    await client.callTool({ name: 'read_cv', arguments: { id: 'sample' } });
+    await client.callTool({ name: 'write_cv', arguments: { id: 'sample', html: documents['sample']! } });
+    expect(toolCalls).toBe(3);
   });
 });

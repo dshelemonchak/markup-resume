@@ -1,11 +1,13 @@
 import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
 import { DummyMark } from '../../ui/dummy-mark/dummy-mark';
 import { GlassPanel } from '../../ui/glass-panel/glass-panel';
+import type { ClaudeStatus } from '../connect-claude/claude-status';
 import type { CvListItem } from './cv-list-item';
 import { SidebarItem } from './sidebar-item/sidebar-item';
 
 /**
- * Left sidebar: brand, import, search, pinned and other CVs, and the way to connect Claude.
+ * Left sidebar: brand, import, search, pinned and other CVs, and Claude's connection status,
+ * which also opens the way to connect it.
  * Presentational: the list comes in through inputs, selection and the connect request go out
  * through outputs. Import and search are placeholders for now.
  */
@@ -19,6 +21,12 @@ import { SidebarItem } from './sidebar-item/sidebar-item';
 export class Sidebar {
   readonly items = input.required<readonly CvListItem[]>();
   readonly selectedId = input<string | null>(null);
+  readonly claude = input<ClaudeStatus>({
+    connected: false,
+    label: 'Connect Claude',
+    description: 'Connect Claude',
+    lastUsed: null,
+  });
   readonly selectCv = output<string>();
   readonly connectClaude = output();
 

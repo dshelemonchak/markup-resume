@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import type { CvRepository } from '../../domain/index.ts';
 import { type HttpAppOptions, createHttpApp } from './http-app.ts';
 
@@ -70,5 +70,68 @@ describe('HTTP API v1', () => {
 
     close();
     expect((await reader.read()).done).toBe(true);
+  });
+
+  it('serves cv-kit as a Claude Desktop extension with the project folder filled in', async () => {
+    const response = await setup({ hostProjectDir: '/Users/me/CV' }).app.request(
+      '/api/v1/claude/desktop-extension',
+    );
+    expect(response.status).toBe(200);
+    expect(response.headers.get('content-type')).toBe('application/zip');
+    expect(response.headers.get('content-disposition')).toBe('attachment; filename="cv-kit.mcpb"');
+    // Stored entries, so the manifest is readable in the bytes.
+    const bytes = Buffer.from(await response.arrayBuffer()).toString('latin1');
+    expect(bytes.startsWith('PK\x03\x04')).toBe(true);
+    expect(bytes).toContain('"default": "/Users/me/CV"');
+  });
+
+  describe('Claude presence', () => {
+    async function open(app: ReturnType<typeof setup>['app'], path: string) {
+      const response = await app.request(path);
+      const reader = (response.body as ReadableStream<Uint8Array>).getReader();
+      await reader.read(); // "ready"
+      return reader;
+    }
+
+    it('lists a session while its presence connection is open', async () => {
+      const { app } = setup();
+      const connection = await open(app, '/api/v1/claude/sessions/s1/presence?client=claude-ai&version=1.2');
+
+      expect(await (await app.request('/api/v1/claude/sessions')).json()).toEqual([
+        expect.objectContaining({ id: 's1', client: 'claude-ai', version: '1.2', lastActivityAt: null }),
+      ]);
+
+      // The MCP server goes away: its end of the connection closes.
+      await connection.cancel();
+      await vi.waitFor(async () =>
+        expect(await (await app.request('/api/v1/claude/sessions')).json()).toEqual([]),
+      );
+    });
+
+    it('records activity of connected sessions only', async () => {
+      const { app } = setup();
+      await open(app, '/api/v1/claude/sessions/s1/presence?client=claude-code');
+
+      const post = (id: string) => app.request(`/api/v1/claude/sessions/${id}/activity`, { method: 'POST' });
+      expect((await post('s1')).status).toBe(204);
+      expect((await post('missing')).status).toBe(404);
+      const [session] = (await (await app.request('/api/v1/claude/sessions')).json()) as {
+        lastActivityAt: string | null;
+      }[];
+      expect(session!.lastActivityAt).not.toBeNull();
+    });
+
+    it('rejects a malformed session or a missing client', async () => {
+      const { app } = setup();
+      expect((await app.request('/api/v1/claude/sessions/bad id/presence?client=x')).status).toBe(400);
+      expect((await app.request('/api/v1/claude/sessions/s1/presence')).status).toBe(400);
+    });
+
+    it('tells event-stream clients when sessions change', async () => {
+      const { app } = setup();
+      const events = await open(app, '/api/v1/events');
+      await open(app, '/api/v1/claude/sessions/s1/presence?client=claude-ai');
+      expect(new TextDecoder().decode((await events.read()).value)).toContain('event: claude-changed');
+    });
   });
 });

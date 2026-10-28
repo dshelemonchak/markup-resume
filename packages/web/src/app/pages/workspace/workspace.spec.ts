@@ -44,6 +44,7 @@ describe('Workspace', () => {
     TestBed.tick(); // issue the list request (the app stays unstable until it is answered)
     http.expectOne('/api/v1/cvs').flush(CVS);
     http.expectOne('/api/v1/setup').flush({ hostProjectDir: '/Users/me/CV' });
+    http.expectOne('/api/v1/claude/sessions').flush([]);
     await fixture.whenStable();
     const root = fixture.nativeElement as HTMLElement;
     const frameSrc = () => root.querySelector('cvc-document-canvas iframe')?.getAttribute('src');
@@ -75,5 +76,24 @@ describe('Workspace', () => {
     http.expectOne('/api/v1/cvs').flush(CVS);
     await fixture.whenStable();
     expect(frameSrc()).toBe('/api/v1/cvs/second/document?v=1');
+  });
+
+  it('shows Claude as connected when the server reports a session', async () => {
+    const { fixture, http, root } = await render();
+    expect(root.querySelector('.connection')!.textContent).toContain('Connect Claude');
+
+    FakeEventSource.last!.emit('claude-changed');
+    TestBed.tick();
+    http.expectOne('/api/v1/claude/sessions').flush([
+      {
+        id: 's1',
+        client: 'claude-ai',
+        version: '1.0',
+        connectedAt: '2026-10-28T10:00:00.000Z',
+        lastActivityAt: null,
+      },
+    ]);
+    await fixture.whenStable();
+    expect(root.querySelector('.connection')!.getAttribute('aria-label')).toBe('Claude Desktop connected');
   });
 });

@@ -53,4 +53,23 @@ describe('Sidebar', () => {
     root.querySelector<HTMLButtonElement>('.connection')!.click();
     expect(asked).toBe(1);
   });
+
+  it("shows Claude's connection status", async () => {
+    const { fixture, root } = await render(ITEMS);
+    const button = () => root.querySelector('.connection')!;
+    expect(button().textContent).toContain('Connect Claude');
+    expect(button().querySelector('.dot.on')).toBeNull();
+
+    fixture.componentRef.setInput('claude', {
+      connected: true,
+      label: 'Claude Desktop',
+      description: 'Claude Desktop connected, last used 2 min ago',
+      lastUsed: '2 min ago',
+    });
+    await fixture.whenStable();
+    expect(button().textContent).toContain('Claude Desktop');
+    expect(button().getAttribute('aria-label')).toBe('Claude Desktop connected, last used 2 min ago');
+    expect(button().textContent).toContain('2 min ago');
+    expect(button().querySelector('.dot.on')).not.toBeNull();
+  });
 });

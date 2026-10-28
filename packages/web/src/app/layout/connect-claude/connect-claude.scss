@@ -64,6 +64,13 @@
   margin-top: 8px;
 }
 
+.download {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+
 .manual {
   margin-top: 12px;
 
@@ -75,5 +82,31 @@
 
   .steps {
     margin-top: 8px;
+  }
+}
+
+.sessions {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--bs-success);
+  }
+
+  .last-used {
+    color: var(--bs-secondary-color);
   }
 }

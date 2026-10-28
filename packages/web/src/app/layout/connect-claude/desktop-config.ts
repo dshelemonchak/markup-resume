@@ -19,7 +19,9 @@ export function desktopConfig(projectDir: string | null): string {
 
 /**
  * A prompt for Claude Code, which can edit files on this machine, to do the manual setup:
- * the Claude Desktop chat cannot change its own config.
+ * the Claude Desktop chat cannot change its own config. Claude Desktop must be closed meanwhile,
+ * since while it runs it rewrites the file from memory and drops the new entry; so the prompt is
+ * for Claude Code in a terminal, which survives Claude Desktop quitting.
  */
 export function desktopPrompt(projectDir: string | null): string {
   const projectFolder = projectDir
@@ -28,10 +30,11 @@ export function desktopPrompt(projectDir: string | null): string {
   return [
     'Add the cv-kit MCP server to my Claude Desktop config.',
     '1. Find the docker binary with `which docker`.',
-    '2. Back up ~/Library/Application Support/Claude/claude_desktop_config.json.',
-    `3. Merge this block into the file's top-level object, keeping every other key as is, with the docker path in place of ${DOCKER_PLACEHOLDER}${projectFolder}:`,
+    '2. Quit Claude Desktop (osascript -e \'quit app "Claude"\') and wait until it has exited: while it runs, it rewrites its config and drops new entries.',
+    '3. Back up ~/Library/Application Support/Claude/claude_desktop_config.json.',
+    `4. Merge this block into the file's top-level object, keeping every other key as is, with the docker path in place of ${DOCKER_PLACEHOLDER}${projectFolder}:`,
     desktopConfig(projectDir),
-    '4. Check that the server starts: run its command, send an MCP initialize and tools/list, and expect list_cvs, read_cv and write_cv.',
-    '5. Tell me to quit Claude Desktop (⌘Q) and open it again.',
+    '5. Check that the server starts: run its command, send an MCP initialize and tools/list, and expect list_cvs, read_cv and write_cv.',
+    '6. Open Claude Desktop again (open -a Claude).',
   ].join('\n');
 }

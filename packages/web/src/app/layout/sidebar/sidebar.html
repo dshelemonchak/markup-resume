@@ -57,8 +57,17 @@
     </section>
   </nav>
 
-  <button type="button" class="btn btn-sm connection" (click)="connectClaude.emit()">
-    <i class="bi bi-plug" aria-hidden="true"></i>
-    Connect Claude
+  <button
+    type="button"
+    class="btn btn-sm connection"
+    [attr.aria-label]="claude().description"
+    [title]="claude().description"
+    (click)="connectClaude.emit()"
+  >
+    <span class="dot" [class.on]="claude().connected" aria-hidden="true"></span>
+    <span class="label">{{ claude().label }}</span>
+    @if (claude().lastUsed; as lastUsed) {
+      <span class="last-used">· {{ lastUsed }}</span>
+    }
   </button>
 </aside>

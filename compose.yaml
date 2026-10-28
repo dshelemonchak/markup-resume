@@ -58,5 +58,10 @@ services:
   mcp:
     <<: *workspace
     profiles: [mcp]
+    environment:
+      CV_DATA_DIR: /data
+      # Holds a presence connection to the app so the UI shows Claude as connected (ADR-0018).
+      # The app may be down; the MCP server works the same and reconnects when it is up.
+      CV_APP_URL: http://app:3000
     command: node packages/app/src/mcp.ts
     stdin_open: true

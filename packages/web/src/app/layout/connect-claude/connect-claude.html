@@ -12,6 +12,23 @@
       Docker, so keep Docker Desktop running.
     </p>
 
+    @if (sessions().length) {
+      <section class="section" aria-labelledby="connect-claude-connected">
+        <h3 id="connect-claude-connected" class="section-title">Connected now</h3>
+        <ul class="sessions">
+          @for (session of sessions(); track session.id) {
+            <li>
+              <span class="dot" aria-hidden="true"></span>
+              {{ session.name }}
+              <span class="last-used">
+                · {{ session.lastUsed ? 'last used ' + session.lastUsed : 'no tool calls yet' }}
+              </span>
+            </li>
+          }
+        </ul>
+      </section>
+    }
+
     <section class="section" aria-labelledby="connect-claude-code">
       <h3 id="connect-claude-code" class="section-title">Claude Code</h3>
       <p>
@@ -22,16 +39,39 @@
 
     <section class="section" aria-labelledby="connect-claude-desktop">
       <h3 id="connect-claude-desktop" class="section-title">Claude Desktop</h3>
-      <p>
-        Paste this prompt into Claude Code: it can edit files on this Mac and sets everything up. The Claude
-        Desktop chat cannot change its own config.
-      </p>
-      <cvc-copy-block class="block" [text]="prompt()" />
+      <a class="btn btn-primary btn-sm download" [href]="extensionUrl()" download="cv-kit.mcpb">
+        <i class="bi bi-download" aria-hidden="true"></i>
+        Download extension
+      </a>
+      <ol class="steps">
+        <li>
+          Open <code>cv-kit.mcpb</code> from Downloads, or drag it into
+          <strong>Settings → Extensions</strong> in Claude Desktop.
+        </li>
+        <li>Check the project folder Claude Desktop asks for, and install.</li>
+      </ol>
+
+      <details class="manual">
+        <summary>Set up with Claude Code</summary>
+        <p>
+          Paste this prompt into Claude Code in a terminal: it can edit files on this Mac and sets everything
+          up. The Claude Desktop chat cannot change its own config, and the Code tab of Claude Desktop closes
+          with the app, which has to quit for the change to stick.
+        </p>
+        <cvc-copy-block class="block" [text]="prompt()" />
+      </details>
 
       <details class="manual">
         <summary>Set up manually</summary>
         <ol class="steps">
-          <li>Open <strong>Settings → Developer → Edit Config</strong>.</li>
+          <li>
+            Open <strong>Settings → Developer → Edit Config</strong> to find the file, and open it in an
+            editor.
+          </li>
+          <li>
+            Quit Claude Desktop (⌘Q) before editing: while it runs, it rewrites the file and drops new
+            entries.
+          </li>
           <li>
             Add the block below inside the file's outer <code>{{ '{ }' }}</code
             >, next to what is already there, separated by a comma. If <code>"mcpServers"</code> exists, add
@@ -43,7 +83,7 @@
               Replace <code>{{ projectPlaceholder }}</code> with this project's folder.
             }
           </li>
-          <li>Quit Claude Desktop (⌘Q) and open it again.</li>
+          <li>Save the file and open Claude Desktop again.</li>
         </ol>
         <cvc-copy-block [text]="config()" />
       </details>

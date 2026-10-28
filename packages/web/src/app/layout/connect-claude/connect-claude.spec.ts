@@ -17,6 +17,7 @@ describe('ConnectClaude', () => {
   async function render(projectDir: string | null) {
     const fixture = TestBed.createComponent(ConnectClaude);
     fixture.componentRef.setInput('projectDir', projectDir);
+    fixture.componentRef.setInput('extensionUrl', '/api/v1/claude/desktop-extension');
     await fixture.whenStable();
     const root = fixture.nativeElement as HTMLElement;
     return { fixture, root, dialog: root.querySelector('dialog')! };
@@ -31,20 +32,37 @@ describe('ConnectClaude', () => {
     expect(dialog.open).toBe(false);
   });
 
-  it('leads with the prompt and folds the manual steps', async () => {
+  it('leads with the extension download and folds the other ways', async () => {
     const { root } = await render('/Users/me/CV');
-    const [prompt, config] = [...root.querySelectorAll('pre')].map((pre) => pre.textContent);
+    const download = root.querySelector<HTMLAnchorElement>('a.download')!;
+    expect(download.getAttribute('href')).toBe('/api/v1/claude/desktop-extension');
+    expect(download.getAttribute('download')).toBe('cv-kit.mcpb');
+
+    const [prompt, config] = [...root.querySelectorAll('details.manual pre')].map((pre) => pre.textContent);
     expect(prompt).toContain('Add the cv-kit MCP server');
     expect(prompt).toContain('/Users/me/CV');
-    expect(root.querySelector('details.manual')!.contains(root.querySelectorAll('pre')[1]!)).toBe(true);
     expect(config).toContain('"mcpServers"');
   });
 
   it('asks to replace the project folder only when it is unknown', async () => {
     const known = await render('/Users/me/CV');
-    expect(known.root.querySelector('.steps')!.textContent).not.toContain('/path/to/CV');
+    expect(known.root.querySelector('details .steps')!.textContent).not.toContain('/path/to/CV');
 
     const unknown = await render(null);
-    expect(unknown.root.querySelector('.steps')!.textContent).toContain('/path/to/CV');
+    expect(unknown.root.querySelector('details .steps')!.textContent).toContain('/path/to/CV');
+  });
+
+  it('lists the Claude clients connected now', async () => {
+    const { fixture, root } = await render('/Users/me/CV');
+    expect(root.querySelector('.sessions')).toBeNull();
+
+    fixture.componentRef.setInput('sessions', [
+      { id: 'a', name: 'Claude Desktop', lastUsed: '2 min ago' },
+      { id: 'b', name: 'Claude Code', lastUsed: null },
+    ]);
+    await fixture.whenStable();
+    expect(
+      [...root.querySelectorAll('.sessions li')].map((li) => li.textContent?.replace(/\s+/g, ' ').trim()),
+    ).toEqual(['Claude Desktop · last used 2 min ago', 'Claude Code · no tool calls yet']);
   });
 });

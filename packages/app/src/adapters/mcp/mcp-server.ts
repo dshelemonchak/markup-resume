@@ -15,11 +15,16 @@ const cvSummary = z.object({
   updatedAt: z.string().describe('ISO 8601'),
 });
 
+export interface McpServerOptions {
+  /** Called on every tool call, e.g. to report Claude's activity to the UI (ADR-0018). */
+  readonly onToolCall?: () => void;
+}
+
 /**
  * The MCP server for Claude (ADR-0003): three tools over the CV use cases. Transport-agnostic, so the
  * composition root connects it to stdio and tests connect it to an in-memory client.
  */
-export function createMcpServer(repository: CvRepository): McpServer {
+export function createMcpServer(repository: CvRepository, options: McpServerOptions = {}): McpServer {
   const server = new McpServer({ name: 'cv-kit', version: '0.0.0' });
 
   server.registerTool(
@@ -34,6 +39,7 @@ export function createMcpServer(repository: CvRepository): McpServer {
       annotations: { readOnlyHint: true, openWorldHint: false },
     },
     async () => {
+      options.onToolCall?.();
       const cvs = await listCvs(repository);
       const output = { cvs: [...cvs] };
       return { content: [text(JSON.stringify(output, null, 2))], structuredContent: output };
@@ -52,6 +58,7 @@ export function createMcpServer(repository: CvRepository): McpServer {
       annotations: { readOnlyHint: true, openWorldHint: false },
     },
     async ({ id }) => {
+      options.onToolCall?.();
       const result = await getCvDocument(repository, id);
       switch (result.kind) {
         case 'found':
@@ -83,6 +90,7 @@ export function createMcpServer(repository: CvRepository): McpServer {
       annotations: { destructiveHint: true, idempotentHint: true, openWorldHint: false },
     },
     async ({ id, html }) => {
+      options.onToolCall?.();
       const result = await saveCvDocument(repository, id, html);
       switch (result.kind) {
         case 'saved':

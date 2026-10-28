@@ -8,3 +8,4 @@ export {
   saveCvDocument,
   type SaveCvDocumentResult,
 } from './cvs.ts';
+export { type ClaudeSession, ClaudeSessions } from './claude-sessions.ts';

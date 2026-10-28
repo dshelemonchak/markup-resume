@@ -12,6 +12,7 @@ import {
 } from '@angular/core';
 import { CvApi } from '../../api/cv-api';
 import { toCvListItem } from '../../api/to-cv-list-item';
+import { claudeSessionLines, claudeStatus } from '../../layout/connect-claude/claude-status';
 import { ConnectClaude } from '../../layout/connect-claude/connect-claude';
 import { DocumentCanvas } from '../../layout/document-canvas/document-canvas';
 import type { DocumentInfo } from '../../layout/document-canvas/document-info';
@@ -36,6 +37,15 @@ export class Workspace {
   protected readonly cvs = computed(() => (this.api.cvs.value() ?? []).map(toCvListItem));
   protected readonly loadError = computed(() => this.api.cvs.error() !== undefined);
   protected readonly hostProjectDir = computed(() => this.api.setup.value()?.hostProjectDir ?? null);
+  protected readonly desktopExtensionUrl = this.api.desktopExtensionUrl;
+
+  /** Ticks so that "2 min ago" stays current. */
+  private readonly now = signal(new Date());
+  private readonly claudeSessions = computed(() => this.api.claudeSessions.value() ?? []);
+  protected readonly claudeStatus = computed(() => claudeStatus(this.claudeSessions(), this.now()));
+  protected readonly claudeSessionLines = computed(() =>
+    claudeSessionLines(this.claudeSessions(), this.now()),
+  );
 
   /** Keeps the user's choice while it still exists after a reload; otherwise the first CV. */
   protected readonly selectedId = linkedSignal<readonly { id: string }[], string | null>({
@@ -67,6 +77,9 @@ export class Workspace {
 
   constructor() {
     const destroyRef = inject(DestroyRef);
+    const clock = setInterval(() => this.now.set(new Date()), 30_000);
+    destroyRef.onDestroy(() => clearInterval(clock));
+
     afterNextRender(() => {
       const observer = new ResizeObserver(() => {
         this.headerHeight.set(this.header().nativeElement.getBoundingClientRect().height);
