@@ -1,4 +1,4 @@
-import { canZoom, fitScale, stepZoom } from './zoom';
+import { canZoom, fitScale, scaleZoom, stepZoom } from './zoom';
 
 const A4 = { width: 794, height: 1123 };
 
@@ -35,5 +35,17 @@ describe('stepZoom', () => {
     expect(canZoom(2, 1)).toBe(false);
     expect(canZoom(0.25, -1)).toBe(false);
     expect(canZoom(1, 1)).toBe(true);
+  });
+});
+
+describe('scaleZoom', () => {
+  it('scales smoothly, between the preset steps', () => {
+    expect(scaleZoom(1, 1.1)).toBeCloseTo(1.1);
+    expect(scaleZoom(0.8, 0.5)).toBeCloseTo(0.4);
+  });
+
+  it('stays within the zoom limits', () => {
+    expect(scaleZoom(1.8, 2)).toBe(2);
+    expect(scaleZoom(0.3, 0.5)).toBe(0.25);
   });
 });

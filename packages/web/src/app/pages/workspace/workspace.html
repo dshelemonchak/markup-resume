@@ -6,6 +6,9 @@
 />
 <div
   class="document-column"
+  cvcPinchZoom
+  [(zoom)]="zoom"
+  [scale]="documentInfo()?.scale ?? 1"
   [style.--cvc-header-height.px]="headerHeight()"
   [style.--cvc-footer-height.px]="footerHeight()"
 >

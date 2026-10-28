@@ -11,11 +11,14 @@ export const ZOOM_STEPS: readonly number[] = [0.25, 0.5, 0.75, 1, 1.25, 1.5, 2];
 const MIN_ZOOM = ZOOM_STEPS[0]!;
 const MAX_ZOOM = ZOOM_STEPS[ZOOM_STEPS.length - 1]!;
 
+/** Value kept within [min, max]. */
+export const clamp = (value: number, min: number, max: number): number => Math.min(Math.max(value, min), max);
+
 /** Scale at which the whole page fits into the available area. */
 export function fitScale(available: Size, page: Size): number {
   if (available.width <= 0 || available.height <= 0) return 1;
   const scale = Math.min(available.width / page.width, available.height / page.height);
-  return Math.min(Math.max(scale, MIN_ZOOM), MAX_ZOOM);
+  return clamp(scale, MIN_ZOOM, MAX_ZOOM);
 }
 
 /** Next preset step above or below the current scale (which may lie between steps after "fit"). */
@@ -23,6 +26,11 @@ export function stepZoom(current: number, direction: 1 | -1): number {
   const epsilon = 0.001;
   if (direction > 0) return ZOOM_STEPS.find((step) => step > current + epsilon) ?? MAX_ZOOM;
   return [...ZOOM_STEPS].reverse().find((step) => step < current - epsilon) ?? MIN_ZOOM;
+}
+
+/** Scale multiplied by a pinch factor, kept within the zoom limits. */
+export function scaleZoom(current: number, factor: number): number {
+  return clamp(current * factor, MIN_ZOOM, MAX_ZOOM);
 }
 
 export const canZoom = (current: number, direction: 1 | -1): boolean =>

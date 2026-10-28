@@ -18,12 +18,13 @@ import { DocumentFooter } from '../../layout/document-footer/document-footer';
 import { DocumentHeader } from '../../layout/document-header/document-header';
 import type { PreviewMode } from '../../layout/document-header/preview-mode';
 import { Sidebar } from '../../layout/sidebar/sidebar';
+import { PinchZoom } from '../../ui/zoom-control/pinch-zoom';
 import type { ZoomSetting } from '../../ui/zoom-control/zoom';
 
 /** Main screen: CVs from the local server on the left; top bar, the selected CV and the status bar on the right. */
 @Component({
   selector: 'cvc-workspace',
-  imports: [DocumentCanvas, DocumentFooter, DocumentHeader, Sidebar],
+  imports: [DocumentCanvas, DocumentFooter, DocumentHeader, PinchZoom, Sidebar],
   templateUrl: './workspace.html',
   styleUrl: './workspace.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
