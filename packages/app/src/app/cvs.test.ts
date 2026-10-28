@@ -3,8 +3,8 @@ import type { CvRepository, CvSummary, ParseMarkup, TemplateCatalog } from '../d
 import { createCvDocument, getCvDocument, listCvs, MAX_CV_DOCUMENT_BYTES, saveCvDocument } from './cvs.ts';
 
 const templates: TemplateCatalog = {
-  refs: () => ['classic@0.0.1'],
-  styles: (ref) => (ref === 'classic@0.0.1' ? 'p {}' : null),
+  refs: () => ['classic@0.0.2'],
+  styles: (ref) => (ref === 'classic@0.0.2' ? 'p {}' : null),
   guide: () => null,
   schema: () => null,
 };
@@ -101,10 +101,10 @@ describe('saveCvDocument', () => {
     const { repository, documents } = setup();
     const sent = doc('New').replace(
       '<meta',
-      '<head><meta name="cv:template" content="classic@0.0.1"></head><meta',
+      '<head><meta name="cv:template" content="classic@0.0.2"></head><meta',
     );
     expect(await saveCvDocument(services(repository), 'sample', sent)).toEqual({ kind: 'saved' });
-    expect(documents['sample']).toContain('<style id="cv-lib" data-cv-lib="classic@0.0.1">\np {}');
+    expect(documents['sample']).toContain('<style id="cv-lib" data-cv-lib="classic@0.0.2">\np {}');
     // The stored document, sent back as it is, changes nothing.
     expect(await saveCvDocument(services(repository), 'sample', documents['sample']!)).toEqual({
       kind: 'unchanged',

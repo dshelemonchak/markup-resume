@@ -6,9 +6,9 @@ import { createMcpServer } from './mcp-server.ts';
 const doc = (title: string) => `<!doctype html><html><meta name="cv:title" content="${title}"></html>`;
 
 const templates: TemplateCatalog = {
-  refs: () => ['classic@0.0.1'],
-  styles: (ref) => (ref === 'classic@0.0.1' ? 'p {}' : null),
-  guide: (ref) => (ref === 'classic@0.0.1' ? { rules: '# Rules\n', example: '<!doctype html>\n' } : null),
+  refs: () => ['classic@0.0.2'],
+  styles: (ref) => (ref === 'classic@0.0.2' ? 'p {}' : null),
+  guide: (ref) => (ref === 'classic@0.0.2' ? { rules: '# Rules\n', example: '<!doctype html>\n' } : null),
   schema: () => null,
 };
 
@@ -133,16 +133,16 @@ describe('MCP server', () => {
   it('tells Claude in the handshake to read the template before writing', () => {
     const instructions = client.getInstructions();
     expect(instructions).toContain('call read_template');
-    expect(instructions).toContain('classic@0.0.1');
+    expect(instructions).toContain('classic@0.0.2');
   });
 
   it("returns a template's rules with its example, and names the templates for an unknown one", async () => {
-    const result = await client.callTool({ name: 'read_template', arguments: { template: 'classic@0.0.1' } });
+    const result = await client.callTool({ name: 'read_template', arguments: { template: 'classic@0.0.2' } });
     expect(textOf(result)).toBe('# Rules\n\n## Example document\n\n```html\n<!doctype html>\n```\n');
 
     const unknown = await client.callTool({ name: 'read_template', arguments: { template: 'modern@1.0.0' } });
     expect(unknown.isError).toBe(true);
-    expect(textOf(unknown)).toContain('Templates: classic@0.0.1');
+    expect(textOf(unknown)).toContain('Templates: classic@0.0.2');
   });
 
   it('rejects arguments that do not match the input schema', async () => {

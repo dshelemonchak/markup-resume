@@ -1,4 +1,4 @@
-# Template "classic" (version 0.0.1)
+# Template "classic" (version 0.0.2)
 
 One A4 page: name and headline, a summary across the page, then a narrow sidebar (contacts, skills, education)
 next to the main column (experience, languages). The design comes from the template; the document only holds
@@ -7,7 +7,7 @@ content and the class names below.
 ## The document
 
 - `<head>` keeps `<meta charset="utf-8">`, `<title>`, `<meta name="cv:title">` and
-  `<meta name="cv:template" content="classic@0.0.1">`.
+  `<meta name="cv:template" content="classic@0.0.2">`.
 - Do not write CSS. cv-kit inserts the template's styles as `<style id="cv-lib">` on every save; send it back
   unchanged or leave it out. No `style` attributes, scripts, images or external resources.
 - Use only the classes listed here, on the elements and in the nesting shown. Sections may be left out; their

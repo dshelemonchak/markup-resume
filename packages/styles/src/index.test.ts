@@ -21,7 +21,7 @@ describe('templateCatalog', () => {
 
 describe('asset folders', () => {
   it('hold the fonts and icons the classic template loads', () => {
-    const css = templateCatalog.styles('classic@0.0.1') ?? '';
+    const css = templateCatalog.styles('classic@0.0.2') ?? '';
     const urls = [...css.matchAll(/url\('\/api\/v1\/(fonts|icons)\/([\w.-]+)'\)/g)];
     expect(urls.length).toBeGreaterThan(0);
     for (const [, kind, file] of urls) {

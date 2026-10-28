@@ -2,22 +2,22 @@ import { describe, expect, it } from 'vitest';
 import { type TemplateCatalog, withTemplateStyles } from './cv-template.ts';
 
 const catalog: TemplateCatalog = {
-  refs: () => ['classic@0.0.1'],
-  styles: (ref) => (ref === 'classic@0.0.1' ? 'body { color: red; }' : null),
+  refs: () => ['classic@0.0.2'],
+  styles: (ref) => (ref === 'classic@0.0.2' ? 'body { color: red; }' : null),
   guide: () => null,
   schema: () => null,
 };
 
 const doc = (head: string) =>
   `<!doctype html>\n<html>\n  <head>\n${head}  </head>\n  <body></body>\n</html>\n`;
-const template = '    <meta name="cv:template" content="classic@0.0.1" />\n';
+const template = '    <meta name="cv:template" content="classic@0.0.2" />\n';
 
 describe('withTemplateStyles', () => {
   it('inserts the template CSS at the end of the head', () => {
     expect(withTemplateStyles(doc(template), catalog)).toEqual({
       kind: 'styled',
       html: doc(
-        `${template}    <style id="cv-lib" data-cv-lib="classic@0.0.1">\nbody { color: red; }\n    </style>\n`,
+        `${template}    <style id="cv-lib" data-cv-lib="classic@0.0.2">\nbody { color: red; }\n    </style>\n`,
       ),
     });
   });
@@ -40,12 +40,12 @@ describe('withTemplateStyles', () => {
     const html = doc('    <meta name="cv:template" content="modern@3" />\n');
     expect(withTemplateStyles(html, catalog)).toEqual({
       kind: 'problem',
-      problem: 'Unknown template "modern@3" in cv:template; use one of: "classic@0.0.1".',
+      problem: 'Unknown template "modern@3" in cv:template; use one of: "classic@0.0.2".',
     });
   });
 
   it('needs a head to put the styles in', () => {
-    const html = '<!doctype html><meta name="cv:template" content="classic@0.0.1"><p>no head</p></html>';
+    const html = '<!doctype html><meta name="cv:template" content="classic@0.0.2"><p>no head</p></html>';
     expect(withTemplateStyles(html, catalog)).toMatchObject({ kind: 'problem' });
   });
 });

@@ -15,7 +15,7 @@ export const iconsDir = fileURLToPath(new URL('icons/', PACKAGE_DIR));
  * The templates by reference: what a document names in <meta name="cv:template">, "<name>@<semver>",
  * mapped to its folder under templates/.
  */
-const TEMPLATES: ReadonlyMap<string, string> = new Map([['classic@0.0.1', 'classic']]);
+const TEMPLATES: ReadonlyMap<string, string> = new Map([['classic@0.0.2', 'classic']]);
 
 /** One file of a template, or null when there is no template with this reference. */
 function read(
