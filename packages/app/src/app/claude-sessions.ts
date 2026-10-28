@@ -1,4 +1,4 @@
-/** A Claude client connected to cv-kit's MCP server, as the server reports it (ADR-0018). */
+/** A Claude client connected to Markup Résumé's MCP server, as the server reports it (ADR-0018). */
 export interface ClaudeSession {
   readonly id: string;
   /** clientInfo.name from the MCP handshake, e.g. "claude-ai" (Claude Desktop) or "claude-code". */

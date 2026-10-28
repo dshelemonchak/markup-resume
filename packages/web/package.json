@@ -1,5 +1,5 @@
 {
-  "name": "@cv-kit/web",
+  "name": "@markup-resume/web",
   "version": "0.0.0",
   "private": true,
   "description": "Angular UI: CV viewer and, later, the editor. Client of the /api/v1 HTTP API.",

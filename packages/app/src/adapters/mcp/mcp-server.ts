@@ -32,11 +32,11 @@ export interface McpServerOptions {
  */
 const instructions = (refs: readonly string[]) =>
   [
-    'cv-kit stores CVs as standalone HTML documents and shows them to the user in the cv-kit viewer.',
+    'Markup Résumé stores CVs as standalone HTML documents and shows them to the user in the Markup Résumé viewer.',
     `A CV is built on a template, named in <meta name="cv:template" content="…">; templates: ${refs.join(', ')}.`,
     'Before you create a CV with create_cv or change one with write_cv, call read_template for its template ' +
       'and follow those rules exactly: they list the only class names and structure the template accepts.',
-    'Never write CSS: cv-kit puts the template styles into the document itself.',
+    'Never write CSS: Markup Résumé puts the template styles into the document itself.',
   ].join('\n');
 
 /**
@@ -46,7 +46,7 @@ const instructions = (refs: readonly string[]) =>
 export function createMcpServer(services: CvDocumentServices, options: McpServerOptions = {}): McpServer {
   const { repository, templates } = services;
   const server = new McpServer(
-    { name: 'cv-kit', version: '0.0.0' },
+    { name: 'markup-resume', version: '0.0.0' },
     { instructions: instructions(templates.refs()) },
   );
 
@@ -55,7 +55,7 @@ export function createMcpServer(services: CvDocumentServices, options: McpServer
     {
       title: 'List CVs',
       description:
-        'Lists the CVs stored in cv-kit, most recently changed first. Each entry has the CV id ' +
+        'Lists the CVs stored in Markup Résumé, most recently changed first. Each entry has the CV id ' +
         '(use it with read_cv and write_cv), its display title and the time of the last change. ' +
         'Call this first when the user refers to a CV by name rather than by id.',
       outputSchema: z.object({ cvs: z.array(cvSummary) }),
@@ -105,7 +105,7 @@ export function createMcpServer(services: CvDocumentServices, options: McpServer
         'read_cv returned it. The document must start with <!doctype html>, end with </html> and keep ' +
         `<meta name="cv:title" content="…">; the size limit is ${MAX_CV_DOCUMENT_BYTES / MIB} MiB. ` +
         "The previous version is kept in the CV's history, and the user sees the change live in the " +
-        'cv-kit viewer. Sending the same document again changes nothing. A rejected document is not ' +
+        'Markup Résumé viewer. Sending the same document again changes nothing. A rejected document is not ' +
         'saved; the error lists what to fix.',
       inputSchema: z.object({
         id: cvId.describe(`${cvId.description} Only existing CVs can be written.`),
@@ -141,7 +141,7 @@ export function createMcpServer(services: CvDocumentServices, options: McpServer
         'a new CV, for example one tailored to a vacancy; to change an existing CV use write_cv instead. ' +
         'Never replaces an existing CV: if the id is taken, nothing is written and you can pick another. ' +
         'Build the document by the rules from read_template; the same checks as in write_cv apply. ' +
-        'Give it its own cv:title so the user can tell it apart in the cv-kit viewer.',
+        'Give it its own cv:title so the user can tell it apart in the Markup Résumé viewer.',
       inputSchema: z.object({
         id: z
           .string()
@@ -158,7 +158,7 @@ export function createMcpServer(services: CvDocumentServices, options: McpServer
       const result = await createCvDocument(services, id, html);
       switch (result.kind) {
         case 'created':
-          return { content: [text(`Created CV "${id}". The user sees it in the cv-kit viewer.`)] };
+          return { content: [text(`Created CV "${id}". The user sees it in the Markup Résumé viewer.`)] };
         case 'already-exists':
           return failure(
             `A CV with the id "${id}" already exists; nothing was written. Choose an id that is not in ` +

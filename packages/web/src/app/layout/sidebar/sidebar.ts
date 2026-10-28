@@ -12,7 +12,7 @@ import { SidebarItem } from '../sidebar-item/sidebar-item';
  * through outputs. Import and search are placeholders for now.
  */
 @Component({
-  selector: 'cvc-sidebar',
+  selector: 'mr-sidebar',
   imports: [DummyMark, GlassPanel, SidebarItem],
   templateUrl: './sidebar.html',
   styleUrl: './sidebar.scss',

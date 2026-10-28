@@ -38,17 +38,17 @@ export default defineConfig(
     processor: angular.processInlineTemplates,
     languageOptions: { globals: globals.browser },
     rules: {
-      // Components are elements (cvc-shell); surface components may be attributes (cvc-glass-panel).
+      // Components are elements (mr-shell); surface components may be attributes (mr-glass-panel).
       '@angular-eslint/component-selector': [
         'error',
         [
-          { type: 'element', prefix: 'cvc', style: 'kebab-case' },
-          { type: 'attribute', prefix: 'cvc', style: 'kebab-case' },
+          { type: 'element', prefix: 'mr', style: 'kebab-case' },
+          { type: 'attribute', prefix: 'mr', style: 'kebab-case' },
         ],
       ],
       '@angular-eslint/directive-selector': [
         'error',
-        { type: 'attribute', prefix: 'cvc', style: 'camelCase' },
+        { type: 'attribute', prefix: 'mr', style: 'camelCase' },
       ],
     },
   },

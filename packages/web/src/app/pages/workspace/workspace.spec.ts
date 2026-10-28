@@ -51,13 +51,13 @@ describe('Workspace', () => {
     http.expectOne('/api/v1/claude/sessions').flush([]);
     await fixture.whenStable();
     const root = fixture.nativeElement as HTMLElement;
-    const frameSrc = () => root.querySelector('cvc-document-canvas iframe')?.getAttribute('src');
+    const frameSrc = () => root.querySelector('mr-document-canvas iframe')?.getAttribute('src');
     return { fixture, http, root, frameSrc };
   }
 
   it('lists CVs from the server and previews the first one', async () => {
     const { root, frameSrc } = await render();
-    expect([...root.querySelectorAll('cvc-sidebar-item .title')].map((el) => el.textContent)).toEqual([
+    expect([...root.querySelectorAll('mr-sidebar-item .title')].map((el) => el.textContent)).toEqual([
       'First',
       'Second',
     ]);
@@ -66,12 +66,12 @@ describe('Workspace', () => {
 
   it('puts the host project folder into the Connect Claude dialog', async () => {
     const { root } = await render();
-    expect(root.querySelector('cvc-connect-claude pre')!.textContent).toContain('/Users/me/CV');
+    expect(root.querySelector('mr-connect-claude pre')!.textContent).toContain('/Users/me/CV');
   });
 
   it('keeps the selection and reloads list and preview when the server reports a change', async () => {
     const { fixture, http, root, frameSrc } = await render();
-    root.querySelectorAll<HTMLButtonElement>('cvc-sidebar-item button')[1]!.click();
+    root.querySelectorAll<HTMLButtonElement>('mr-sidebar-item button')[1]!.click();
     await fixture.whenStable();
     expect(frameSrc()).toBe('/api/v1/cvs/second/document?v=0');
 
@@ -114,7 +114,7 @@ describe('Workspace', () => {
     http.expectOne('/api/v1/claude/sessions').error(new ProgressEvent('error'));
     await fixture.whenStable();
     expect(message()).toContain('not reachable');
-    expect(root.querySelector('cvc-sidebar .empty')!.textContent).toContain('Server not reachable');
+    expect(root.querySelector('mr-sidebar .empty')!.textContent).toContain('Server not reachable');
 
     // The dev proxy answers the event stream with 502 while the server is down: EventSource gives up, so
     // the app opens a new one after a pause, and its "ready" means the server is back.
@@ -131,7 +131,7 @@ describe('Workspace', () => {
     http.expectOne('/api/v1/setup').flush({ hostProjectDir: null });
     http.expectOne('/api/v1/claude/sessions').flush([]);
     await fixture.whenStable();
-    expect(root.querySelectorAll('cvc-sidebar-item')).toHaveLength(2);
+    expect(root.querySelectorAll('mr-sidebar-item')).toHaveLength(2);
   });
 
   it('reports a failing server apart from an unreachable one, and tries again by itself', async () => {
@@ -149,14 +149,14 @@ describe('Workspace', () => {
       http.expectOne('/api/v1/setup').flush({ hostProjectDir: null });
       http.expectOne('/api/v1/claude/sessions').flush([]);
       await settle();
-      expect(root.querySelector('cvc-sidebar .empty')!.textContent).toContain('Could not load the CVs');
+      expect(root.querySelector('mr-sidebar .empty')!.textContent).toContain('Could not load the CVs');
       expect(root.querySelector('.document-area .empty')!.textContent).toContain('could not load');
 
       await vi.advanceTimersByTimeAsync(5_000);
       TestBed.tick();
       http.expectOne('/api/v1/cvs').flush(CVS);
       await settle();
-      expect(root.querySelectorAll('cvc-sidebar-item')).toHaveLength(2);
+      expect(root.querySelectorAll('mr-sidebar-item')).toHaveLength(2);
     } finally {
       vi.useRealTimers();
     }
@@ -186,7 +186,7 @@ describe('Workspace', () => {
     Object.assign(URL, { createObjectURL: () => 'blob:pdf', revokeObjectURL: () => {} });
     const { fixture, http, root } = await render();
 
-    root.querySelector<HTMLButtonElement>('cvc-document-header .export')!.click();
+    root.querySelector<HTMLButtonElement>('mr-document-header .export')!.click();
     http
       .expectOne('/api/v1/cvs/first/pdf')
       .flush(new Blob([JSON.stringify({ error: 'pdf-check-failed', problems: ['Order is off.'] })]), {
@@ -194,10 +194,10 @@ describe('Workspace', () => {
         statusText: 'Unprocessable',
       });
     await fixture.whenStable();
-    expect(root.querySelector('cvc-export-report dialog')!.hasAttribute('open')).toBe(true);
-    expect(root.querySelector('cvc-export-report .problems')!.textContent).toContain('Order is off.');
+    expect(root.querySelector('mr-export-report dialog')!.hasAttribute('open')).toBe(true);
+    expect(root.querySelector('mr-export-report .problems')!.textContent).toContain('Order is off.');
 
-    [...root.querySelectorAll<HTMLButtonElement>('cvc-export-report button')]
+    [...root.querySelectorAll<HTMLButtonElement>('mr-export-report button')]
       .find((button) => button.textContent.includes('Download anyway'))!
       .click();
     http.expectOne('/api/v1/cvs/first/pdf?force=1').flush(new Blob(['%PDF-']), {

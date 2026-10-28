@@ -56,7 +56,7 @@ export class CvApi {
     timeout: REQUEST_TIMEOUT_MS,
   }));
   readonly setup = httpResource<SetupDto>(() => ({ url: `${API}/setup`, timeout: REQUEST_TIMEOUT_MS }));
-  /** cv-kit as a Claude Desktop extension, a file to download and install. */
+  /** Markup Résumé as a Claude Desktop extension, a file to download and install. */
   readonly desktopExtensionUrl = `${API}/claude/desktop-extension`;
   readonly claudeSessions = httpResource<readonly ClaudeSessionDto[]>(() => ({
     url: `${API}/claude/sessions`,

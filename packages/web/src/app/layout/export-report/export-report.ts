@@ -5,7 +5,7 @@ import { ChangeDetectionStrategy, Component, type ElementRef, input, output, vie
  * (ADR-0009), for which the PDF is held back but can still be taken, or the export failing altogether.
  */
 @Component({
-  selector: 'cvc-export-report',
+  selector: 'mr-export-report',
   templateUrl: './export-report.html',
   styleUrl: './export-report.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

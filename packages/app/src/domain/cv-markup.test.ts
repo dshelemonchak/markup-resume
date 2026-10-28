@@ -83,7 +83,7 @@ describe('checkMarkup', () => {
       ),
     );
     expect(checkMarkup(page, schema)).toEqual([
-      '<style> is not allowed: the template does all the styling (cv-kit adds <style id="cv-lib">).',
+      '<style> is not allowed: the template does all the styling (Markup Résumé adds <style id="cv-lib">).',
       '<script> is not allowed in <head>.',
       '<img in .cv-skills> is not allowed.',
       '<script in .cv-skills> is not allowed.',

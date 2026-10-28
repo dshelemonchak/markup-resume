@@ -25,7 +25,7 @@ describe('DocumentHeader', () => {
     expect(root.querySelector('h1')?.textContent?.trim()).toBe('Senior Angular');
     expect(root.querySelector('.file')?.textContent).toBe('senior-angular.html');
     expect(root.querySelector('.badge')?.textContent?.trim()).toBe('Warnings');
-    expect(root.querySelector('header[cvc-glass-panel]')).not.toBeNull();
+    expect(root.querySelector('header[mr-glass-panel]')).not.toBeNull();
   });
 
   it('shows a placeholder when no CV is selected', async () => {

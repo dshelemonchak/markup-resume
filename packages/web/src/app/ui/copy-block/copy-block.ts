@@ -5,7 +5,7 @@ import { ChangeDetectionStrategy, Component, type ElementRef, input, signal, vie
  * browser, a missing permission), the text is selected instead for the user to copy.
  */
 @Component({
-  selector: 'cvc-copy-block',
+  selector: 'mr-copy-block',
   templateUrl: './copy-block.html',
   styleUrl: './copy-block.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

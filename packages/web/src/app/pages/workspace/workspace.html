@@ -1,4 +1,4 @@
-<cvc-sidebar
+<mr-sidebar
   class="sidebar"
   [items]="cvs()"
   [listState]="listState()"
@@ -7,12 +7,12 @@
   [claude]="claudeStatus()"
   (connectClaude)="connectClaude.open()"
 />
-<cvc-export-report
+<mr-export-report
   [problems]="exportProblems()"
   [failure]="exportFailure()"
   (downloadAnyway)="exportPdf(true)"
 />
-<cvc-connect-claude
+<mr-connect-claude
   #connectClaude
   [projectDir]="hostProjectDir()"
   [extensionUrl]="desktopExtensionUrl"
@@ -20,13 +20,13 @@
 />
 <div
   class="document-column"
-  cvcPinchZoom
+  mrPinchZoom
   [(zoom)]="zoom"
   [scale]="documentInfo()?.scale ?? 1"
-  [style.--cvc-header-height.px]="headerHeight()"
-  [style.--cvc-footer-height.px]="footerHeight()"
+  [style.--mr-header-height.px]="headerHeight()"
+  [style.--mr-footer-height.px]="footerHeight()"
 >
-  <cvc-document-header
+  <mr-document-header
     class="header"
     [cv]="selectedCv()"
     [(mode)]="mode"
@@ -35,7 +35,7 @@
   />
   <main class="document-area">
     @if (documentSrc(); as src) {
-      <cvc-document-canvas
+      <mr-document-canvas
         [src]="src"
         [mode]="mode()"
         [(zoom)]="zoom"
@@ -59,7 +59,7 @@
       </p>
     }
   </main>
-  <cvc-document-footer
+  <mr-document-footer
     class="footer"
     [info]="documentSrc() ? documentInfo() : null"
     [mode]="mode()"

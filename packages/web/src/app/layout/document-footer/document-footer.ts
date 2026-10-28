@@ -12,7 +12,7 @@ import type { PreviewMode } from '../preview-mode';
  * summary, export time and the validation report are placeholders.
  */
 @Component({
-  selector: 'cvc-document-footer',
+  selector: 'mr-document-footer',
   imports: [DummyMark, GlassPanel, ZoomControl],
   templateUrl: './document-footer.html',
   styleUrl: './document-footer.scss',

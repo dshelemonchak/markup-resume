@@ -1,6 +1,6 @@
 {
   "mcpServers": {
-    "cv-kit": {
+    "markup-resume": {
       "command": "docker",
       "args": ["compose", "run", "--rm", "-T", "mcp"]
     }

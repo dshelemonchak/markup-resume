@@ -40,7 +40,7 @@ export interface HttpAppOptions {
  *                                                 "claude-changed" when a Claude session comes, goes or acts
  *   GET  /api/v1/setup                            what the UI needs to show how to connect Claude
  *   GET  /api/v1/fonts/:file, /api/v1/icons/:file the style library's fonts and icons, used by template styles
- *   GET  /api/v1/claude/desktop-extension         cv-kit as a Claude Desktop extension (cv-kit.mcpb)
+ *   GET  /api/v1/claude/desktop-extension         Markup Résumé as a Claude Desktop extension (markup-resume.mcpb)
  *   GET  /api/v1/claude/sessions                  Claude sessions connected now
  *   GET  /api/v1/claude/sessions/:id/presence     held open by the MCP server while Claude is connected
  *        ?client=<clientInfo.name>&version=<clientInfo.version>                         (ADR-0018)
@@ -123,7 +123,7 @@ export function createHttpApp(
   app.get('/claude/desktop-extension', (c) =>
     c.body(desktopExtension(options.hostProjectDir ?? null), 200, {
       'Content-Type': 'application/zip',
-      'Content-Disposition': 'attachment; filename="cv-kit.mcpb"',
+      'Content-Disposition': 'attachment; filename="markup-resume.mcpb"',
     }),
   );
 

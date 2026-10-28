@@ -28,7 +28,7 @@ import type { ZoomSetting } from '../../ui/zoom';
 
 /** Main screen: CVs from the local server on the left; top bar, the selected CV and the status bar on the right. */
 @Component({
-  selector: 'cvc-workspace',
+  selector: 'mr-workspace',
   imports: [ConnectClaude, DocumentCanvas, DocumentFooter, DocumentHeader, ExportReport, PinchZoom, Sidebar],
   templateUrl: './workspace.html',
   styleUrl: './workspace.scss',

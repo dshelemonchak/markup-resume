@@ -1,5 +1,5 @@
 {
-  "name": "cv-kit",
+  "name": "markup-resume",
   "private": true,
   "type": "module",
   "packageManager": "pnpm@12.15.0",
@@ -13,7 +13,7 @@
     "typecheck": "pnpm -r --parallel typecheck",
     "test": "pnpm -r test",
     "check": "pnpm lint && pnpm format:check && pnpm typecheck && pnpm test",
-    "seed": "pnpm --filter @cv-kit/app seed"
+    "seed": "pnpm --filter @markup-resume/app seed"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

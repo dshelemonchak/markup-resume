@@ -4,8 +4,8 @@ import { DummyMark, dummyPattern } from './dummy-mark';
 
 @Component({
   imports: [DummyMark],
-  template: `<button cvcDummy>Export</button>
-    <div [cvcDummy]="word()">Soon</div>`,
+  template: `<button mrDummy>Export</button>
+    <div [mrDummy]="word()">Soon</div>`,
 })
 class Host {
   readonly word = signal('soon');
@@ -34,12 +34,12 @@ describe('DummyMark', () => {
     await fixture.whenStable();
     const [button, div] = [...(fixture.nativeElement as HTMLElement).children] as HTMLElement[];
 
-    expect(button!.classList).toContain('cvc-dummy');
-    expect(svgOf(button!.style.getPropertyValue('--cvc-dummy-pattern'))).toContain('>dummy</text>');
-    expect(svgOf(div!.style.getPropertyValue('--cvc-dummy-pattern'))).toContain('>soon</text>');
+    expect(button!.classList).toContain('mr-dummy');
+    expect(svgOf(button!.style.getPropertyValue('--mr-dummy-pattern'))).toContain('>dummy</text>');
+    expect(svgOf(div!.style.getPropertyValue('--mr-dummy-pattern'))).toContain('>soon</text>');
 
     fixture.componentInstance.word.set('later');
     await fixture.whenStable();
-    expect(svgOf(div!.style.getPropertyValue('--cvc-dummy-pattern'))).toContain('>later</text>');
+    expect(svgOf(div!.style.getPropertyValue('--mr-dummy-pattern'))).toContain('>later</text>');
   });
 });

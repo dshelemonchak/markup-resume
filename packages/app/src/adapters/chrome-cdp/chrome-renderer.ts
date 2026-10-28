@@ -36,7 +36,7 @@ export interface ChromeRendererOptions {
 export function createChromeRenderer({ chromePath, appUrl }: ChromeRendererOptions): RenderCv {
   const api = `${appUrl}/api/v1/`;
   return async (id: CvId) => {
-    const profile = await mkdtemp(join(tmpdir(), 'cv-kit-chrome-'));
+    const profile = await mkdtemp(join(tmpdir(), 'markup-resume-chrome-'));
     const chrome = new CdpPipe(chromePath, [
       '--headless',
       // The container runs Chromium as a normal user without the kernel features its sandbox needs.

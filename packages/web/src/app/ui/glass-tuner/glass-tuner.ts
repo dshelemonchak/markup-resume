@@ -20,13 +20,13 @@ interface TunerParam {
 }
 
 const PARAMS: readonly TunerParam[] = [
-  { name: '--cvc-glass-opacity', label: 'Panel opacity', min: 0, max: 1, step: 0.05, unit: '' },
-  { name: '--cvc-glass-blur-radius', label: 'Blur', min: 0, max: 60, step: 1, unit: 'px' },
-  { name: '--cvc-glass-saturation', label: 'Saturation', min: 100, max: 250, step: 5, unit: '%' },
-  { name: '--cvc-glass-border-alpha', label: 'Border', min: 0, max: 1, step: 0.05, unit: '' },
-  { name: '--cvc-glass-highlight-alpha', label: 'Top highlight', min: 0, max: 1, step: 0.05, unit: '' },
-  { name: '--cvc-glass-shadow-alpha', label: 'Shadow', min: 0, max: 0.4, step: 0.01, unit: '' },
-  { name: '--cvc-glow-opacity', label: 'Background glow', min: 0, max: 0.8, step: 0.05, unit: '' },
+  { name: '--mr-glass-opacity', label: 'Panel opacity', min: 0, max: 1, step: 0.05, unit: '' },
+  { name: '--mr-glass-blur-radius', label: 'Blur', min: 0, max: 60, step: 1, unit: 'px' },
+  { name: '--mr-glass-saturation', label: 'Saturation', min: 100, max: 250, step: 5, unit: '%' },
+  { name: '--mr-glass-border-alpha', label: 'Border', min: 0, max: 1, step: 0.05, unit: '' },
+  { name: '--mr-glass-highlight-alpha', label: 'Top highlight', min: 0, max: 1, step: 0.05, unit: '' },
+  { name: '--mr-glass-shadow-alpha', label: 'Shadow', min: 0, max: 0.4, step: 0.01, unit: '' },
+  { name: '--mr-glow-opacity', label: 'Background glow', min: 0, max: 0.8, step: 0.05, unit: '' },
 ];
 
 /**
@@ -35,7 +35,7 @@ const PARAMS: readonly TunerParam[] = [
  * and produces the SCSS lines to copy back into the theme. Remove with the playground.
  */
 @Component({
-  selector: 'cvc-glass-tuner',
+  selector: 'mr-glass-tuner',
   imports: [GlassPanel],
   templateUrl: './glass-tuner.html',
   styleUrl: './glass-tuner.scss',

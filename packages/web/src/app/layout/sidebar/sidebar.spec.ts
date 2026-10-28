@@ -22,7 +22,7 @@ const titles = (root: HTMLElement, groupId: string) =>
 describe('Sidebar', () => {
   it('renders as a glass aside', async () => {
     const { root } = await render(ITEMS);
-    expect(root.querySelector('aside[cvc-glass-panel]')).not.toBeNull();
+    expect(root.querySelector('aside[mr-glass-panel]')).not.toBeNull();
   });
 
   it('splits CVs into pinned and all others', async () => {
@@ -56,7 +56,7 @@ describe('Sidebar', () => {
 
     const emitted: string[] = [];
     fixture.componentInstance.selectCv.subscribe((id) => emitted.push(id));
-    root.querySelectorAll<HTMLButtonElement>('cvc-sidebar-item button')[2]!.click();
+    root.querySelectorAll<HTMLButtonElement>('mr-sidebar-item button')[2]!.click();
     expect(emitted).toEqual(['c']);
   });
 

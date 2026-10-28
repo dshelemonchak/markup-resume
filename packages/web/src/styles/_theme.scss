@@ -1,30 +1,30 @@
-// Design tokens of the tool's UI (not the CVs), from the cv-kit UI design canvas.
+// Design tokens of the tool's UI (not the CVs), from the Markup Résumé UI design canvas.
 // Components read them as CSS custom properties.
 :root {
   // App background and its two blurred colour glows.
-  --cvc-surface-base: #eef1f6;
-  --cvc-glow-opacity: 0.4;
-  --cvc-glow-primary: rgb(13 110 253 / var(--cvc-glow-opacity));
-  --cvc-glow-secondary: rgb(111 66 193 / var(--cvc-glow-opacity));
+  --mr-surface-base: #eef1f6;
+  --mr-glow-opacity: 0.4;
+  --mr-glow-primary: rgb(13 110 253 / var(--mr-glow-opacity));
+  --mr-glow-secondary: rgb(111 66 193 / var(--mr-glow-opacity));
 
   // Frosted glass: base values…
-  --cvc-glass-opacity: 0.5;
-  --cvc-glass-blur-radius: 30px;
-  --cvc-glass-saturation: 160%;
-  --cvc-glass-border-alpha: 0;
-  --cvc-glass-highlight-alpha: 0;
-  --cvc-glass-shadow-alpha: 0.1;
-  --cvc-glass-radius: 16px;
-  --cvc-glass-radius-compact: 12px;
+  --mr-glass-opacity: 0.5;
+  --mr-glass-blur-radius: 30px;
+  --mr-glass-saturation: 160%;
+  --mr-glass-border-alpha: 0;
+  --mr-glass-highlight-alpha: 0;
+  --mr-glass-shadow-alpha: 0.1;
+  --mr-glass-radius: 16px;
+  --mr-glass-radius-compact: 12px;
 
   // …and the values components use, derived from them.
-  --cvc-glass-bg: rgb(255 255 255 / var(--cvc-glass-opacity));
-  --cvc-glass-blur: blur(var(--cvc-glass-blur-radius)) saturate(var(--cvc-glass-saturation));
-  --cvc-glass-border: rgb(255 255 255 / var(--cvc-glass-border-alpha));
-  --cvc-glass-shadow:
-    inset 0 1px 0 rgb(255 255 255 / var(--cvc-glass-highlight-alpha)),
-    0 8px 32px rgb(15 23 42 / var(--cvc-glass-shadow-alpha));
+  --mr-glass-bg: rgb(255 255 255 / var(--mr-glass-opacity));
+  --mr-glass-blur: blur(var(--mr-glass-blur-radius)) saturate(var(--mr-glass-saturation));
+  --mr-glass-border: rgb(255 255 255 / var(--mr-glass-border-alpha));
+  --mr-glass-shadow:
+    inset 0 1px 0 rgb(255 255 255 / var(--mr-glass-highlight-alpha)),
+    0 8px 32px rgb(15 23 42 / var(--mr-glass-shadow-alpha));
 
   // Layout rhythm.
-  --cvc-gap: 12px;
+  --mr-gap: 12px;
 }

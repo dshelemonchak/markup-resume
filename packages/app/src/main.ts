@@ -3,7 +3,7 @@
 //   PORT         HTTP port (default 3000)
 //   HOST_PROJECT_DIR  project folder on the host, shown in the UI's Claude setup (optional)
 //   CHROME_PATH  Chrome or Chromium for PDF export (set in the image); unset: no PDF export
-import { fontsDir, iconsDir } from '@cv-kit/styles';
+import { fontsDir, iconsDir } from '@markup-resume/styles';
 import { serve } from '@hono/node-server';
 import { resolve } from 'node:path';
 import { createChromeRenderer } from './adapters/chrome-cdp/chrome-renderer.ts';
@@ -29,7 +29,7 @@ const { app, close } = createHttpApp(repository, {
   }),
 });
 const server = serve({ fetch: app.fetch, port, hostname: '0.0.0.0' }, (info) => {
-  console.log(`cv-kit API on http://localhost:${info.port} · data: ${dataDir}`);
+  console.log(`Markup Résumé API on http://localhost:${info.port} · data: ${dataDir}`);
 });
 
 const shutdown = () => {

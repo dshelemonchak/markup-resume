@@ -3,7 +3,7 @@ import type { CvListItem } from '../cv-list-item';
 
 /** One CV row in the sidebar. Display only for now; hover actions and rename come later. */
 @Component({
-  selector: 'cvc-sidebar-item',
+  selector: 'mr-sidebar-item',
   templateUrl: './sidebar-item.html',
   styleUrl: './sidebar-item.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

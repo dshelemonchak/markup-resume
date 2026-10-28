@@ -1,17 +1,17 @@
-<aside cvc-glass-panel class="sidebar" aria-label="CVs">
+<aside mr-glass-panel class="sidebar" aria-label="CVs">
   <div class="brand">
     <span class="logo" aria-hidden="true"></span>
-    <span class="name">cv-kit</span>
+    <span class="name">Markup Résumé</span>
   </div>
 
   <!-- Placeholder: import is not implemented yet. -->
-  <button type="button" class="btn btn-outline-secondary btn-sm import" cvcDummy>
+  <button type="button" class="btn btn-outline-secondary btn-sm import" mrDummy>
     <i class="bi bi-plus-lg" aria-hidden="true"></i>
     Import HTML
   </button>
 
   <!-- Placeholder: search is not implemented yet. -->
-  <div cvcDummy>
+  <div mrDummy>
     <label for="cv-search" class="visually-hidden">Search CVs</label>
     <input
       id="cv-search"
@@ -28,7 +28,7 @@
         <ul class="items">
           @for (item of pinned(); track item.id) {
             <li>
-              <cvc-sidebar-item
+              <mr-sidebar-item
                 [item]="item"
                 [selected]="item.id === selectedId()"
                 (selectCv)="selectCv.emit($event)"
@@ -44,7 +44,7 @@
       <ul class="items">
         @for (item of others(); track item.id) {
           <li>
-            <cvc-sidebar-item
+            <mr-sidebar-item
               [item]="item"
               [selected]="item.id === selectedId()"
               (selectCv)="selectCv.emit($event)"

@@ -9,7 +9,7 @@ export const PROJECT_PLACEHOLDER = '/path/to/CV';
  */
 export function desktopConfig(projectDir: string | null): string {
   const servers = {
-    'cv-kit': {
+    'markup-resume': {
       command: DOCKER_PLACEHOLDER,
       args: ['compose', '--project-directory', projectDir ?? PROJECT_PLACEHOLDER, 'run', '--rm', '-T', 'mcp'],
     },
@@ -26,9 +26,9 @@ export function desktopConfig(projectDir: string | null): string {
 export function desktopPrompt(projectDir: string | null): string {
   const projectFolder = projectDir
     ? ''
-    : ` and the cv-kit project folder in place of ${PROJECT_PLACEHOLDER} (ask me if unsure)`;
+    : ` and the Markup Résumé project folder in place of ${PROJECT_PLACEHOLDER} (ask me if unsure)`;
   return [
-    'Add the cv-kit MCP server to my Claude Desktop config.',
+    'Add the Markup Résumé MCP server to my Claude Desktop config.',
     '1. Find the docker binary with `which docker`.',
     '2. Quit Claude Desktop (osascript -e \'quit app "Claude"\') and wait until it has exited: while it runs, it rewrites its config and drops new entries.',
     '3. Back up ~/Library/Application Support/Claude/claude_desktop_config.json.',

@@ -11,14 +11,14 @@ import type { ClaudeSessionLine } from '../claude-status';
 import { DOCKER_PLACEHOLDER, PROJECT_PLACEHOLDER, desktopConfig, desktopPrompt } from '../desktop-config';
 
 /**
- * How to connect Claude to cv-kit's MCP server (ADR-0003): Claude Code picks it up from
+ * How to connect Claude to Markup Résumé's MCP server (ADR-0003): Claude Code picks it up from
  * .mcp.json; Claude Desktop installs it as an extension downloaded from the app, or, as fallbacks,
  * gets an entry in its config from a prompt for Claude Code or by hand.
  * A native modal <dialog>: focus stays inside, Escape closes it; closedby="any" also closes it
  * on a backdrop click where the browser supports it.
  */
 @Component({
-  selector: 'cvc-connect-claude',
+  selector: 'mr-connect-claude',
   imports: [CopyBlock],
   templateUrl: './connect-claude.html',
   styleUrl: './connect-claude.scss',
@@ -27,7 +27,7 @@ import { DOCKER_PLACEHOLDER, PROJECT_PLACEHOLDER, desktopConfig, desktopPrompt }
 export class ConnectClaude {
   /** Project folder on the host; null leaves a placeholder in the config. */
   readonly projectDir = input<string | null>(null);
-  /** Where the app serves cv-kit as a Claude Desktop extension (.mcpb). */
+  /** Where the app serves Markup Résumé as a Claude Desktop extension (.mcpb). */
   readonly extensionUrl = input.required<string>();
   /** Claude clients connected now, listed above the instructions. */
   readonly sessions = input<readonly ClaudeSessionLine[]>([]);

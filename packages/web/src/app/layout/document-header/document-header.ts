@@ -17,7 +17,7 @@ const STATUS_BADGE: Record<CvListItemStatus, { readonly text: string; readonly c
  * font and revisions are placeholders.
  */
 @Component({
-  selector: 'cvc-document-header',
+  selector: 'mr-document-header',
   imports: [DummyMark, GlassPanel, RibbonGroup],
   templateUrl: './document-header.html',
   styleUrl: './document-header.scss',

@@ -1,4 +1,4 @@
-import { templateCatalog } from '@cv-kit/styles';
+import { templateCatalog } from '@markup-resume/styles';
 import { describe, expect, it } from 'vitest';
 import { checkMarkup } from '../../domain/index.ts';
 import { parseMarkup } from './parse-markup.ts';

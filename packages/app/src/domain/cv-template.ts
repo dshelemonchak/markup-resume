@@ -29,7 +29,7 @@ const HEAD_CLOSE = /([ \t]*)<\/head>/i;
 
 /**
  * Puts the CSS of the document's template into <style id="cv-lib">, replacing whatever was there: the block is
- * owned by cv-kit, not by the sender (ADR-0006). A document that names no template is returned as it is.
+ * owned by Markup Résumé, not by the sender (ADR-0006). A document that names no template is returned as it is.
  */
 export function withTemplateStyles(html: string, catalog: TemplateCatalog): TemplateStylesResult {
   const ref = readCvMeta(html, 'cv:template');

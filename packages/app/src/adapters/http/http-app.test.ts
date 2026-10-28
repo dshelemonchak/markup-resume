@@ -76,13 +76,13 @@ describe('HTTP API v1', () => {
     expect((await reader.read()).done).toBe(true);
   });
 
-  it('serves cv-kit as a Claude Desktop extension with the project folder filled in', async () => {
+  it('serves Markup Résumé as a Claude Desktop extension with the project folder filled in', async () => {
     const response = await setup({ hostProjectDir: '/Users/me/CV' }).app.request(
       '/api/v1/claude/desktop-extension',
     );
     expect(response.status).toBe(200);
     expect(response.headers.get('content-type')).toBe('application/zip');
-    expect(response.headers.get('content-disposition')).toBe('attachment; filename="cv-kit.mcpb"');
+    expect(response.headers.get('content-disposition')).toBe('attachment; filename="markup-resume.mcpb"');
     // Stored entries, so the manifest is readable in the bytes.
     const bytes = Buffer.from(await response.arrayBuffer()).toString('latin1');
     expect(bytes.startsWith('PK\x03\x04')).toBe(true);

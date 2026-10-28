@@ -18,7 +18,7 @@ const MAX_WHEEL_DELTA = 25;
  * An iframe gets its own events, so the directive also listens on the document of each
  * same-origin iframe inside the host as it loads.
  */
-@Directive({ selector: '[cvcPinchZoom]' })
+@Directive({ selector: '[mrPinchZoom]' })
 export class PinchZoom {
   readonly zoom = model<ZoomSetting>('fit');
   /** Scale the content is shown at; the starting point while zoom is 'fit'. */

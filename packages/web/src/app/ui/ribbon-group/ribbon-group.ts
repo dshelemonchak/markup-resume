@@ -5,7 +5,7 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
  * like a Word ribbon group. The caption also names the group for assistive technology.
  */
 @Component({
-  selector: 'cvc-ribbon-group',
+  selector: 'mr-ribbon-group',
   template: `
     <div class="control"><ng-content /></div>
     <div class="caption" aria-hidden="true">{{ label() }}</div>

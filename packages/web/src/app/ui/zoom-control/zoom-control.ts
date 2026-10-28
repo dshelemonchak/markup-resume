@@ -7,7 +7,7 @@ import { type ZoomSetting, canZoom, stepZoom } from '../zoom';
  * measures the available space (for "fit" only the canvas knows it).
  */
 @Component({
-  selector: 'cvc-zoom-control',
+  selector: 'mr-zoom-control',
   templateUrl: './zoom-control.html',
   styleUrl: './zoom-control.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -4,7 +4,7 @@ import { setTimeout as sleep } from 'node:timers/promises';
 const RETRY_DELAYS_MS = [1_000, 2_000, 5_000, 10_000];
 
 export interface PresenceReporterOptions {
-  /** Base URL of the cv-kit app, e.g. http://app:3000. */
+  /** Base URL of the Markup Résumé app, e.g. http://app:3000. */
   readonly appUrl: string;
   readonly sessionId: string;
   readonly client: string;
@@ -20,7 +20,7 @@ export interface PresenceReporter {
 }
 
 /**
- * Tells the cv-kit app that Claude is connected (ADR-0018) by holding its presence request open:
+ * Tells the Markup Résumé app that Claude is connected (ADR-0018) by holding its presence request open:
  * the app drops the session as soon as the connection closes, so a crashed or killed MCP server
  * leaves nothing behind. While the app is down or restarting, it reconnects with a growing delay;
  * the MCP server works the same either way.

@@ -51,7 +51,7 @@ export function checkMarkup(html: MarkupElement, schema: MarkupSchema): readonly
     if (!HEAD_TAGS.has(element.tag)) problems.push(`<${element.tag}> is not allowed in <head>.`);
     else if (element.tag === 'style' && element.attributes.get('id') !== 'cv-lib') {
       problems.push(
-        '<style> is not allowed: the template does all the styling (cv-kit adds <style id="cv-lib">).',
+        '<style> is not allowed: the template does all the styling (Markup Résumé adds <style id="cv-lib">).',
       );
     }
   }

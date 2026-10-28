@@ -8,8 +8,8 @@
     </div>
 
     <p class="intro">
-      cv-kit gives Claude tools to list, read and write your CVs. Claude starts the server itself through
-      Docker, so keep Docker Desktop running.
+      Markup Résumé gives Claude tools to list, read and write your CVs. Claude starts the server itself
+      through Docker, so keep Docker Desktop running.
     </p>
 
     @if (sessions().length) {
@@ -32,20 +32,20 @@
     <section class="section" aria-labelledby="connect-claude-code">
       <h3 id="connect-claude-code" class="section-title">Claude Code</h3>
       <p>
-        Open this project folder in Claude Code. It finds the cv-kit server in <code>.mcp.json</code> and asks
-        once to enable it.
+        Open this project folder in Claude Code. It finds the Markup Résumé server in
+        <code>.mcp.json</code> and asks once to enable it.
       </p>
     </section>
 
     <section class="section" aria-labelledby="connect-claude-desktop">
       <h3 id="connect-claude-desktop" class="section-title">Claude Desktop</h3>
-      <a class="btn btn-primary btn-sm download" [href]="extensionUrl()" download="cv-kit.mcpb">
+      <a class="btn btn-primary btn-sm download" [href]="extensionUrl()" download="markup-resume.mcpb">
         <i class="bi bi-download" aria-hidden="true"></i>
         Download extension
       </a>
       <ol class="steps">
         <li>
-          Open <code>cv-kit.mcpb</code> from Downloads, or drag it into
+          Open <code>markup-resume.mcpb</code> from Downloads, or drag it into
           <strong>Settings → Extensions</strong> in Claude Desktop.
         </li>
         <li>Check the project folder Claude Desktop asks for, and install.</li>
@@ -58,7 +58,7 @@
           up. The Claude Desktop chat cannot change its own config, and the Code tab of Claude Desktop closes
           with the app, which has to quit for the change to stick.
         </p>
-        <cvc-copy-block class="block" [text]="prompt()" />
+        <mr-copy-block class="block" [text]="prompt()" />
       </details>
 
       <details class="manual">
@@ -75,7 +75,7 @@
           <li>
             Add the block below inside the file's outer <code>{{ '{ }' }}</code
             >, next to what is already there, separated by a comma. If <code>"mcpServers"</code> exists, add
-            just the <code>"cv-kit"</code> entry to it.
+            just the <code>"markup-resume"</code> entry to it.
           </li>
           <li>
             Replace <code>{{ dockerPlaceholder }}</code> with the output of <code>which docker</code>.
@@ -85,7 +85,7 @@
           </li>
           <li>Save the file and open Claude Desktop again.</li>
         </ol>
-        <cvc-copy-block [text]="config()" />
+        <mr-copy-block [text]="config()" />
       </details>
     </section>
   </div>

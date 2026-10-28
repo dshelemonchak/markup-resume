@@ -4,7 +4,7 @@ const parse = (block: string) => JSON.parse(`{${block}}`) as { mcpServers: Recor
 
 describe('desktopConfig', () => {
   it('runs the MCP service of the project through Docker', () => {
-    expect(parse(desktopConfig('/Users/me/CV')).mcpServers['cv-kit']).toEqual({
+    expect(parse(desktopConfig('/Users/me/CV')).mcpServers['markup-resume']).toEqual({
       command: DOCKER_PLACEHOLDER,
       args: ['compose', '--project-directory', '/Users/me/CV', 'run', '--rm', '-T', 'mcp'],
     });
@@ -23,6 +23,8 @@ describe('desktopPrompt', () => {
   });
 
   it('asks for the project folder when it is unknown', () => {
-    expect(desktopPrompt(null)).toContain(`the cv-kit project folder in place of ${PROJECT_PLACEHOLDER}`);
+    expect(desktopPrompt(null)).toContain(
+      `the Markup Résumé project folder in place of ${PROJECT_PLACEHOLDER}`,
+    );
   });
 });

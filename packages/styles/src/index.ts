@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 
 const PACKAGE_DIR = new URL('../', import.meta.url);
 
-/** Folders whose files cv-kit serves at /api/v1/fonts/<file> and /api/v1/icons/<file>. */
+/** Folders whose files Markup Résumé serves at /api/v1/fonts/<file> and /api/v1/icons/<file>. */
 export const fontsDir = fileURLToPath(new URL('fonts/inter/', PACKAGE_DIR));
 export const iconsDir = fileURLToPath(new URL('icons/', PACKAGE_DIR));
 
@@ -26,10 +26,10 @@ function read(
   return folder ? readFileSync(new URL(`templates/${folder}/${file}`, PACKAGE_DIR), 'utf8') : null;
 }
 
-/** The templates as cv-kit's TemplateCatalog port expects them. */
+/** The templates as Markup Résumé's TemplateCatalog port expects them. */
 export const templateCatalog = {
   refs: (): readonly string[] => [...TEMPLATES.keys()],
-  /** The CSS cv-kit inserts into the document. */
+  /** The CSS Markup Résumé inserts into the document. */
   styles: (ref: string): string | null => read(ref, 'template.css'),
   /** The design system for whoever writes the document (Claude), and a complete example built by it. */
   guide: (ref: string): { rules: string; example: string } | null => {
@@ -37,14 +37,14 @@ export const templateCatalog = {
     const example = read(ref, 'example.html');
     return rules !== null && example !== null ? { rules, example } : null;
   },
-  /** The markup cv-kit accepts for documents on this template. */
+  /** The markup accepted for documents on this template. */
   schema: (ref: string): TemplateSchema | null => {
     const json = read(ref, 'schema.json');
     return json === null ? null : (JSON.parse(json) as TemplateSchema);
   },
 };
 
-/** The shape of schema.json; cv-kit's MarkupSchema in packages/app/src/domain/cv-markup.ts. */
+/** The shape of schema.json; Markup Résumé's MarkupSchema in packages/app/src/domain/cv-markup.ts. */
 export interface TemplateSchema {
   readonly plainElements: readonly string[];
   readonly classes: Readonly<

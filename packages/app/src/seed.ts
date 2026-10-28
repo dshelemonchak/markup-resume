@@ -2,7 +2,7 @@
 // directory, so a fresh checkout has something to show. It goes through the same use case as Claude's
 // create_cv, so the template's styles are inserted and its markup is checked. Never overwrites a CV.
 //   CV_DATA_DIR  data directory (default ./data)
-import { templateCatalog } from '@cv-kit/styles';
+import { templateCatalog } from '@markup-resume/styles';
 import { resolve } from 'node:path';
 import { parseMarkup } from './adapters/html-parse5/parse-markup.ts';
 import { FsCvRepository } from './adapters/storage-fs/fs-cv-repository.ts';

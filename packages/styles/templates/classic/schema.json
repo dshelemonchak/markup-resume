@@ -1,5 +1,5 @@
 {
-  "$comment": "The markup cv-kit accepts for this template; rules.md explains the same to Claude. Every element in the page carries one class from \"classes\" (plus its kind class, if it has \"oneOf\"), or no class and a tag from \"plainElements\". \"parents\": the classes of the nearest classed ancestor it may sit in; empty for the page itself. \"first\": the class of the element that must open it.",
+  "$comment": "The markup accepted for documents on this template; rules.md explains the same to Claude. Every element in the page carries one class from \"classes\" (plus its kind class, if it has \"oneOf\"), or no class and a tag from \"plainElements\". \"parents\": the classes of the nearest classed ancestor it may sit in; empty for the page itself. \"first\": the class of the element that must open it.",
   "plainElements": ["p", "ul", "li", "a", "strong", "time", "h3", "span"],
   "classes": {
     "cv-page": { "tags": ["main"], "parents": [] },

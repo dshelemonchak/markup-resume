@@ -31,12 +31,12 @@ describe('zip', () => {
     expect(
       unzip(
         zip([
-          { path: 'manifest.json', content: '{"name":"cv-kit"}' },
+          { path: 'manifest.json', content: '{"name":"markup-resume"}' },
           { path: 'server/run.sh', content: '#!/bin/sh\necho ✓\n', mode: 0o755 },
         ]),
       ),
     ).toEqual([
-      { path: 'manifest.json', content: '{"name":"cv-kit"}', mode: 0o644 },
+      { path: 'manifest.json', content: '{"name":"markup-resume"}', mode: 0o644 },
       { path: 'server/run.sh', content: '#!/bin/sh\necho ✓\n', mode: 0o755 },
     ]);
   });

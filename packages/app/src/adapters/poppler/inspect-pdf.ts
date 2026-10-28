@@ -12,7 +12,7 @@ const run = promisify(execFile);
  * pdffonts for the fonts, pdftotext -raw for the text in content-stream order, pdftohtml -xml for the links.
  */
 export const inspectPdf: InspectPdf = async (pdf) => {
-  const dir = await mkdtemp(join(tmpdir(), 'cv-kit-pdf-'));
+  const dir = await mkdtemp(join(tmpdir(), 'markup-resume-pdf-'));
   try {
     const file = join(dir, 'cv.pdf');
     await writeFile(file, pdf);

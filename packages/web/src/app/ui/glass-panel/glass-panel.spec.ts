@@ -6,9 +6,9 @@ import { GlassPanel, type GlassPanelVariant } from './glass-panel';
 @Component({
   imports: [GlassPanel],
   template: `
-    <aside cvc-glass-panel id="bare">sidebar</aside>
-    <div cvc-glass-panel [variant]="variant()" id="bound">control</div>
-    <span cvc-glass-panel id="inline">not a block</span>
+    <aside mr-glass-panel id="bare">sidebar</aside>
+    <div mr-glass-panel [variant]="variant()" id="bound">control</div>
+    <span mr-glass-panel id="inline">not a block</span>
   `,
 })
 class Host {

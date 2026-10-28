@@ -5,7 +5,7 @@
   // clip, not hidden: the glows overhang the edges, and a hidden-overflow box can still be
   // scrolled by the browser (focus, scrollIntoView), which shifted the whole UI.
   overflow: clip;
-  background: var(--cvc-surface-base);
+  background: var(--mr-surface-base);
 }
 
 // Decorative glows: they give the frosted-glass panels something to blur.
@@ -20,7 +20,7 @@
   left: -120px;
   width: 620px;
   height: 620px;
-  background: var(--cvc-glow-primary);
+  background: var(--mr-glow-primary);
   filter: blur(80px);
 }
 
@@ -29,12 +29,12 @@
   bottom: -220px;
   width: 700px;
   height: 700px;
-  background: var(--cvc-glow-secondary);
+  background: var(--mr-glow-secondary);
   filter: blur(90px);
 }
 
 .content {
   position: relative;
   height: 100%;
-  padding: var(--cvc-gap);
+  padding: var(--mr-gap);
 }

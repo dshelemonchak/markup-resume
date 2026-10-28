@@ -1,4 +1,4 @@
-<header cvc-glass-panel class="header">
+<header mr-glass-panel class="header">
   <div class="title-row">
     @if (cv(); as cv) {
       <h1 class="title">{{ cv.title }}</h1>
@@ -11,7 +11,7 @@
     }
 
     <!-- Placeholder: real notices come from the server (ADR-0013). -->
-    <div class="notice" cvcDummy>
+    <div class="notice" mrDummy>
       <i class="bi bi-info-circle" aria-hidden="true"></i>
       Claude updated Summary · rev 12 · 2 min ago
     </div>
@@ -33,7 +33,7 @@
   </div>
 
   <div class="ribbon">
-    <cvc-ribbon-group label="View">
+    <mr-ribbon-group label="View">
       <div class="btn-group btn-group-sm">
         <input
           type="radio"
@@ -54,27 +54,27 @@
         />
         <label class="btn btn-outline-secondary" for="preview-mode-ats">ATS</label>
       </div>
-    </cvc-ribbon-group>
+    </mr-ribbon-group>
 
     <!-- Placeholder: width editing is not implemented yet; ATS output is always A4. -->
-    <cvc-ribbon-group [label]="isAts() ? 'A4 in ATS' : 'Page width'">
-      <div class="input-group input-group-sm page-width" cvcDummy>
+    <mr-ribbon-group [label]="isAts() ? 'A4 in ATS' : 'Page width'">
+      <div class="input-group input-group-sm page-width" mrDummy>
         <label class="input-group-text" for="page-width">W</label>
         <input id="page-width" type="text" class="form-control" value="210" [disabled]="isAts()" />
         <span class="input-group-text">mm</span>
       </div>
-    </cvc-ribbon-group>
+    </mr-ribbon-group>
 
     <!-- Placeholder: font selection is not implemented yet. -->
-    <cvc-ribbon-group label="Font" cvcDummy>
+    <mr-ribbon-group label="Font" mrDummy>
       <label for="font-family" class="visually-hidden">Font family</label>
       <select id="font-family" class="form-select form-select-sm font">
         <option>Inter</option>
       </select>
-    </cvc-ribbon-group>
+    </mr-ribbon-group>
 
     <!-- Placeholder: revisions are not implemented yet (ADR-0013). -->
-    <cvc-ribbon-group label="Revisions" cvcDummy>
+    <mr-ribbon-group label="Revisions" mrDummy>
       <div class="btn-group btn-group-sm">
         <button type="button" class="btn btn-outline-secondary">
           <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>
@@ -88,6 +88,6 @@
           rev 12
         </button>
       </div>
-    </cvc-ribbon-group>
+    </mr-ribbon-group>
   </div>
 </header>

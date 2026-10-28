@@ -27,8 +27,8 @@ describe('DocumentFooter', () => {
 
   it('passes the zoom through its controls', async () => {
     const { fixture, root } = await render({ info: { pages: 1, font: null, scale: 0.8 } });
-    expect(root.querySelector('cvc-zoom-control .level')!.textContent?.trim()).toBe('80%');
-    root.querySelector<HTMLButtonElement>('cvc-zoom-control [aria-label="Zoom in"]')!.click();
+    expect(root.querySelector('mr-zoom-control .level')!.textContent?.trim()).toBe('80%');
+    root.querySelector<HTMLButtonElement>('mr-zoom-control [aria-label="Zoom in"]')!.click();
     expect(fixture.componentInstance.zoom()).toBe(1);
   });
 });

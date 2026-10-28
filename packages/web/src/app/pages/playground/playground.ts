@@ -4,7 +4,7 @@ import { GlassTuner } from '../../ui/glass-tuner/glass-tuner';
 
 /** Temporary page showing UI building blocks while the real screens are built. */
 @Component({
-  selector: 'cvc-playground',
+  selector: 'mr-playground',
   imports: [GlassPanel, GlassTuner],
   templateUrl: './playground.html',
   styleUrl: './playground.scss',

@@ -1,10 +1,10 @@
 // Composition root for the MCP server (ADR-0003): Claude Desktop / Claude Code start this process and talk
 // JSON-RPC over its stdin/stdout.
 //   CV_DATA_DIR  data directory (default ./data); CVs live in <dir>/cvs/<id>/document.html
-//   CV_APP_URL   the cv-kit app, told when Claude connects and acts (ADR-0018); unset: not told
+//   CV_APP_URL   the Markup Résumé app, told when Claude connects and acts (ADR-0018); unset: not told
 // stdout belongs to the protocol: start it with `node src/mcp.ts`, not through pnpm (which prints a banner
 // to stdout), and log only to stderr.
-import { templateCatalog } from '@cv-kit/styles';
+import { templateCatalog } from '@markup-resume/styles';
 import { StdioServerTransport } from '@modelcontextprotocol/server/stdio';
 import { randomUUID } from 'node:crypto';
 import { resolve } from 'node:path';
@@ -44,4 +44,4 @@ process.once('SIGTERM', stop);
 process.once('SIGINT', stop);
 
 await server.connect(new StdioServerTransport());
-console.error(`cv-kit MCP server on stdio · data: ${dataDir}`);
+console.error(`Markup Résumé MCP server on stdio · data: ${dataDir}`);

@@ -8,11 +8,11 @@ content and the class names below.
 
 - `<head>` keeps `<meta charset="utf-8">`, `<title>`, `<meta name="cv:title">` and
   `<meta name="cv:template" content="classic@0.0.2">`.
-- Do not write CSS. cv-kit inserts the template's styles as `<style id="cv-lib">` on every save; send it back
+- Do not write CSS. Markup Résumé inserts the template's styles as `<style id="cv-lib">` on every save; send it back
   unchanged or leave it out. No `style` attributes, scripts, images or external resources.
 - Use only the classes listed here, on the elements and in the nesting shown. Sections may be left out; their
   order inside a column may change.
-- cv-kit checks the markup on every save: an unknown class, a class on the wrong element or in the wrong place,
+- Markup Résumé checks the markup on every save: an unknown class, a class on the wrong element or in the wrong place,
   or anything outside the page is rejected, and the error lists each problem to fix.
 - Elements without a class: only `p`, `ul`, `li`, `a`, `strong`, `time`, `h3` and `span`, as in the blocks below.
   Links go to `https://`, `mailto:` or `tel:` addresses.

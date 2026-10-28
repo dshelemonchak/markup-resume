@@ -9,14 +9,14 @@ describe('GlassTuner', () => {
     await fixture.whenStable();
 
     const range = (fixture.nativeElement as HTMLElement).querySelector<HTMLInputElement>(
-      '#--cvc-glass-blur-radius',
+      '#--mr-glass-blur-radius',
     )!;
     range.value = '42';
     range.dispatchEvent(new Event('input'));
     await fixture.whenStable();
-    expect(root.style.getPropertyValue('--cvc-glass-blur-radius')).toBe('42px');
+    expect(root.style.getPropertyValue('--mr-glass-blur-radius')).toBe('42px');
 
     fixture.destroy();
-    expect(root.style.getPropertyValue('--cvc-glass-blur-radius')).toBe('');
+    expect(root.style.getPropertyValue('--mr-glass-blur-radius')).toBe('');
   });
 });

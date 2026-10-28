@@ -31,7 +31,7 @@ const PAGE = { width: 794, height: 1123 } as const;
  * into a scale, since only the canvas knows the space available for "fit".
  */
 @Component({
-  selector: 'cvc-document-canvas',
+  selector: 'mr-document-canvas',
   templateUrl: './document-canvas.html',
   styleUrl: './document-canvas.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

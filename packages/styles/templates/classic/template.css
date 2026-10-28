@@ -1,6 +1,6 @@
 /*
- * cv-kit template "classic", version 0.0.2: the original Figma design, one A4 page with a left sidebar.
- * Inserted into the document by cv-kit as <style id="cv-lib"> (ADR-0006); documents never edit it.
+ * Markup Résumé template "classic", version 0.0.2: the original Figma design, one A4 page with a left sidebar.
+ * Inserted into the document by Markup Résumé as <style id="cv-lib"> (ADR-0006); documents never edit it.
  *
  * Every size is in px of the Figma frame, as in the design. The frame is 989 px wide; .cv-page zooms it to
  * the A4 width (794 CSS px), so 1 Figma px = 0.8028 CSS px in the rendered page and in the PDF.
@@ -290,7 +290,7 @@ body {
   break-after: avoid;
 }
 
-/* Contact icons: Bootstrap Icons (MIT) on a disc, files in @cv-kit/styles/icons; the LinkedIn mark is drawn
+/* Contact icons: Bootstrap Icons (MIT) on a disc, files in @markup-resume/styles/icons; the LinkedIn mark is drawn
    for this design. */
 
 .cv-contact-email::before {

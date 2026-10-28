@@ -8,11 +8,14 @@
 #   docker compose run --rm -T mcp               MCP server on stdio, started by Claude (see .mcp.json)
 # A database service is added when a database adapter exists (ADR-0012).
 
+# The project name, so containers and the network are named after the product whatever the folder is called.
+name: markup-resume
+
 x-workspace: &workspace
   build:
     context: .
     target: dev
-  image: cv-kit:dev
+  image: markup-resume:dev
   working_dir: /workspace
   volumes:
     - .:/workspace
@@ -28,7 +31,7 @@ services:
 
   app:
     <<: *workspace
-    command: pnpm --filter @cv-kit/app dev
+    command: pnpm --filter @markup-resume/app dev
     environment:
       CV_DATA_DIR: /data
       PORT: '3000'
@@ -40,7 +43,7 @@ services:
 
   web:
     <<: *workspace
-    command: pnpm --filter @cv-kit/web start --host 0.0.0.0 --port 4200
+    command: pnpm --filter @markup-resume/web start --host 0.0.0.0 --port 4200
     depends_on:
       - app
     ports:
@@ -52,7 +55,7 @@ services:
   # Claude Code picks it up from .mcp.json. For Claude Desktop (Chat), the UI's "Connect Claude"
   # dialog gives the entry for Settings → Developer → Edit Config, with absolute paths because
   # GUI apps start without your shell's PATH or working directory:
-  #   "mcpServers": { "cv-kit": {
+  #   "mcpServers": { "markup-resume": {
   #     "command": "<output of `which docker`>",
   #     "args": ["compose", "--project-directory", "/absolute/path/to/CV", "run", "--rm", "-T", "mcp"] } }
   mcp:

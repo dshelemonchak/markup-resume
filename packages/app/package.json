@@ -1,5 +1,5 @@
 {
-  "name": "@cv-kit/app",
+  "name": "@markup-resume/app",
   "version": "0.0.0",
   "private": true,
   "description": "Domain, use cases and adapters: rendering, validation, storage, CLI, HTTP API, MCP server.",
@@ -21,7 +21,7 @@
     "vitest": "^5.0.5"
   },
   "dependencies": {
-    "@cv-kit/styles": "workspace:*",
+    "@markup-resume/styles": "workspace:*",
     "@hono/node-server": "^2.1.5",
     "@modelcontextprotocol/server": "^2.4.0",
     "hono": "^4.13.14",

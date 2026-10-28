@@ -37,18 +37,18 @@ export function dummyPattern(text: string): string {
  * and is not announced. The overlay is a ::after (see styles/_dummy.scss), so on an <input> or
  * <select>, which have none, put the directive on the wrapper.
  *
- *   <button cvcDummy>Export PDF</button>
- *   <div cvcDummy="soon">…</div>
+ *   <button mrDummy>Export PDF</button>
+ *   <div mrDummy="soon">…</div>
  */
 @Directive({
-  selector: '[cvcDummy]',
+  selector: '[mrDummy]',
   host: {
-    class: 'cvc-dummy',
-    '[style.--cvc-dummy-pattern]': 'pattern()',
+    class: 'mr-dummy',
+    '[style.--mr-dummy-pattern]': 'pattern()',
   },
 })
 export class DummyMark {
-  readonly text = input('', { alias: 'cvcDummy' });
+  readonly text = input('', { alias: 'mrDummy' });
 
   protected readonly pattern = computed(() => dummyPattern(this.text() || DEFAULT_TEXT));
 }

@@ -36,10 +36,10 @@ describe('ConnectClaude', () => {
     const { root } = await render('/Users/me/CV');
     const download = root.querySelector<HTMLAnchorElement>('a.download')!;
     expect(download.getAttribute('href')).toBe('/api/v1/claude/desktop-extension');
-    expect(download.getAttribute('download')).toBe('cv-kit.mcpb');
+    expect(download.getAttribute('download')).toBe('markup-resume.mcpb');
 
     const [prompt, config] = [...root.querySelectorAll('details.manual pre')].map((pre) => pre.textContent);
-    expect(prompt).toContain('Add the cv-kit MCP server');
+    expect(prompt).toContain('Add the Markup Résumé MCP server');
     expect(prompt).toContain('/Users/me/CV');
     expect(config).toContain('"mcpServers"');
   });

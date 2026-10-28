@@ -5,7 +5,7 @@ import type { ZoomSetting } from '../zoom';
 
 @Component({
   imports: [PinchZoom],
-  template: `<div cvcPinchZoom [(zoom)]="zoom" [scale]="0.5"></div>`,
+  template: `<div mrPinchZoom [(zoom)]="zoom" [scale]="0.5"></div>`,
 })
 class Host {
   readonly zoom = signal<ZoomSetting>('fit');
