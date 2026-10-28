@@ -26,6 +26,9 @@ const server = serve({ fetch: app.fetch, port, hostname: '0.0.0.0' }, (info) => 
 const shutdown = () => {
   close();
   server.close();
+  // server.close() only stops new connections. Open keep-alive ones would still take requests, and the MCP servers'
+  // presence connections and the UI's event stream reconnect at once, so the process would never exit.
+  if ('closeAllConnections' in server) server.closeAllConnections();
 };
 process.on('SIGINT', shutdown);
 process.on('SIGTERM', shutdown);
