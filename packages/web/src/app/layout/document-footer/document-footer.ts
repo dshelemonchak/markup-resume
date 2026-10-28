@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, input, model } from '@angular/core';
+import { DummyMark } from '../../ui/dummy-mark/dummy-mark';
 import { GlassPanel } from '../../ui/glass-panel/glass-panel';
 import { ZoomControl } from '../../ui/zoom-control/zoom-control';
 import type { ZoomSetting } from '../../ui/zoom-control/zoom';
@@ -12,7 +13,7 @@ import type { PreviewMode } from '../document-header/preview-mode';
  */
 @Component({
   selector: 'cvc-document-footer',
-  imports: [GlassPanel, ZoomControl],
+  imports: [DummyMark, GlassPanel, ZoomControl],
   templateUrl: './document-footer.html',
   styleUrl: './document-footer.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

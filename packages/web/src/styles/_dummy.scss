@@ -1,0 +1,15 @@
+// Overlay of the DummyMark directive (app/ui/dummy-mark): marks placeholder parts of the UI.
+// :where keeps specificity at zero, so an element that is already positioned stays as it is.
+:where(.cvc-dummy) {
+  position: relative;
+}
+
+.cvc-dummy::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  background-image: var(--cvc-dummy-pattern);
+  pointer-events: none;
+}

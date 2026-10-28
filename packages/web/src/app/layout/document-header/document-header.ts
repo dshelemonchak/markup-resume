@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, input, model } from '@angular/core';
+import { DummyMark } from '../../ui/dummy-mark/dummy-mark';
 import { GlassPanel } from '../../ui/glass-panel/glass-panel';
 import { RibbonGroup } from '../../ui/ribbon-group/ribbon-group';
 import type { CvListItem, CvListItemStatus } from '../sidebar/cv-list-item';
@@ -17,7 +18,7 @@ const STATUS_BADGE: Record<CvListItemStatus, { readonly text: string; readonly c
  */
 @Component({
   selector: 'cvc-document-header',
-  imports: [GlassPanel, RibbonGroup],
+  imports: [DummyMark, GlassPanel, RibbonGroup],
   templateUrl: './document-header.html',
   styleUrl: './document-header.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

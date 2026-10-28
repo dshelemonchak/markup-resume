@@ -1,6 +1,6 @@
 <footer cvc-glass-panel class="footer">
   <!-- Placeholder: validation is not implemented yet (ADR-0009). -->
-  <span class="validation">
+  <span class="validation" cvcDummy>
     <i class="bi bi-check-circle" aria-hidden="true"></i>
     0 errors · 2 warnings
   </span>
@@ -13,10 +13,10 @@
   }
 
   <!-- Placeholder: export is not implemented yet. -->
-  <span>Exported 14:32</span>
+  <span cvcDummy>Exported 14:32</span>
 
   <!-- Placeholder: the report panel comes with validation. -->
-  <button type="button" class="btn btn-link btn-sm report" disabled>Validation report</button>
+  <button type="button" class="btn btn-link btn-sm report" cvcDummy disabled>Validation report</button>
 
   <span class="divider" aria-hidden="true"></span>
   <cvc-zoom-control [(zoom)]="zoom" [scale]="scale()" />

@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
+import { DummyMark } from '../../ui/dummy-mark/dummy-mark';
 import { GlassPanel } from '../../ui/glass-panel/glass-panel';
 import type { CvListItem } from './cv-list-item';
 import { SidebarItem } from './sidebar-item/sidebar-item';
@@ -10,7 +11,7 @@ import { SidebarItem } from './sidebar-item/sidebar-item';
  */
 @Component({
   selector: 'cvc-sidebar',
-  imports: [GlassPanel, SidebarItem],
+  imports: [DummyMark, GlassPanel, SidebarItem],
   templateUrl: './sidebar.html',
   styleUrl: './sidebar.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

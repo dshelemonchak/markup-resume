@@ -11,13 +11,13 @@
     }
 
     <!-- Placeholder: real notices come from the server (ADR-0013). -->
-    <div class="notice">
+    <div class="notice" cvcDummy>
       <i class="bi bi-info-circle" aria-hidden="true"></i>
       Claude updated Summary · rev 12 · 2 min ago
     </div>
 
     <!-- Placeholder: export is not implemented yet. -->
-    <button type="button" class="btn btn-primary btn-sm export">
+    <button type="button" class="btn btn-primary btn-sm export" cvcDummy>
       <i class="bi bi-download" aria-hidden="true"></i>
       Export PDF
     </button>
@@ -49,7 +49,7 @@
 
     <!-- Placeholder: width editing is not implemented yet; ATS output is always A4. -->
     <cvc-ribbon-group [label]="isAts() ? 'A4 in ATS' : 'Page width'">
-      <div class="input-group input-group-sm page-width">
+      <div class="input-group input-group-sm page-width" cvcDummy>
         <label class="input-group-text" for="page-width">W</label>
         <input id="page-width" type="text" class="form-control" value="210" [disabled]="isAts()" />
         <span class="input-group-text">mm</span>
@@ -57,7 +57,7 @@
     </cvc-ribbon-group>
 
     <!-- Placeholder: font selection is not implemented yet. -->
-    <cvc-ribbon-group label="Font">
+    <cvc-ribbon-group label="Font" cvcDummy>
       <label for="font-family" class="visually-hidden">Font family</label>
       <select id="font-family" class="form-select form-select-sm font">
         <option>Inter</option>
@@ -65,7 +65,7 @@
     </cvc-ribbon-group>
 
     <!-- Placeholder: revisions are not implemented yet (ADR-0013). -->
-    <cvc-ribbon-group label="Revisions">
+    <cvc-ribbon-group label="Revisions" cvcDummy>
       <div class="btn-group btn-group-sm">
         <button type="button" class="btn btn-outline-secondary">
           <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>
