@@ -1,0 +1,29 @@
+// Compact enough to sit in the status bar's line.
+:host {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.btn {
+  min-width: 28px;
+  height: 28px;
+  padding: 0 6px;
+  font-size: 12px;
+}
+
+.level {
+  min-width: 48px;
+  font-variant-numeric: tabular-nums;
+}
+
+.fit[aria-pressed='true'] {
+  background: rgb(15 23 42 / 0.08);
+}
+
+.divider {
+  width: 1px;
+  height: 16px;
+  margin: 0 4px;
+  background: rgb(15 23 42 / 0.12);
+}

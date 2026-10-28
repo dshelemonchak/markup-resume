@@ -13,14 +13,17 @@ import {
 import { CvApi } from '../../api/cv-api';
 import { toCvListItem } from '../../api/to-cv-list-item';
 import { DocumentCanvas } from '../../layout/document-canvas/document-canvas';
+import type { DocumentInfo } from '../../layout/document-canvas/document-info';
+import { DocumentFooter } from '../../layout/document-footer/document-footer';
 import { DocumentHeader } from '../../layout/document-header/document-header';
 import type { PreviewMode } from '../../layout/document-header/preview-mode';
 import { Sidebar } from '../../layout/sidebar/sidebar';
+import type { ZoomSetting } from '../../ui/zoom-control/zoom';
 
-/** Main screen: CVs from the local server on the left; top bar and the selected CV on the right. */
+/** Main screen: CVs from the local server on the left; top bar, the selected CV and the status bar on the right. */
 @Component({
   selector: 'cvc-workspace',
-  imports: [DocumentCanvas, DocumentHeader, Sidebar],
+  imports: [DocumentCanvas, DocumentFooter, DocumentHeader, Sidebar],
   templateUrl: './workspace.html',
   styleUrl: './workspace.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -46,21 +49,28 @@ export class Workspace {
   });
 
   protected readonly mode = signal<PreviewMode>('visual');
+  protected readonly zoom = signal<ZoomSetting>('fit');
+  protected readonly documentInfo = signal<DocumentInfo | null>(null);
 
-  /** Height of the floating header; the document area keeps this much clear at the top. */
+  /** Heights of the floating header and status bar; the document area keeps this much clear. */
   protected readonly headerHeight = signal(0);
+  protected readonly footerHeight = signal(0);
   private readonly header = viewChild.required<DocumentHeader, ElementRef<HTMLElement>>(DocumentHeader, {
+    read: ElementRef,
+  });
+  private readonly footer = viewChild.required<DocumentFooter, ElementRef<HTMLElement>>(DocumentFooter, {
     read: ElementRef,
   });
 
   constructor() {
     const destroyRef = inject(DestroyRef);
     afterNextRender(() => {
-      const element = this.header().nativeElement;
-      const observer = new ResizeObserver(() =>
-        this.headerHeight.set(element.getBoundingClientRect().height),
-      );
-      observer.observe(element);
+      const observer = new ResizeObserver(() => {
+        this.headerHeight.set(this.header().nativeElement.getBoundingClientRect().height);
+        this.footerHeight.set(this.footer().nativeElement.getBoundingClientRect().height);
+      });
+      observer.observe(this.header().nativeElement);
+      observer.observe(this.footer().nativeElement);
       destroyRef.onDestroy(() => observer.disconnect());
     });
   }

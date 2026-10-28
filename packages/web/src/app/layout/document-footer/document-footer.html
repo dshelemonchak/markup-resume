@@ -1,0 +1,23 @@
+<footer cvc-glass-panel class="footer">
+  <!-- Placeholder: validation is not implemented yet (ADR-0009). -->
+  <span class="validation">
+    <i class="bi bi-check-circle" aria-hidden="true"></i>
+    0 errors · 2 warnings
+  </span>
+
+  @if (pageInfo(); as pageInfo) {
+    <span class="pages">{{ pageInfo }}</span>
+  }
+  @if (info()?.font; as font) {
+    <span class="font">{{ font }}</span>
+  }
+
+  <!-- Placeholder: export is not implemented yet. -->
+  <span>Exported 14:32</span>
+
+  <!-- Placeholder: the report panel comes with validation. -->
+  <button type="button" class="btn btn-link btn-sm report" disabled>Validation report</button>
+
+  <span class="divider" aria-hidden="true"></span>
+  <cvc-zoom-control [(zoom)]="zoom" [scale]="scale()" />
+</footer>

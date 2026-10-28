@@ -13,6 +13,7 @@
   padding: 24px;
   // A parent with floating panels over the canvas reserves room for them here.
   padding-top: var(--cvc-canvas-inset-top, 24px);
+  padding-bottom: var(--cvc-canvas-inset-bottom, 24px);
   // Thin, translucent scrollbar: it runs under the floating header's right edge.
   scrollbar-width: thin;
   scrollbar-color: rgb(15 23 42 / 0.25) transparent;
@@ -37,36 +38,4 @@
   display: block;
   border: 0;
   transform-origin: 0 0;
-}
-
-.zoom {
-  position: absolute;
-  right: 20px;
-  bottom: 20px;
-  display: flex;
-  align-items: center;
-  gap: 2px;
-  padding: 4px;
-
-  .btn {
-    min-width: 36px;
-    height: 36px;
-    padding: 0 8px;
-  }
-
-  .level {
-    min-width: 60px;
-    font-variant-numeric: tabular-nums;
-  }
-
-  .fit[aria-pressed='true'] {
-    background: rgb(15 23 42 / 0.08);
-  }
-}
-
-.divider {
-  width: 1px;
-  height: 20px;
-  margin: 0 4px;
-  background: rgb(15 23 42 / 0.12);
 }

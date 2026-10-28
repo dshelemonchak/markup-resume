@@ -9,8 +9,8 @@
   width: 264px;
 }
 
-// The header floats over the document area; the area runs under it to the window's
-// top, right and bottom edges, so a scrolled sheet slides under the glass and blurs.
+// The header and the status bar float over the document area; the area runs under them to
+// the window's top, right and bottom edges, so a scrolled sheet slides under the glass and blurs.
 // The sidebar stays a boundary: the area starts at its right edge.
 .document-column {
   position: relative;
@@ -23,11 +23,20 @@
   z-index: 1;
 }
 
+.footer {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1;
+}
+
 .document-area {
   position: absolute;
   inset: calc(-1 * var(--cvc-gap));
-  // Space the content keeps clear at the top: the shell's padding, the header, a gap.
+  // Space the content keeps clear: the shell's padding, the header or status bar, a gap.
   --cvc-canvas-inset-top: calc(2 * var(--cvc-gap) + var(--cvc-header-height, 0px));
+  --cvc-canvas-inset-bottom: calc(2 * var(--cvc-gap) + var(--cvc-footer-height, 0px));
 }
 
 .empty {

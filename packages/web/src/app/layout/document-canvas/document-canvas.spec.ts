@@ -1,5 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { DocumentCanvas } from './document-canvas';
+import type { DocumentInfo } from './document-info';
 
 describe('DocumentCanvas', () => {
   beforeEach(() => {
@@ -30,20 +31,14 @@ describe('DocumentCanvas', () => {
     expect(frame.getAttribute('src')).toBe('examples/sample-cv.html');
   });
 
-  it('zooms in steps and returns to fit', async () => {
+  it('applies the zoom setting as the scale and reports it', async () => {
     const { fixture, root } = await render();
-    const level = () => root.querySelector('.level')!.textContent?.trim();
-    const fit = root.querySelector<HTMLButtonElement>('.fit')!;
-    expect(level()).toBe('100%');
-    expect(fit.getAttribute('aria-pressed')).toBe('true');
+    const reported: DocumentInfo[] = [];
+    fixture.componentInstance.documentInfo.subscribe((info) => reported.push(info));
 
-    root.querySelector<HTMLButtonElement>('[aria-label="Zoom in"]')!.click();
+    fixture.componentRef.setInput('zoom', 1.5);
     await fixture.whenStable();
-    expect(level()).toBe('125%');
-    expect(fit.getAttribute('aria-pressed')).toBe('false');
-
-    fit.click();
-    await fixture.whenStable();
-    expect(level()).toBe('100%');
+    expect(root.querySelector<HTMLElement>('.sheet')!.style.width).toBe(`${794 * 1.5}px`);
+    expect(reported.at(-1)).toEqual({ pages: 1, font: null, scale: 1.5 });
   });
 });

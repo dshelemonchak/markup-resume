@@ -1,0 +1,36 @@
+:host {
+  display: block;
+}
+
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 4px 16px;
+  padding: 4px 8px 4px 20px;
+  color: var(--bs-secondary-color);
+  font-size: 12px;
+}
+
+.validation {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+
+  .bi {
+    color: var(--bs-success);
+    font-size: 14px;
+  }
+}
+
+.report {
+  margin-left: auto;
+  padding: 0;
+  font-size: 12px;
+}
+
+.divider {
+  width: 1px;
+  height: 16px;
+  background: rgb(15 23 42 / 0.12);
+}

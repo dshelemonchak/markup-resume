@@ -8,13 +8,15 @@ import {
   effect,
   inject,
   input,
+  model,
+  output,
   signal,
   viewChild,
 } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
-import { GlassPanel } from '../../ui/glass-panel/glass-panel';
+import { type ZoomSetting, fitScale } from '../../ui/zoom-control/zoom';
 import type { PreviewMode } from '../document-header/preview-mode';
-import { type ZoomSetting, canZoom, fitScale, stepZoom } from './zoom';
+import { type DocumentInfo, pageCount, primaryFontFamily } from './document-info';
 
 /** A4 at 96 dpi: 210 × 297 mm. */
 const PAGE = { width: 794, height: 1123 } as const;
@@ -24,10 +26,12 @@ const PAGE = { width: 794, height: 1123 } as const;
  * so the app's styles and the CV's styles never mix and the preview matches the PDF render:
  * no scripts run inside (no allow-scripts), but same origin lets the app measure the document
  * and switch its data-cv-mode (visual / ATS).
+ *
+ * The zoom setting is owned outside (the controls live in the status bar); the canvas turns it
+ * into a scale, since only the canvas knows the space available for "fit".
  */
 @Component({
   selector: 'cvc-document-canvas',
-  imports: [GlassPanel],
   templateUrl: './document-canvas.html',
   styleUrl: './document-canvas.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -36,6 +40,9 @@ export class DocumentCanvas {
   /** URL of the CV document. App-provided, never user input. */
   readonly src = input.required<string>();
   readonly mode = input<PreviewMode>('visual');
+  readonly zoom = model<ZoomSetting>('fit');
+  /** Emitted whenever the measured pages, font or the applied scale change. */
+  readonly documentInfo = output<DocumentInfo>();
 
   private readonly sanitizer = inject(DomSanitizer);
   private readonly viewport = viewChild.required<ElementRef<HTMLElement>>('viewport');
@@ -47,15 +54,17 @@ export class DocumentCanvas {
   private readonly available = signal({ width: 0, height: 0 });
   private readonly loaded = signal(false);
   protected readonly contentHeight = signal<number>(PAGE.height);
+  private readonly font = signal<string | null>(null);
 
-  protected readonly zoom = signal<ZoomSetting>('fit');
   protected readonly scale = computed(() => {
     const zoom = this.zoom();
     return zoom === 'fit' ? fitScale(this.available(), PAGE) : zoom;
   });
-  protected readonly percent = computed(() => Math.round(this.scale() * 100));
-  protected readonly canZoomIn = computed(() => canZoom(this.scale(), 1));
-  protected readonly canZoomOut = computed(() => canZoom(this.scale(), -1));
+  private readonly info = computed<DocumentInfo>(() => ({
+    pages: pageCount(this.contentHeight(), PAGE.height),
+    font: this.font(),
+    scale: this.scale(),
+  }));
 
   constructor() {
     const destroyRef = inject(DestroyRef);
@@ -74,6 +83,8 @@ export class DocumentCanvas {
       const mode = this.mode();
       if (this.loaded()) this.applyMode(mode);
     });
+
+    effect(() => this.documentInfo.emit(this.info()));
   }
 
   protected onLoad(): void {
@@ -81,27 +92,15 @@ export class DocumentCanvas {
     this.applyMode(this.mode());
   }
 
-  protected zoomIn(): void {
-    this.zoom.set(stepZoom(this.scale(), 1));
-  }
-
-  protected zoomOut(): void {
-    this.zoom.set(stepZoom(this.scale(), -1));
-  }
-
-  protected resetZoom(): void {
-    this.zoom.set(1);
-  }
-
-  protected fit(): void {
-    this.zoom.set('fit');
-  }
-
-  /** Switches the document's mode and resizes the frame to the document's height. */
+  /** Switches the document's mode, then measures it: height for the frame, pages and font. */
   private applyMode(mode: PreviewMode): void {
     const document = this.frame().nativeElement.contentDocument;
     if (!document?.documentElement) return;
     document.documentElement.setAttribute('data-cv-mode', mode);
     this.contentHeight.set(Math.max(PAGE.height, document.documentElement.scrollHeight));
+    const view = document.defaultView;
+    this.font.set(
+      view && document.body ? primaryFontFamily(view.getComputedStyle(document.body).fontFamily) : null,
+    );
   }
 }

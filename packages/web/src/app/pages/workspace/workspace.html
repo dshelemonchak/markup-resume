@@ -4,11 +4,20 @@
   [selectedId]="selectedId()"
   (selectCv)="selectedId.set($event)"
 />
-<div class="document-column" [style.--cvc-header-height.px]="headerHeight()">
+<div
+  class="document-column"
+  [style.--cvc-header-height.px]="headerHeight()"
+  [style.--cvc-footer-height.px]="footerHeight()"
+>
   <cvc-document-header class="header" [cv]="selectedCv()" [(mode)]="mode" />
   <main class="document-area">
     @if (documentSrc(); as src) {
-      <cvc-document-canvas [src]="src" [mode]="mode()" />
+      <cvc-document-canvas
+        [src]="src"
+        [mode]="mode()"
+        [(zoom)]="zoom"
+        (documentInfo)="documentInfo.set($event)"
+      />
     } @else if (loadError()) {
       <p class="empty">
         The local server is not reachable. Start it with <code>docker compose up -d app</code>.
@@ -19,4 +28,10 @@
       </p>
     }
   </main>
+  <cvc-document-footer
+    class="footer"
+    [info]="documentSrc() ? documentInfo() : null"
+    [mode]="mode()"
+    [(zoom)]="zoom"
+  />
 </div>
