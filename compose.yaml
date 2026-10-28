@@ -52,12 +52,13 @@ services:
   # MCP server for Claude (ADR-0003). Not started by `up`: Claude runs it per session with
   #   docker compose run --rm -T mcp
   # -T: no pseudo-TTY, which would rewrite line endings and break JSON-RPC on stdout.
-  # Claude Code picks it up from .mcp.json. For Claude Desktop (Chat), the UI's "Connect Claude"
-  # dialog gives the entry for Settings → Developer → Edit Config, with absolute paths because
-  # GUI apps start without your shell's PATH or working directory:
+  # Claude Code picks it up from .mcp.json. Claude Desktop installs it as the markup-resume.mcpb
+  # extension from the UI's "Connect Claude" dialog. The dialog also explains a manual entry for
+  # Settings → Developer → Edit Config, with absolute paths because GUI apps start without your
+  # shell's PATH or working directory:
   #   "mcpServers": { "markup-resume": {
   #     "command": "<output of `which docker`>",
-  #     "args": ["compose", "--project-directory", "/absolute/path/to/CV", "run", "--rm", "-T", "mcp"] } }
+  #     "args": ["compose", "--project-directory", "/absolute/path/to/markup-resume", "run", "--rm", "-T", "mcp"] } }
   mcp:
     <<: *workspace
     profiles: [mcp]

@@ -46,10 +46,10 @@ describe('ConnectClaude', () => {
 
   it('asks to replace the project folder only when it is unknown', async () => {
     const known = await render('/Users/me/CV');
-    expect(known.root.querySelector('details .steps')!.textContent).not.toContain('/path/to/CV');
+    expect(known.root.querySelector('details .steps')!.textContent).not.toContain('/path/to/markup-resume');
 
     const unknown = await render(null);
-    expect(unknown.root.querySelector('details .steps')!.textContent).toContain('/path/to/CV');
+    expect(unknown.root.querySelector('details .steps')!.textContent).toContain('/path/to/markup-resume');
   });
 
   it('lists the Claude clients connected now', async () => {

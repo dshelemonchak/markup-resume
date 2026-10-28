@@ -1,5 +1,5 @@
 <footer mr-glass-panel class="footer">
-  <!-- Placeholder: validation is not implemented yet (ADR-0009). -->
+  <!-- Placeholder: the PDF check runs on export (ADR-0019); a live count here comes later. -->
   <span class="validation" mrDummy>
     <i class="bi bi-check-circle" aria-hidden="true"></i>
     0 errors · 2 warnings
@@ -12,10 +12,10 @@
     <span class="font">{{ font }}</span>
   }
 
-  <!-- Placeholder: export is not implemented yet. -->
+  <!-- Placeholder: the time of the last export is not kept yet; nothing is stored on export. -->
   <span mrDummy>Exported 14:32</span>
 
-  <!-- Placeholder: the report panel comes with validation. -->
+  <!-- Placeholder: no report panel yet; export lists the PDF's problems in a dialog. -->
   <button type="button" class="btn btn-link btn-sm report" mrDummy disabled>Validation report</button>
 
   <span class="divider" aria-hidden="true"></span>

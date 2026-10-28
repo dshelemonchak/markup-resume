@@ -7,9 +7,5 @@
 data
 reference
 docs
-output
-cvs
-incoming
-history
 .env
 .env.*

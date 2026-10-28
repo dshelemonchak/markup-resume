@@ -112,4 +112,4 @@ MIT — see [LICENSE](LICENSE).
 Bundled assets:
 
 - Inter font — SIL Open Font License 1.1 (`packages/styles/fonts/inter/`);
-- contact icons — based on Bootstrap Icons, MIT.
+- contact icons — based on Bootstrap Icons, MIT (`packages/styles/icons/BOOTSTRAP-ICONS-LICENSE.txt`).

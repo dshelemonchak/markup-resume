@@ -1,6 +1,6 @@
 /** Stand-ins the user replaces: the app runs in a container and cannot see the host's paths. */
 export const DOCKER_PLACEHOLDER = '/path/to/docker';
-export const PROJECT_PLACEHOLDER = '/path/to/CV';
+export const PROJECT_PLACEHOLDER = '/path/to/markup-resume';
 
 /**
  * The "mcpServers" block for claude_desktop_config.json, to add inside the file's top-level

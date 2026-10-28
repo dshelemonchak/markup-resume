@@ -2,7 +2,7 @@
   "name": "@markup-resume/app",
   "version": "0.0.0",
   "private": true,
-  "description": "Domain, use cases and adapters: rendering, validation, storage, CLI, HTTP API, MCP server.",
+  "description": "Domain, use cases and adapters: storage, HTTP API, MCP server, PDF export and checks.",
   "type": "module",
   "exports": {
     "./domain": "./src/domain/index.ts"
