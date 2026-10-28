@@ -3,6 +3,7 @@
 export {
   createCvDocument,
   type CreateCvDocumentResult,
+  type CvDocumentServices,
   type CvDocumentResult,
   getCvDocument,
   listCvs,

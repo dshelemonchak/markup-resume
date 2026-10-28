@@ -8,6 +8,7 @@ import { templateCatalog } from '@cv-kit/styles';
 import { StdioServerTransport } from '@modelcontextprotocol/server/stdio';
 import { randomUUID } from 'node:crypto';
 import { resolve } from 'node:path';
+import { parseMarkup } from './adapters/html-parse5/parse-markup.ts';
 import { createMcpServer } from './adapters/mcp/mcp-server.ts';
 import { type PresenceReporter, reportPresence } from './adapters/presence-http/presence-reporter.ts';
 import { FsCvRepository } from './adapters/storage-fs/fs-cv-repository.ts';
@@ -19,7 +20,10 @@ const repository = new FsCvRepository(dataDir);
 await repository.init();
 
 let presence: PresenceReporter | undefined;
-const server = createMcpServer(repository, templateCatalog, { onToolCall: () => presence?.activity() });
+const server = createMcpServer(
+  { repository, templates: templateCatalog, parseMarkup },
+  { onToolCall: () => presence?.activity() },
+);
 
 // The client introduces itself in the handshake; only then is there something to report.
 server.server.oninitialized = () => {

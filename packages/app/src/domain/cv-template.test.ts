@@ -5,6 +5,7 @@ const catalog: TemplateCatalog = {
   refs: () => ['classic@0.0.1'],
   styles: (ref) => (ref === 'classic@0.0.1' ? 'body { color: red; }' : null),
   guide: () => null,
+  schema: () => null,
 };
 
 const doc = (head: string) =>

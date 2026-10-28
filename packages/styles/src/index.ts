@@ -18,7 +18,10 @@ export const iconsDir = fileURLToPath(new URL('icons/', PACKAGE_DIR));
 const TEMPLATES: ReadonlyMap<string, string> = new Map([['classic@0.0.1', 'classic']]);
 
 /** One file of a template, or null when there is no template with this reference. */
-function read(ref: string, file: 'template.css' | 'rules.md' | 'example.html'): string | null {
+function read(
+  ref: string,
+  file: 'template.css' | 'rules.md' | 'example.html' | 'schema.json',
+): string | null {
   const folder = TEMPLATES.get(ref);
   return folder ? readFileSync(new URL(`templates/${folder}/${file}`, PACKAGE_DIR), 'utf8') : null;
 }
@@ -34,4 +37,25 @@ export const templateCatalog = {
     const example = read(ref, 'example.html');
     return rules !== null && example !== null ? { rules, example } : null;
   },
+  /** The markup cv-kit accepts for documents on this template. */
+  schema: (ref: string): TemplateSchema | null => {
+    const json = read(ref, 'schema.json');
+    return json === null ? null : (JSON.parse(json) as TemplateSchema);
+  },
 };
+
+/** The shape of schema.json; cv-kit's MarkupSchema in packages/app/src/domain/cv-markup.ts. */
+export interface TemplateSchema {
+  readonly plainElements: readonly string[];
+  readonly classes: Readonly<
+    Record<
+      string,
+      {
+        readonly tags: readonly string[];
+        readonly parents: readonly string[];
+        readonly first?: string;
+        readonly oneOf?: readonly string[];
+      }
+    >
+  >;
+}

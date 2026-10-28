@@ -1,11 +1,20 @@
 import {
   checkCvDocument,
+  checkTemplateMarkup,
   type CvRepository,
   type CvSummary,
   isValidCvId,
+  type ParseMarkup,
   type TemplateCatalog,
   withTemplateStyles,
 } from '../domain/index.ts';
+
+/** What storing a CV document needs: where it goes, the templates it may use, and an HTML parser. */
+export interface CvDocumentServices {
+  readonly repository: CvRepository;
+  readonly templates: TemplateCatalog;
+  readonly parseMarkup: ParseMarkup;
+}
 
 /** All CVs, most recently changed first. */
 export async function listCvs(repository: CvRepository): Promise<readonly CvSummary[]> {
@@ -36,12 +45,12 @@ export type SaveCvDocumentResult =
  * stored one (after the template styles are put in) is not written, so it adds no history entry.
  */
 export async function saveCvDocument(
-  repository: CvRepository,
-  templates: TemplateCatalog,
+  services: CvDocumentServices,
   id: string,
   html: string,
 ): Promise<SaveCvDocumentResult> {
-  const incoming = prepareIncoming(templates, id, html);
+  const { repository } = services;
+  const incoming = prepareIncoming(services, id, html);
   if (incoming.kind !== 'ready') return incoming;
 
   const current = await repository.getDocument(id);
@@ -56,14 +65,15 @@ export type CreateCvDocumentResult =
 
 /** Stores a new CV under a new id, with the same checks as saveCvDocument. Never replaces an existing CV. */
 export async function createCvDocument(
-  repository: CvRepository,
-  templates: TemplateCatalog,
+  services: CvDocumentServices,
   id: string,
   html: string,
 ): Promise<CreateCvDocumentResult> {
-  const incoming = prepareIncoming(templates, id, html);
+  const incoming = prepareIncoming(services, id, html);
   if (incoming.kind !== 'ready') return incoming;
-  return (await repository.create(id, incoming.html)) ? { kind: 'created' } : { kind: 'already-exists' };
+  return (await services.repository.create(id, incoming.html))
+    ? { kind: 'created' }
+    : { kind: 'already-exists' };
 }
 
 type Rejection =
@@ -72,18 +82,19 @@ type Rejection =
   | { readonly kind: 'invalid-document'; readonly problems: readonly string[] };
 
 /**
- * The checks of an incoming document that need no I/O, then the template styles put in (ADR-0006): the
- * document as it will be stored, or why it may not be. The size limit applies to what was sent.
+ * The checks of an incoming document that need no I/O, including its markup against the template's schema,
+ * then the template styles put in (ADR-0006): the document as it will be stored, or why it may not be. The size
+ * limit applies to what was sent.
  */
 function prepareIncoming(
-  templates: TemplateCatalog,
+  { templates, parseMarkup }: CvDocumentServices,
   id: string,
   html: string,
 ): { readonly kind: 'ready'; readonly html: string } | Rejection {
   if (!isValidCvId(id)) return { kind: 'invalid-id' };
   const bytes = new TextEncoder().encode(html).byteLength;
   if (bytes > MAX_CV_DOCUMENT_BYTES) return { kind: 'too-large', bytes, limitBytes: MAX_CV_DOCUMENT_BYTES };
-  const problems = [...checkCvDocument(html)];
+  const problems = [...checkCvDocument(html), ...checkTemplateMarkup(html, templates, parseMarkup)];
   const styled = withTemplateStyles(html, templates);
   if (styled.kind === 'problem') problems.push(styled.problem);
   if (problems.length > 0 || styled.kind !== 'styled') return { kind: 'invalid-document', problems };

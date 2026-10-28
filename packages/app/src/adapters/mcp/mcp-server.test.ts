@@ -9,6 +9,7 @@ const templates: TemplateCatalog = {
   refs: () => ['classic@0.0.1'],
   styles: (ref) => (ref === 'classic@0.0.1' ? 'p {}' : null),
   guide: (ref) => (ref === 'classic@0.0.1' ? { rules: '# Rules\n', example: '<!doctype html>\n' } : null),
+  schema: () => null,
 };
 
 let documents: Record<string, string>;
@@ -39,7 +40,10 @@ beforeEach(async () => {
   const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
   client = new Client({ name: 'test-client', version: '0.0.0' });
   await Promise.all([
-    createMcpServer(repository, templates, { onToolCall: () => toolCalls++ }).connect(serverTransport),
+    createMcpServer(
+      { repository, templates, parseMarkup: () => ({ tag: 'html', attributes: new Map(), children: [] }) },
+      { onToolCall: () => toolCalls++ },
+    ).connect(serverTransport),
     client.connect(clientTransport),
   ]);
 });

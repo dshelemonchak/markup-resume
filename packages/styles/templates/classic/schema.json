@@ -1,0 +1,63 @@
+{
+  "$comment": "The markup cv-kit accepts for this template; rules.md explains the same to Claude. Every element in the page carries one class from \"classes\" (plus its kind class, if it has \"oneOf\"), or no class and a tag from \"plainElements\". \"parents\": the classes of the nearest classed ancestor it may sit in; empty for the page itself. \"first\": the class of the element that must open it.",
+  "plainElements": ["p", "ul", "li", "a", "strong", "time", "h3", "span"],
+  "classes": {
+    "cv-page": { "tags": ["main"], "parents": [] },
+
+    "cv-header": { "tags": ["header"], "parents": ["cv-page"] },
+    "cv-name": { "tags": ["h1"], "parents": ["cv-header"] },
+    "cv-headline": { "tags": ["p"], "parents": ["cv-header"] },
+
+    "cv-summary": { "tags": ["section"], "parents": ["cv-page"], "first": "cv-summary-header" },
+    "cv-summary-header": { "tags": ["h2"], "parents": ["cv-summary"] },
+
+    "cv-columns": { "tags": ["div"], "parents": ["cv-page"] },
+    "cv-sidebar": { "tags": ["aside"], "parents": ["cv-columns"] },
+    "cv-main": { "tags": ["div"], "parents": ["cv-columns"] },
+
+    "cv-contacts": { "tags": ["section"], "parents": ["cv-sidebar"], "first": "cv-contacts-header" },
+    "cv-contacts-header": { "tags": ["h2"], "parents": ["cv-contacts"] },
+    "cv-contact-list": { "tags": ["ul"], "parents": ["cv-contacts"] },
+    "cv-contact": {
+      "tags": ["li"],
+      "parents": ["cv-contact-list"],
+      "oneOf": [
+        "cv-contact-email",
+        "cv-contact-phone",
+        "cv-contact-linkedin",
+        "cv-contact-github",
+        "cv-contact-telegram",
+        "cv-contact-website",
+        "cv-contact-location"
+      ]
+    },
+
+    "cv-skills": { "tags": ["section"], "parents": ["cv-sidebar"], "first": "cv-skills-header" },
+    "cv-skills-header": { "tags": ["h2"], "parents": ["cv-skills"] },
+    "cv-skill-group": { "tags": ["div"], "parents": ["cv-skills"] },
+    "cv-skill-list": { "tags": ["ul"], "parents": ["cv-skill-group"] },
+
+    "cv-education": { "tags": ["section"], "parents": ["cv-sidebar"], "first": "cv-education-header" },
+    "cv-education-header": { "tags": ["h2"], "parents": ["cv-education"] },
+    "cv-school": { "tags": ["article"], "parents": ["cv-education"] },
+    "cv-school-name": { "tags": ["h3"], "parents": ["cv-school"] },
+    "cv-degree": { "tags": ["div"], "parents": ["cv-school"] },
+    "cv-degree-name": { "tags": ["p"], "parents": ["cv-degree"] },
+    "cv-dates": { "tags": ["p"], "parents": ["cv-degree", "cv-employer-header", "cv-project-header"] },
+
+    "cv-experience": { "tags": ["section"], "parents": ["cv-main"], "first": "cv-experience-header" },
+    "cv-experience-header": { "tags": ["h2"], "parents": ["cv-experience"] },
+    "cv-employer": { "tags": ["article"], "parents": ["cv-experience"] },
+    "cv-employer-header": { "tags": ["div"], "parents": ["cv-employer"] },
+    "cv-employer-name": { "tags": ["h3"], "parents": ["cv-employer-header"] },
+    "cv-project": { "tags": ["div"], "parents": ["cv-employer"] },
+    "cv-project-header": { "tags": ["div"], "parents": ["cv-project"] },
+    "cv-role": { "tags": ["h4"], "parents": ["cv-project-header"] },
+    "cv-domain": { "tags": ["p"], "parents": ["cv-project-header"] },
+    "cv-achievements": { "tags": ["ul"], "parents": ["cv-project"] },
+
+    "cv-languages": { "tags": ["section"], "parents": ["cv-main"], "first": "cv-languages-header" },
+    "cv-languages-header": { "tags": ["h2"], "parents": ["cv-languages"] },
+    "cv-language-list": { "tags": ["ul"], "parents": ["cv-languages"] }
+  }
+}
