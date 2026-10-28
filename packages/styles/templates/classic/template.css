@@ -1,0 +1,313 @@
+/*
+ * cv-kit template "classic", version 0.0.1: the original Figma design, one A4 page with a left sidebar.
+ * Inserted into the document by cv-kit as <style id="cv-lib"> (ADR-0006); documents never edit it.
+ *
+ * Every size is in px of the Figma frame, as in the design. The frame is 989 px wide; .cv-page zooms it to
+ * the A4 width (794 CSS px), so 1 Figma px = 0.8028 CSS px in the rendered page and in the PDF.
+ */
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  src: url('/api/v1/fonts/inter-latin-400-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 500;
+  src: url('/api/v1/fonts/inter-latin-500-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 700;
+  src: url('/api/v1/fonts/inter-latin-700-normal.woff2') format('woff2');
+}
+
+:root {
+  --cv-page-margin: 40px;
+  --cv-column-gap: 38px;
+  --cv-section-gap: 29px;
+  --cv-heading-gap: 12px;
+
+  --cv-font: 'Inter', -apple-system, 'Helvetica Neue', Arial, sans-serif;
+  --cv-fs-name: 28px;
+  --cv-lh-name: 34px;
+  --cv-fs-heading: 16px;
+  --cv-lh-heading: 24px;
+  --cv-fs-body: 14px;
+  --cv-lh-body: 20px;
+  --cv-lh-tight: 17px;
+
+  --cv-ink: #000; /* name, headings, roles, summary */
+  --cv-meta: #505050; /* headline, dates, project domains */
+  --cv-text: #464646; /* lists: skills, achievements, languages */
+}
+
+/* Base */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  print-color-adjust: exact;
+}
+
+body {
+  margin: 0;
+  background: #fff;
+  color: var(--cv-ink);
+  font-family: var(--cv-font);
+}
+
+/* Sizes are set on the zoomed page, not on body, so that they are in Figma px. */
+.cv-page {
+  font-size: var(--cv-fs-body);
+  line-height: var(--cv-lh-body);
+  /* Letter spacing and ligatures break words apart in extracted PDF text. */
+  font-kerning: normal;
+  font-variant-ligatures: none;
+  letter-spacing: normal;
+  hyphens: manual;
+  overflow-wrap: break-word;
+}
+
+.cv-page :is(h1, h2, h3, h4, p, ul) {
+  margin: 0;
+  padding: 0;
+}
+.cv-page :is(h3, h4) {
+  font-size: var(--cv-fs-body);
+}
+.cv-page ul {
+  list-style: none;
+}
+.cv-page a {
+  color: inherit;
+  text-decoration: none;
+}
+.cv-page strong {
+  font-weight: 700;
+}
+.cv-page time {
+  font: inherit;
+}
+
+/*
+ * The A4 sheet: the Figma frame, zoomed to the A4 width. On screen the padding is the margin; in print the
+ * @page margins repeat on every page (@page is not zoomed, hence the factor there).
+ */
+@page {
+  size: A4;
+  margin: calc(40px * 0.8028);
+}
+.cv-page {
+  zoom: 0.8028; /* 989 px Figma → 794 px A4 */
+  width: 989px;
+  min-height: calc(989px * 297 / 210);
+  padding: var(--cv-page-margin);
+}
+@media print {
+  .cv-page {
+    width: auto;
+    min-height: 0;
+    padding: 0;
+  }
+}
+
+/* Header and section headings */
+
+.cv-name {
+  margin-top: 12px;
+  font-size: var(--cv-fs-name);
+  line-height: var(--cv-lh-name);
+  font-weight: 700;
+}
+.cv-headline {
+  margin-top: 5px;
+  color: var(--cv-meta);
+}
+
+/* Every section heading has its own class, so the rules can say which heading belongs to which section. */
+:is(
+  .cv-summary-header,
+  .cv-contacts-header,
+  .cv-skills-header,
+  .cv-education-header,
+  .cv-experience-header,
+  .cv-languages-header
+) {
+  margin-bottom: var(--cv-heading-gap);
+  font-size: var(--cv-fs-heading);
+  line-height: var(--cv-lh-heading);
+  font-weight: 700;
+}
+
+/* Summary */
+
+.cv-summary {
+  margin-top: 23px;
+}
+.cv-summary-header {
+  margin-bottom: 14px;
+}
+.cv-summary p + p {
+  margin-top: 6px;
+}
+
+/* Two columns: sidebar 300, gap 38, main 571 (in the 909 px between the margins) */
+
+.cv-columns {
+  display: grid;
+  grid-template-columns: minmax(0, 300fr) minmax(0, 571fr);
+  column-gap: var(--cv-column-gap);
+  align-items: start;
+  margin-top: var(--cv-section-gap);
+}
+.cv-sidebar {
+  padding-top: 1px;
+}
+:is(.cv-sidebar, .cv-main) > section + section {
+  margin-top: var(--cv-section-gap);
+}
+
+/* Contacts: the icon comes from the cv-contact-<kind> class, so the document holds no SVG. */
+
+.cv-contact {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  break-inside: avoid;
+}
+.cv-contact + .cv-contact {
+  margin-top: 8px;
+}
+.cv-contact::before {
+  content: '';
+  flex: none;
+  width: 20px;
+  height: 20px;
+  background: center / contain no-repeat;
+}
+.cv-contact a[href^='http'] {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+/* Bulleted lists */
+
+.cv-page :is(.cv-skill-list, .cv-achievements) {
+  padding-left: 21px;
+  list-style: disc;
+  color: var(--cv-text);
+}
+
+/* Skills */
+
+.cv-skills-header {
+  margin-bottom: 14px;
+}
+.cv-skill-group h3 {
+  font-weight: 400;
+  color: var(--cv-text);
+}
+.cv-skill-group + .cv-skill-group {
+  margin-top: var(--cv-lh-body);
+}
+
+/* Education */
+
+.cv-school-name {
+  font-weight: 700;
+  line-height: var(--cv-lh-tight);
+}
+.cv-degree .cv-dates {
+  margin-top: 16px;
+  color: var(--cv-meta);
+}
+.cv-degree-name {
+  margin-top: 4px;
+}
+
+/* Experience */
+
+.cv-experience-header {
+  margin-bottom: 27px;
+}
+.cv-employer + .cv-employer {
+  margin-top: var(--cv-section-gap);
+}
+.cv-employer-name {
+  font-weight: 700;
+  line-height: var(--cv-lh-tight);
+}
+.cv-employer-header .cv-dates {
+  color: var(--cv-meta);
+  line-height: var(--cv-lh-tight);
+}
+.cv-employer-header + .cv-project {
+  margin-top: 32px;
+}
+.cv-project + .cv-project {
+  margin-top: 24px;
+}
+.cv-project-header .cv-dates,
+.cv-domain {
+  color: var(--cv-meta);
+}
+.cv-role {
+  margin-top: 4px;
+  font-weight: 500;
+}
+.cv-achievements {
+  margin-top: 9px;
+}
+
+/* Languages */
+
+.cv-language-list {
+  color: var(--cv-text);
+}
+.cv-language-list li + li {
+  margin-top: 8px;
+}
+
+/* Keep small units together when a CV runs onto a second page. */
+
+:is(.cv-employer-header, .cv-project-header, .cv-degree, .cv-skill-group, .cv-achievements li) {
+  break-inside: avoid;
+}
+.cv-page :is(h2, h3, h4) {
+  break-after: avoid;
+}
+
+/* Contact icons: Bootstrap Icons (MIT) on a disc, files in @cv-kit/styles/icons; the LinkedIn mark is drawn
+   for this design. */
+
+.cv-contact-email::before {
+  background-image: url('/api/v1/icons/email.svg');
+}
+.cv-contact-phone::before {
+  background-image: url('/api/v1/icons/phone.svg');
+}
+.cv-contact-website::before {
+  background-image: url('/api/v1/icons/website.svg');
+}
+.cv-contact-location::before {
+  background-image: url('/api/v1/icons/location.svg');
+}
+.cv-contact-linkedin::before {
+  background-image: url('/api/v1/icons/linkedin.svg');
+}
+.cv-contact-telegram::before {
+  background-image: url('/api/v1/icons/telegram.svg');
+}
+.cv-contact-github::before {
+  background-image: url('/api/v1/icons/github.svg');
+}

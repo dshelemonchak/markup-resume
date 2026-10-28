@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import type { CvRepository, CvSummary } from '../domain/index.ts';
+import type { CvRepository, CvSummary, TemplateCatalog } from '../domain/index.ts';
 import { createCvDocument, getCvDocument, listCvs, MAX_CV_DOCUMENT_BYTES, saveCvDocument } from './cvs.ts';
+
+const templates: TemplateCatalog = {
+  refs: () => ['classic@0.0.1'],
+  styles: (ref) => (ref === 'classic@0.0.1' ? 'p {}' : null),
+};
 
 function fakeRepository(cvs: CvSummary[], documents: Record<string, string> = {}): CvRepository {
   return {
@@ -54,21 +59,23 @@ describe('saveCvDocument', () => {
 
   it('saves a valid document of an existing CV', async () => {
     const { repository, documents, saves } = setup();
-    expect(await saveCvDocument(repository, 'sample', doc('New'))).toEqual({ kind: 'saved' });
+    expect(await saveCvDocument(repository, templates, 'sample', doc('New'))).toEqual({ kind: 'saved' });
     expect(saves).toEqual(['sample']);
     expect(documents['sample']).toBe(doc('New'));
   });
 
   it('does not write a document identical to the stored one', async () => {
     const { repository, saves } = setup();
-    expect(await saveCvDocument(repository, 'sample', doc('Old'))).toEqual({ kind: 'unchanged' });
+    expect(await saveCvDocument(repository, templates, 'sample', doc('Old'))).toEqual({ kind: 'unchanged' });
     expect(saves).toEqual([]);
   });
 
   it('rejects invalid ids and missing CVs without writing', async () => {
     const { repository, saves } = setup();
-    expect(await saveCvDocument(repository, '../secret', doc('New'))).toEqual({ kind: 'invalid-id' });
-    expect(await saveCvDocument(repository, 'missing', doc('New'))).toEqual({ kind: 'not-found' });
+    expect(await saveCvDocument(repository, templates, '../secret', doc('New'))).toEqual({
+      kind: 'invalid-id',
+    });
+    expect(await saveCvDocument(repository, templates, 'missing', doc('New'))).toEqual({ kind: 'not-found' });
     expect(saves).toEqual([]);
   });
 
@@ -76,14 +83,41 @@ describe('saveCvDocument', () => {
     const { repository, saves } = setup();
     // Two bytes per Cyrillic letter: under the limit in characters, over it in bytes.
     const filler = 'ж'.repeat(MAX_CV_DOCUMENT_BYTES / 2);
-    const result = await saveCvDocument(repository, 'sample', doc(filler));
+    const result = await saveCvDocument(repository, templates, 'sample', doc(filler));
     expect(result).toMatchObject({ kind: 'too-large', limitBytes: MAX_CV_DOCUMENT_BYTES });
+    expect(saves).toEqual([]);
+  });
+
+  it('stores the document with the styles of the template it names', async () => {
+    const { repository, documents } = setup();
+    const sent = doc('New').replace(
+      '<meta',
+      '<head><meta name="cv:template" content="classic@0.0.1"></head><meta',
+    );
+    expect(await saveCvDocument(repository, templates, 'sample', sent)).toEqual({ kind: 'saved' });
+    expect(documents['sample']).toContain('<style id="cv-lib" data-cv-lib="classic@0.0.1">\np {}');
+    // The stored document, sent back as it is, changes nothing.
+    expect(await saveCvDocument(repository, templates, 'sample', documents['sample']!)).toEqual({
+      kind: 'unchanged',
+    });
+  });
+
+  it('rejects a template that does not exist', async () => {
+    const { repository, saves } = setup();
+    const sent = doc('New').replace(
+      '<meta',
+      '<head><meta name="cv:template" content="modern@1"></head><meta',
+    );
+    expect(await saveCvDocument(repository, templates, 'sample', sent)).toMatchObject({
+      kind: 'invalid-document',
+      problems: [expect.stringContaining('Unknown template "modern@1"')],
+    });
     expect(saves).toEqual([]);
   });
 
   it('returns the problems of a broken document', async () => {
     const { repository, saves } = setup();
-    const result = await saveCvDocument(repository, 'sample', doc('New').replace('</html>', ''));
+    const result = await saveCvDocument(repository, templates, 'sample', doc('New').replace('</html>', ''));
     expect(result).toEqual({
       kind: 'invalid-document',
       problems: ['The document must end with </html>; it may have been cut off.'],
@@ -110,19 +144,19 @@ describe('createCvDocument', () => {
 
   it('creates a CV under a free id', async () => {
     const { repository, created } = setup();
-    expect(await createCvDocument(repository, 'fresh', doc)).toEqual({ kind: 'created' });
+    expect(await createCvDocument(repository, templates, 'fresh', doc)).toEqual({ kind: 'created' });
     expect(created).toEqual(['fresh']);
   });
 
   it('reports an id that is already taken', async () => {
     const { repository } = setup(['sample']);
-    expect(await createCvDocument(repository, 'sample', doc)).toEqual({ kind: 'already-exists' });
+    expect(await createCvDocument(repository, templates, 'sample', doc)).toEqual({ kind: 'already-exists' });
   });
 
   it('checks the id and the document before touching the repository', async () => {
     const { repository, created } = setup();
-    expect(await createCvDocument(repository, '../secret', doc)).toEqual({ kind: 'invalid-id' });
-    expect(await createCvDocument(repository, 'fresh', doc.replace('</html>', ''))).toMatchObject({
+    expect(await createCvDocument(repository, templates, '../secret', doc)).toEqual({ kind: 'invalid-id' });
+    expect(await createCvDocument(repository, templates, 'fresh', doc.replace('</html>', ''))).toMatchObject({
       kind: 'invalid-document',
     });
     expect(created).toEqual([]);

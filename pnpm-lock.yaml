@@ -199,6 +199,9 @@ importers:
 
   packages/app:
     dependencies:
+      '@cv-kit/styles':
+        specifier: workspace:*
+        version: link:../styles
       '@hono/node-server':
         specifier: ^2.1.5
         version: 2.1.5(hono@4.13.14)

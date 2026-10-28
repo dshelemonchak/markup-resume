@@ -1,3 +1,6 @@
+import { mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { describe, expect, it, vi } from 'vitest';
 import type { CvRepository } from '../../domain/index.ts';
 import { type HttpAppOptions, createHttpApp } from './http-app.ts';
@@ -84,6 +87,32 @@ describe('HTTP API v1', () => {
     const bytes = Buffer.from(await response.arrayBuffer()).toString('latin1');
     expect(bytes.startsWith('PK\x03\x04')).toBe(true);
     expect(bytes).toContain('"default": "/Users/me/CV"');
+  });
+
+  it('serves fonts and icons from their folders, and nothing outside them', async () => {
+    const dir = await mkdtemp(join(tmpdir(), 'cv-assets-'));
+    try {
+      await writeFile(join(dir, 'email.svg'), '<svg/>');
+      await writeFile(join(dir, 'inter.woff2'), 'font');
+      const { app } = setup({ fontsDir: dir, iconsDir: dir });
+
+      const icon = await app.request('/api/v1/icons/email.svg');
+      expect(icon.status).toBe(200);
+      expect(icon.headers.get('content-type')).toBe('image/svg+xml');
+      expect(icon.headers.get('content-security-policy')).toBe('sandbox');
+      expect(await icon.text()).toBe('<svg/>');
+      expect((await app.request('/api/v1/fonts/inter.woff2')).headers.get('content-type')).toBe('font/woff2');
+
+      for (const path of [
+        '/api/v1/icons/missing.svg',
+        '/api/v1/icons/..%2Femail.svg',
+        '/api/v1/fonts/x.txt',
+      ]) {
+        expect((await app.request(path)).status).toBe(404);
+      }
+    } finally {
+      await rm(dir, { recursive: true, force: true });
+    }
   });
 
   describe('Claude presence', () => {

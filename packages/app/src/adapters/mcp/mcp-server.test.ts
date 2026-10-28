@@ -33,7 +33,11 @@ beforeEach(async () => {
   const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
   client = new Client({ name: 'test-client', version: '0.0.0' });
   await Promise.all([
-    createMcpServer(repository, { onToolCall: () => toolCalls++ }).connect(serverTransport),
+    createMcpServer(
+      repository,
+      { refs: () => [], styles: () => null },
+      { onToolCall: () => toolCalls++ },
+    ).connect(serverTransport),
     client.connect(clientTransport),
   ]);
 });

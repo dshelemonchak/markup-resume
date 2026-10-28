@@ -7,7 +7,7 @@ import {
   MAX_CV_DOCUMENT_BYTES,
   saveCvDocument,
 } from '../../app/index.ts';
-import type { CvRepository } from '../../domain/index.ts';
+import type { CvRepository, TemplateCatalog } from '../../domain/index.ts';
 
 const MIB = 1024 * 1024;
 
@@ -30,7 +30,11 @@ export interface McpServerOptions {
  * The MCP server for Claude (ADR-0003): four tools over the CV use cases. Transport-agnostic, so the
  * composition root connects it to stdio and tests connect it to an in-memory client.
  */
-export function createMcpServer(repository: CvRepository, options: McpServerOptions = {}): McpServer {
+export function createMcpServer(
+  repository: CvRepository,
+  templates: TemplateCatalog,
+  options: McpServerOptions = {},
+): McpServer {
   const server = new McpServer({ name: 'cv-kit', version: '0.0.0' });
 
   server.registerTool(
@@ -98,7 +102,7 @@ export function createMcpServer(repository: CvRepository, options: McpServerOpti
     },
     async ({ id, html }) => {
       options.onToolCall?.();
-      const result = await saveCvDocument(repository, id, html);
+      const result = await saveCvDocument(repository, templates, id, html);
       switch (result.kind) {
         case 'saved':
           return { content: [text(`Saved CV "${id}". The previous version is in its history.`)] };
@@ -138,7 +142,7 @@ export function createMcpServer(repository: CvRepository, options: McpServerOpti
     },
     async ({ id, html }) => {
       options.onToolCall?.();
-      const result = await createCvDocument(repository, id, html);
+      const result = await createCvDocument(repository, templates, id, html);
       switch (result.kind) {
         case 'created':
           return { content: [text(`Created CV "${id}". The user sees it in the cv-kit viewer.`)] };

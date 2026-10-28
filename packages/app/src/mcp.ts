@@ -4,6 +4,7 @@
 //   CV_APP_URL   the cv-kit app, told when Claude connects and acts (ADR-0018); unset: not told
 // stdout belongs to the protocol: start it with `node src/mcp.ts`, not through pnpm (which prints a banner
 // to stdout), and log only to stderr.
+import { templateCatalog } from '@cv-kit/styles';
 import { StdioServerTransport } from '@modelcontextprotocol/server/stdio';
 import { randomUUID } from 'node:crypto';
 import { resolve } from 'node:path';
@@ -18,7 +19,7 @@ const repository = new FsCvRepository(dataDir);
 await repository.init();
 
 let presence: PresenceReporter | undefined;
-const server = createMcpServer(repository, { onToolCall: () => presence?.activity() });
+const server = createMcpServer(repository, templateCatalog, { onToolCall: () => presence?.activity() });
 
 // The client introduces itself in the handshake; only then is there something to report.
 server.server.oninitialized = () => {

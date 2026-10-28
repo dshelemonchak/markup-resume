@@ -1,5 +1,7 @@
+import { readFile } from 'node:fs/promises';
+import { join } from 'node:path';
 import { setTimeout as sleep } from 'node:timers/promises';
-import { Hono } from 'hono';
+import { type Context, Hono } from 'hono';
 import { type SSEStreamingApi, streamSSE } from 'hono/streaming';
 import { ClaudeSessions, getCvDocument, listCvs } from '../../app/index.ts';
 import type { CvRepository } from '../../domain/index.ts';
@@ -8,10 +10,16 @@ import { desktopExtension } from './desktop-extension.ts';
 const HEARTBEAT_MS = 25_000;
 const SESSION_ID = /^[\w-]{1,64}$/;
 const MAX_CLIENT_LENGTH = 64;
+/** Asset names: a flat file name, so a request can never leave the asset folder. */
+const ASSET_NAME = /^[\w-]+\.(woff2|svg)$/;
+const ASSET_TYPES = { woff2: 'font/woff2', svg: 'image/svg+xml' } as const;
 
 export interface HttpAppOptions {
   /** Project folder on the host, when the server runs in a container; null if unknown. */
   readonly hostProjectDir?: string | null;
+  /** Folders of the style library's fonts and icons, which template styles load by URL (ADR-0007). */
+  readonly fontsDir?: string;
+  readonly iconsDir?: string;
 }
 
 /**
@@ -21,6 +29,7 @@ export interface HttpAppOptions {
  *   GET  /api/v1/events                           server-sent events: "cvs-changed" when any CV changes,
  *                                                 "claude-changed" when a Claude session comes, goes or acts
  *   GET  /api/v1/setup                            what the UI needs to show how to connect Claude
+ *   GET  /api/v1/fonts/:file, /api/v1/icons/:file the style library's fonts and icons, used by template styles
  *   GET  /api/v1/claude/desktop-extension         cv-kit as a Claude Desktop extension (cv-kit.mcpb)
  *   GET  /api/v1/claude/sessions                  Claude sessions connected now
  *   GET  /api/v1/claude/sessions/:id/presence     held open by the MCP server while Claude is connected
@@ -63,6 +72,9 @@ export function createHttpApp(
   });
 
   app.get('/setup', (c) => c.json({ hostProjectDir: options.hostProjectDir ?? null }));
+
+  app.get('/fonts/:file', (c) => serveAsset(c, options.fontsDir, c.req.param('file')));
+  app.get('/icons/:file', (c) => serveAsset(c, options.iconsDir, c.req.param('file')));
 
   app.get('/events', (c) =>
     streamSSE(c, async (stream) => {
@@ -114,6 +126,26 @@ export function createHttpApp(
   };
 
   return { app, close };
+}
+
+/** A file from an asset folder, or 404 for a name that is not a plain asset file or does not exist. */
+async function serveAsset(c: Context, dir: string | undefined, file: string): Promise<Response> {
+  const extension = ASSET_NAME.exec(file)?.[1] as keyof typeof ASSET_TYPES | undefined;
+  if (!dir || !extension) return c.json({ error: 'not-found' }, 404);
+  try {
+    const body = new Uint8Array(await readFile(join(dir, file)));
+    return c.body(body, 200, {
+      'Content-Type': ASSET_TYPES[extension],
+      // An SVG opened on its own is a document; it gets no scripts and no access to the app.
+      'Content-Security-Policy': 'sandbox',
+      'Cache-Control': 'no-cache',
+    });
+  } catch (error) {
+    if (error instanceof Error && 'code' in error && error.code === 'ENOENT') {
+      return c.json({ error: 'not-found' }, 404);
+    }
+    throw error;
+  }
 }
 
 /** Pings an open stream until the client leaves or the server shuts down. */

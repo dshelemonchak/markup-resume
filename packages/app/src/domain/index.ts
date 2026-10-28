@@ -3,4 +3,5 @@
 export { type CvId, type CvSummary, isValidCvId } from './cv.ts';
 export { checkCvDocument } from './cv-document.ts';
 export type { CvRepository } from './cv-repository.ts';
+export { type TemplateCatalog, type TemplateStylesResult, withTemplateStyles } from './cv-template.ts';
 export { readCvTitle } from './cv-title.ts';
