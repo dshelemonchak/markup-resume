@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, type ElementRef, input, signal, viewChild } from '@angular/core';
+import { TranslocoPipe } from '@jsverse/transloco';
 
 /**
  * Preformatted text with a Copy button. When the browser refuses the clipboard (an embedded
@@ -6,6 +7,7 @@ import { ChangeDetectionStrategy, Component, type ElementRef, input, signal, vie
  */
 @Component({
   selector: 'mr-copy-block',
+  imports: [TranslocoPipe],
   templateUrl: './copy-block.html',
   styleUrl: './copy-block.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

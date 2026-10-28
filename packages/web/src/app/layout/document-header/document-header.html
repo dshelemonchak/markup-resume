@@ -4,16 +4,16 @@
       <h1 class="title">{{ cv.title }}</h1>
       <span class="file">{{ cv.id }}.html</span>
       @if (badge(); as badge) {
-        <span class="badge" [class]="badge.css">{{ badge.text }}</span>
+        <span class="badge" [class]="badge.css">{{ badge.key | transloco }}</span>
       }
     } @else {
-      <h1 class="title empty-title">No CV selected</h1>
+      <h1 class="title empty-title">{{ 'header.noCv' | transloco }}</h1>
     }
 
     <!-- Placeholder: real notices come from the server (ADR-0013). -->
     <div class="notice" mrDummy>
       <i class="bi bi-info-circle" aria-hidden="true"></i>
-      Claude updated Summary · rev 12 · 2 min ago
+      {{ 'header.notice' | transloco }}
     </div>
 
     <button
@@ -24,16 +24,16 @@
     >
       @if (exporting()) {
         <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
-        Exporting…
+        {{ 'header.exporting' | transloco }}
       } @else {
         <i class="bi bi-download" aria-hidden="true"></i>
-        Export PDF
+        {{ 'header.export' | transloco }}
       }
     </button>
   </div>
 
   <div class="ribbon">
-    <mr-ribbon-group label="View">
+    <mr-ribbon-group [label]="'header.view' | transloco">
       <div class="btn-group btn-group-sm">
         <input
           type="radio"
@@ -43,7 +43,9 @@
           [checked]="mode() === 'visual'"
           (change)="mode.set('visual')"
         />
-        <label class="btn btn-outline-secondary" for="preview-mode-visual">Visual</label>
+        <label class="btn btn-outline-secondary" for="preview-mode-visual">{{
+          'header.visual' | transloco
+        }}</label>
         <input
           type="radio"
           class="btn-check"
@@ -52,40 +54,40 @@
           [checked]="mode() === 'ats'"
           (change)="mode.set('ats')"
         />
-        <label class="btn btn-outline-secondary" for="preview-mode-ats">ATS</label>
+        <label class="btn btn-outline-secondary" for="preview-mode-ats">{{ 'header.ats' | transloco }}</label>
       </div>
     </mr-ribbon-group>
 
     <!-- Placeholder: width editing is not implemented yet; ATS output is always A4. -->
-    <mr-ribbon-group [label]="isAts() ? 'A4 in ATS' : 'Page width'">
+    <mr-ribbon-group [label]="(isAts() ? 'header.pageWidthAts' : 'header.pageWidth') | transloco">
       <div class="input-group input-group-sm page-width" mrDummy>
-        <label class="input-group-text" for="page-width">W</label>
+        <label class="input-group-text" for="page-width">{{ 'header.widthShort' | transloco }}</label>
         <input id="page-width" type="text" class="form-control" value="210" [disabled]="isAts()" />
-        <span class="input-group-text">mm</span>
+        <span class="input-group-text">{{ 'header.millimetres' | transloco }}</span>
       </div>
     </mr-ribbon-group>
 
     <!-- Placeholder: font selection is not implemented yet. -->
-    <mr-ribbon-group label="Font" mrDummy>
-      <label for="font-family" class="visually-hidden">Font family</label>
+    <mr-ribbon-group [label]="'header.font' | transloco" mrDummy>
+      <label for="font-family" class="visually-hidden">{{ 'header.fontFamily' | transloco }}</label>
       <select id="font-family" class="form-select form-select-sm font">
         <option>Inter</option>
       </select>
     </mr-ribbon-group>
 
     <!-- Placeholder: revisions are not implemented yet (ADR-0013). -->
-    <mr-ribbon-group label="Revisions" mrDummy>
+    <mr-ribbon-group [label]="'header.revisions' | transloco" mrDummy>
       <div class="btn-group btn-group-sm">
         <button type="button" class="btn btn-outline-secondary">
           <i class="bi bi-arrow-counterclockwise" aria-hidden="true"></i>
-          Roll back
+          {{ 'header.rollBack' | transloco }}
         </button>
         <button
           type="button"
           class="btn btn-outline-secondary revisions-toggle"
-          aria-label="Revision history"
+          [attr.aria-label]="'header.revisionHistory' | transloco"
         >
-          rev 12
+          {{ 'header.revision' | transloco: { number: 12 } }}
         </button>
       </div>
     </mr-ribbon-group>

@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import type { PdfProblemDto } from '../../api/cv-api';
 import { ExportReport } from './export-report';
 
 describe('ExportReport', () => {
@@ -14,7 +15,7 @@ describe('ExportReport', () => {
     });
   });
 
-  async function render(problems: string[], failure: string | null = null) {
+  async function render(problems: PdfProblemDto[], failure: string | null = null) {
     const fixture = TestBed.createComponent(ExportReport);
     fixture.componentRef.setInput('problems', problems);
     fixture.componentRef.setInput('failure', failure);
@@ -25,10 +26,13 @@ describe('ExportReport', () => {
   }
 
   it('lists the problems and still offers the PDF', async () => {
-    const { fixture, root, dialog } = await render(['Words are split.', 'Order is off.']);
+    const { fixture, root, dialog } = await render([
+      { code: 'words-extra', words: ['C', 'anvas'] },
+      { code: 'block-out-of-order', block: 'Experience' },
+    ]);
     expect([...root.querySelectorAll('.problems li')].map((li) => li.textContent)).toEqual([
-      'Words are split.',
-      'Order is off.',
+      'Words in the PDF text that the page does not have: "C", "anvas".',
+      '"Experience" comes earlier in the PDF text than on the page: the reading order is off.',
     ]);
     let wanted = 0;
     fixture.componentInstance.downloadAnyway.subscribe(() => wanted++);

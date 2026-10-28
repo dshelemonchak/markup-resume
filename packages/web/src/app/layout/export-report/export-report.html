@@ -2,24 +2,26 @@
   <div class="content">
     <div class="head">
       <h2 id="export-report-title" class="title">
-        {{ failure() ? 'The export failed' : 'The PDF does not read like the page' }}
+        {{ (failure() ? 'exportReport.title.failed' : 'exportReport.title.problems') | transloco }}
       </h2>
-      <button type="button" class="btn btn-sm close" aria-label="Close" (click)="close()">
+      <button
+        type="button"
+        class="btn btn-sm close"
+        [attr.aria-label]="'dialog.close' | transloco"
+        (click)="close()"
+      >
         <i class="bi bi-x-lg" aria-hidden="true"></i>
       </button>
     </div>
 
     @if (failure(); as failure) {
-      <p class="intro">No PDF was made. Is the server running? See <code>docker compose logs app</code>.</p>
+      <p class="intro" [innerHTML]="'exportReport.intro.failed' | transloco"></p>
       <p class="failure">{{ failure }}</p>
     } @else {
-      <p class="intro">
-        Copied or parsed (by an ATS, for example), its text would come out differently from what you see. The
-        file was not downloaded.
-      </p>
+      <p class="intro">{{ 'exportReport.intro.problems' | transloco }}</p>
       <ul class="problems">
-        @for (problem of problems(); track $index) {
-          <li>{{ problem }}</li>
+        @for (line of lines(); track $index) {
+          <li>{{ line }}</li>
         }
       </ul>
     }
@@ -27,10 +29,12 @@
     <div class="actions">
       @if (!failure()) {
         <button type="button" class="btn btn-outline-secondary btn-sm" (click)="download()">
-          Download anyway
+          {{ 'exportReport.downloadAnyway' | transloco }}
         </button>
       }
-      <button type="button" class="btn btn-primary btn-sm" (click)="close()">Close</button>
+      <button type="button" class="btn btn-primary btn-sm" (click)="close()">
+        {{ 'dialog.close' | transloco }}
+      </button>
     </div>
   </div>
 </dialog>

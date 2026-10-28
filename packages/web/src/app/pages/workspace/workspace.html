@@ -42,22 +42,13 @@
         (documentInfo)="documentInfo.set($event)"
       />
     } @else if (listState() === 'loading') {
-      <p class="empty">Loading CVs…</p>
+      <p class="empty">{{ 'workspace.loading' | transloco }}</p>
     } @else if (listState() === 'unreachable') {
-      <p class="empty">
-        The local server is not reachable. Start it with <code>docker compose up -d app</code>; the list comes
-        back by itself.
-      </p>
+      <p class="empty" [innerHTML]="'workspace.unreachable' | transloco"></p>
     } @else if (listState() === 'failed') {
-      <p class="empty">
-        The server could not load the CVs; see <code>docker compose logs app</code>. Trying again every few
-        seconds.
-      </p>
+      <p class="empty" [innerHTML]="'workspace.failed' | transloco"></p>
     } @else {
-      <p class="empty">
-        No CVs yet. Add one to <code>data/cvs/&lt;id&gt;/document.html</code> or run
-        <code>docker compose exec dev pnpm seed</code>.
-      </p>
+      <p class="empty" [innerHTML]="'workspace.empty' | transloco"></p>
     }
   </main>
   <mr-document-footer

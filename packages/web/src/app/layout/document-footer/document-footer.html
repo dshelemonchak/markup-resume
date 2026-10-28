@@ -2,7 +2,7 @@
   <!-- Placeholder: the PDF check runs on export (ADR-0019); a live count here comes later. -->
   <span class="validation" mrDummy>
     <i class="bi bi-check-circle" aria-hidden="true"></i>
-    0 errors · 2 warnings
+    {{ 'footer.validation' | transloco }}
   </span>
 
   @if (pageInfo(); as pageInfo) {
@@ -13,10 +13,12 @@
   }
 
   <!-- Placeholder: the time of the last export is not kept yet; nothing is stored on export. -->
-  <span mrDummy>Exported 14:32</span>
+  <span mrDummy>{{ 'footer.exported' | transloco }}</span>
 
   <!-- Placeholder: no report panel yet; export lists the PDF's problems in a dialog. -->
-  <button type="button" class="btn btn-link btn-sm report" mrDummy disabled>Validation report</button>
+  <button type="button" class="btn btn-link btn-sm report" mrDummy disabled>
+    {{ 'footer.report' | transloco }}
+  </button>
 
   <span class="divider" aria-hidden="true"></span>
   <mr-zoom-control [(zoom)]="zoom" [scale]="scale()" />

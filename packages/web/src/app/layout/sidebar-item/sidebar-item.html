@@ -11,6 +11,6 @@
     <span class="subtitle">{{ item().subtitle }}</span>
   </span>
   @if (item().pinned) {
-    <i class="bi bi-pin-angle pin" role="img" aria-label="Pinned"></i>
+    <i class="bi bi-pin-angle pin" role="img" [attr.aria-label]="'sidebarItem.pinned' | transloco"></i>
   }
 </button>

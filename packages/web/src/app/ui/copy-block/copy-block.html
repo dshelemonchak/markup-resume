@@ -3,14 +3,14 @@
   @switch (state()) {
     @case ('copied') {
       <i class="bi bi-check-lg" aria-hidden="true"></i>
-      Copied
+      {{ 'copyBlock.copied' | transloco }}
     }
     @case ('selected') {
-      Press ⌘C
+      {{ 'copyBlock.pressToCopy' | transloco }}
     }
     @default {
       <i class="bi bi-copy" aria-hidden="true"></i>
-      Copy
+      {{ 'copyBlock.copy' | transloco }}
     }
   }
 </button>

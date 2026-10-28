@@ -6,6 +6,7 @@ import {
   input,
   viewChild,
 } from '@angular/core';
+import { TranslocoPipe } from '@jsverse/transloco';
 import { CopyBlock } from '../../ui/copy-block/copy-block';
 import type { ClaudeSessionLine } from '../claude-status';
 import { DOCKER_PLACEHOLDER, PROJECT_PLACEHOLDER, desktopConfig, desktopPrompt } from '../desktop-config';
@@ -19,7 +20,7 @@ import { DOCKER_PLACEHOLDER, PROJECT_PLACEHOLDER, desktopConfig, desktopPrompt }
  */
 @Component({
   selector: 'mr-connect-claude',
-  imports: [CopyBlock],
+  imports: [CopyBlock, TranslocoPipe],
   templateUrl: './connect-claude.html',
   styleUrl: './connect-claude.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

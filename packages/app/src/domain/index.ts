@@ -16,6 +16,7 @@ export {
   type PageSnapshot,
   type PdfFacts,
   type PdfFont,
+  type PdfProblem,
   type RenderCv,
   type RenderedCv,
 } from './cv-pdf.ts';

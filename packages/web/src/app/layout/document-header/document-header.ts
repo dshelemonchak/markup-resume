@@ -1,14 +1,19 @@
 import { ChangeDetectionStrategy, Component, computed, input, model, output } from '@angular/core';
+import { TranslocoPipe } from '@jsverse/transloco';
 import { DummyMark } from '../../ui/dummy-mark/dummy-mark';
 import { GlassPanel } from '../../ui/glass-panel/glass-panel';
 import { RibbonGroup } from '../../ui/ribbon-group/ribbon-group';
 import type { CvListItem, CvListItemStatus } from '../cv-list-item';
 import type { PreviewMode } from '../preview-mode';
 
-const STATUS_BADGE: Record<CvListItemStatus, { readonly text: string; readonly css: string }> = {
-  valid: { text: 'Valid', css: 'text-bg-success' },
-  warning: { text: 'Warnings', css: 'text-bg-warning' },
-  'not-exported': { text: 'Not exported', css: 'text-bg-secondary' },
+/**
+ * The badge of each status: its translation key and colour.
+ * t(header.status.valid, header.status.warning, header.status.notExported)
+ */
+const STATUS_BADGE: Record<CvListItemStatus, { readonly key: string; readonly css: string }> = {
+  valid: { key: 'header.status.valid', css: 'text-bg-success' },
+  warning: { key: 'header.status.warning', css: 'text-bg-warning' },
+  'not-exported': { key: 'header.status.notExported', css: 'text-bg-secondary' },
 };
 
 /**
@@ -18,7 +23,7 @@ const STATUS_BADGE: Record<CvListItemStatus, { readonly text: string; readonly c
  */
 @Component({
   selector: 'mr-document-header',
-  imports: [DummyMark, GlassPanel, RibbonGroup],
+  imports: [DummyMark, GlassPanel, RibbonGroup, TranslocoPipe],
   templateUrl: './document-header.html',
   styleUrl: './document-header.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,

@@ -1,13 +1,30 @@
-<button type="button" class="btn btn-sm" aria-label="Zoom out" [disabled]="!canZoomOut()" (click)="zoomOut()">
+<button
+  type="button"
+  class="btn btn-sm"
+  [attr.aria-label]="'zoom.out' | transloco"
+  [disabled]="!canZoomOut()"
+  (click)="zoomOut()"
+>
   <i class="bi bi-dash-lg" aria-hidden="true"></i>
 </button>
-<button type="button" class="btn btn-sm level" aria-label="Zoom level, reset to 100%" (click)="resetZoom()">
+<button
+  type="button"
+  class="btn btn-sm level"
+  [attr.aria-label]="'zoom.level' | transloco"
+  (click)="resetZoom()"
+>
   {{ percent() }}%
 </button>
-<button type="button" class="btn btn-sm" aria-label="Zoom in" [disabled]="!canZoomIn()" (click)="zoomIn()">
+<button
+  type="button"
+  class="btn btn-sm"
+  [attr.aria-label]="'zoom.in' | transloco"
+  [disabled]="!canZoomIn()"
+  (click)="zoomIn()"
+>
   <i class="bi bi-plus-lg" aria-hidden="true"></i>
 </button>
 <span class="divider" aria-hidden="true"></span>
 <button type="button" class="btn btn-sm fit" [attr.aria-pressed]="zoom() === 'fit'" (click)="fit()">
-  Fit
+  {{ 'zoom.fit' | transloco }}
 </button>

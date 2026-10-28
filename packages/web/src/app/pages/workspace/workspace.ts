@@ -11,8 +11,10 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
-import { CvApi } from '../../api/cv-api';
+import { TranslocoPipe } from '@jsverse/transloco';
+import { CvApi, type PdfProblemDto } from '../../api/cv-api';
 import { toCvListItem } from '../../api/to-cv-list-item';
+import { injectLocale, injectTranslate } from '../../i18n/i18n';
 import { claudeSessionLines, claudeStatus } from '../../layout/claude-status';
 import { ConnectClaude } from '../../layout/connect-claude/connect-claude';
 import { DocumentCanvas } from '../../layout/document-canvas/document-canvas';
@@ -29,17 +31,27 @@ import type { ZoomSetting } from '../../ui/zoom';
 /** Main screen: CVs from the local server on the left; top bar, the selected CV and the status bar on the right. */
 @Component({
   selector: 'mr-workspace',
-  imports: [ConnectClaude, DocumentCanvas, DocumentFooter, DocumentHeader, ExportReport, PinchZoom, Sidebar],
+  imports: [
+    ConnectClaude,
+    DocumentCanvas,
+    DocumentFooter,
+    DocumentHeader,
+    ExportReport,
+    PinchZoom,
+    Sidebar,
+    TranslocoPipe,
+  ],
   templateUrl: './workspace.html',
   styleUrl: './workspace.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Workspace {
   private readonly api = inject(CvApi);
+  private readonly locale = injectLocale();
 
   // value() throws while a resource is in its error state (server down), so read it only when there is one.
   protected readonly cvs = computed(() =>
-    (this.api.cvs.hasValue() ? this.api.cvs.value() : []).map(toCvListItem),
+    (this.api.cvs.hasValue() ? this.api.cvs.value() : []).map((cv) => toCvListItem(cv, this.locale())),
   );
   protected readonly listState = computed<CvListState>(() => {
     const cvs = this.api.cvs;
@@ -57,9 +69,12 @@ export class Workspace {
   private readonly claudeSessions = computed(() =>
     this.api.claudeSessions.hasValue() ? this.api.claudeSessions.value() : [],
   );
-  protected readonly claudeStatus = computed(() => claudeStatus(this.claudeSessions(), this.now()));
+  private readonly translate = injectTranslate();
+  protected readonly claudeStatus = computed(() =>
+    claudeStatus(this.claudeSessions(), this.now(), this.translate),
+  );
   protected readonly claudeSessionLines = computed(() =>
-    claudeSessionLines(this.claudeSessions(), this.now()),
+    claudeSessionLines(this.claudeSessions(), this.now(), this.translate),
   );
 
   /** Keeps the user's choice while it still exists after a reload; otherwise the first CV. */
@@ -77,7 +92,7 @@ export class Workspace {
   });
 
   protected readonly exporting = signal(false);
-  protected readonly exportProblems = signal<readonly string[]>([]);
+  protected readonly exportProblems = signal<readonly PdfProblemDto[]>([]);
   protected readonly exportFailure = signal<string | null>(null);
   private readonly exportReport = viewChild.required(ExportReport);
 

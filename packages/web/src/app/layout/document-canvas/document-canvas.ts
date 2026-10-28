@@ -13,6 +13,7 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
+import { TranslocoPipe } from '@jsverse/transloco';
 import { DomSanitizer } from '@angular/platform-browser';
 import { type ZoomSetting, fitScale } from '../../ui/zoom';
 import type { PreviewMode } from '../preview-mode';
@@ -32,6 +33,7 @@ const PAGE = { width: 794, height: 1123 } as const;
  */
 @Component({
   selector: 'mr-document-canvas',
+  imports: [TranslocoPipe],
   templateUrl: './document-canvas.html',
   styleUrl: './document-canvas.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
