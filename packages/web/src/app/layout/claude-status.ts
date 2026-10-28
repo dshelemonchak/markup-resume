@@ -1,4 +1,4 @@
-import type { ClaudeSessionDto } from '../../api/cv-api';
+import type { ClaudeSessionDto } from '../api/cv-api';
 
 /** One connected Claude, ready to show. */
 export interface ClaudeSessionLine {

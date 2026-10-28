@@ -13,18 +13,18 @@ import {
 } from '@angular/core';
 import { CvApi } from '../../api/cv-api';
 import { toCvListItem } from '../../api/to-cv-list-item';
-import { claudeSessionLines, claudeStatus } from '../../layout/connect-claude/claude-status';
+import { claudeSessionLines, claudeStatus } from '../../layout/claude-status';
 import { ConnectClaude } from '../../layout/connect-claude/connect-claude';
 import { DocumentCanvas } from '../../layout/document-canvas/document-canvas';
-import type { DocumentInfo } from '../../layout/document-canvas/document-info';
+import type { DocumentInfo } from '../../layout/document-info';
 import { DocumentFooter } from '../../layout/document-footer/document-footer';
 import { DocumentHeader } from '../../layout/document-header/document-header';
 import { ExportReport } from '../../layout/export-report/export-report';
-import type { PreviewMode } from '../../layout/document-header/preview-mode';
-import type { CvListState } from '../../layout/sidebar/cv-list-item';
+import type { PreviewMode } from '../../layout/preview-mode';
+import type { CvListState } from '../../layout/cv-list-item';
 import { Sidebar } from '../../layout/sidebar/sidebar';
-import { PinchZoom } from '../../ui/zoom-control/pinch-zoom';
-import type { ZoomSetting } from '../../ui/zoom-control/zoom';
+import { PinchZoom } from '../../ui/pinch-zoom/pinch-zoom';
+import type { ZoomSetting } from '../../ui/zoom';
 
 /** Main screen: CVs from the local server on the left; top bar, the selected CV and the status bar on the right. */
 @Component({

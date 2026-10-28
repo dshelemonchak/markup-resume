@@ -14,9 +14,9 @@ import {
   viewChild,
 } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
-import { type ZoomSetting, fitScale } from '../../ui/zoom-control/zoom';
-import type { PreviewMode } from '../document-header/preview-mode';
-import { type DocumentInfo, pageCount, primaryFontFamily } from './document-info';
+import { type ZoomSetting, fitScale } from '../../ui/zoom';
+import type { PreviewMode } from '../preview-mode';
+import { type DocumentInfo, pageCount, primaryFontFamily } from '../document-info';
 
 /** A4 at 96 dpi: 210 × 297 mm. */
 const PAGE = { width: 794, height: 1123 } as const;

@@ -2,9 +2,9 @@ import { ChangeDetectionStrategy, Component, computed, input, model } from '@ang
 import { DummyMark } from '../../ui/dummy-mark/dummy-mark';
 import { GlassPanel } from '../../ui/glass-panel/glass-panel';
 import { ZoomControl } from '../../ui/zoom-control/zoom-control';
-import type { ZoomSetting } from '../../ui/zoom-control/zoom';
-import type { DocumentInfo } from '../document-canvas/document-info';
-import type { PreviewMode } from '../document-header/preview-mode';
+import type { ZoomSetting } from '../../ui/zoom';
+import type { DocumentInfo } from '../document-info';
+import type { PreviewMode } from '../preview-mode';
 
 /**
  * Status bar of the workspace, under the document.

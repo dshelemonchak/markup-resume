@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import type { CvListItem } from './cv-list-item';
+import type { CvListItem } from '../cv-list-item';
 import { Sidebar } from './sidebar';
 
 const ITEMS: readonly CvListItem[] = [

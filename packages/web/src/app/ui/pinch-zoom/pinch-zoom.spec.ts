@@ -1,7 +1,7 @@
 import { Component, signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { PinchZoom } from './pinch-zoom';
-import type { ZoomSetting } from './zoom';
+import type { ZoomSetting } from '../zoom';
 
 @Component({
   imports: [PinchZoom],

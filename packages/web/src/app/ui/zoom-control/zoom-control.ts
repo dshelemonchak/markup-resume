@@ -1,5 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, input, model } from '@angular/core';
-import { type ZoomSetting, canZoom, stepZoom } from './zoom';
+import { type ZoomSetting, canZoom, stepZoom } from '../zoom';
 
 /**
  * Zoom buttons: out, the current level (resets to 100%), in, and Fit.

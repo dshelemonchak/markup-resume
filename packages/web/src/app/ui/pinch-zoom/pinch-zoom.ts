@@ -1,5 +1,5 @@
 import { DestroyRef, Directive, ElementRef, inject, input, model } from '@angular/core';
-import { type ZoomSetting, clamp, scaleZoom } from './zoom';
+import { type ZoomSetting, clamp, scaleZoom } from '../zoom';
 
 /** Safari's non-standard pinch event; scale is relative to the start of the gesture. */
 interface GestureEvent extends UIEvent {

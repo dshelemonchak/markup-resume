@@ -2,8 +2,8 @@ import { ChangeDetectionStrategy, Component, computed, input, model, output } fr
 import { DummyMark } from '../../ui/dummy-mark/dummy-mark';
 import { GlassPanel } from '../../ui/glass-panel/glass-panel';
 import { RibbonGroup } from '../../ui/ribbon-group/ribbon-group';
-import type { CvListItem, CvListItemStatus } from '../sidebar/cv-list-item';
-import type { PreviewMode } from './preview-mode';
+import type { CvListItem, CvListItemStatus } from '../cv-list-item';
+import type { PreviewMode } from '../preview-mode';
 
 const STATUS_BADGE: Record<CvListItemStatus, { readonly text: string; readonly css: string }> = {
   valid: { text: 'Valid', css: 'text-bg-success' },

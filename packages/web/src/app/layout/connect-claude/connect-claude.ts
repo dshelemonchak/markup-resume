@@ -7,8 +7,8 @@ import {
   viewChild,
 } from '@angular/core';
 import { CopyBlock } from '../../ui/copy-block/copy-block';
-import type { ClaudeSessionLine } from './claude-status';
-import { DOCKER_PLACEHOLDER, PROJECT_PLACEHOLDER, desktopConfig, desktopPrompt } from './desktop-config';
+import type { ClaudeSessionLine } from '../claude-status';
+import { DOCKER_PLACEHOLDER, PROJECT_PLACEHOLDER, desktopConfig, desktopPrompt } from '../desktop-config';
 
 /**
  * How to connect Claude to cv-kit's MCP server (ADR-0003): Claude Code picks it up from

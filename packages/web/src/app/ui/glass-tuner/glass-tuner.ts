@@ -8,7 +8,7 @@ import {
   inject,
   signal,
 } from '@angular/core';
-import { GlassPanel } from '../../../ui/glass-panel/glass-panel';
+import { GlassPanel } from '../glass-panel/glass-panel';
 
 interface TunerParam {
   readonly name: string;

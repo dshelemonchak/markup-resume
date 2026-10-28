@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { DocumentCanvas } from './document-canvas';
-import type { DocumentInfo } from './document-info';
+import type { DocumentInfo } from '../document-info';
 
 describe('DocumentCanvas', () => {
   beforeEach(() => {

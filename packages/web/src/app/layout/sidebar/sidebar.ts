@@ -1,9 +1,9 @@
 import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
 import { DummyMark } from '../../ui/dummy-mark/dummy-mark';
 import { GlassPanel } from '../../ui/glass-panel/glass-panel';
-import type { ClaudeStatus } from '../connect-claude/claude-status';
-import type { CvListItem, CvListState } from './cv-list-item';
-import { SidebarItem } from './sidebar-item/sidebar-item';
+import type { ClaudeStatus } from '../claude-status';
+import type { CvListItem, CvListState } from '../cv-list-item';
+import { SidebarItem } from '../sidebar-item/sidebar-item';
 
 /**
  * Left sidebar: brand, import, search, pinned and other CVs, and Claude's connection status,

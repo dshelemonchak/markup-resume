@@ -1,4 +1,4 @@
-import type { CvListItem } from '../layout/sidebar/cv-list-item';
+import type { CvListItem } from '../layout/cv-list-item';
 import type { CvSummaryDto } from './cv-api';
 
 const UPDATED_AT = new Intl.DateTimeFormat('en-GB', {

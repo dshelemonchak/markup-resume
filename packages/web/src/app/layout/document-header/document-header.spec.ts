@@ -1,7 +1,7 @@
 import { TestBed } from '@angular/core/testing';
-import type { CvListItem } from '../sidebar/cv-list-item';
+import type { CvListItem } from '../cv-list-item';
 import { DocumentHeader } from './document-header';
-import type { PreviewMode } from './preview-mode';
+import type { PreviewMode } from '../preview-mode';
 
 const CV: CvListItem = {
   id: 'senior-angular',

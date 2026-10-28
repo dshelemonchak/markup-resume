@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { GlassPanel } from '../../ui/glass-panel/glass-panel';
-import { GlassTuner } from './glass-tuner/glass-tuner';
+import { GlassTuner } from '../../ui/glass-tuner/glass-tuner';
 
 /** Temporary page showing UI building blocks while the real screens are built. */
 @Component({
