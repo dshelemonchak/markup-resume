@@ -46,12 +46,6 @@ export type PdfExport =
   | { readonly kind: 'problems'; readonly problems: readonly PdfProblemDto[] }
   | { readonly kind: 'failed'; readonly message: string };
 
-/** Shape of GET /api/v1/setup. */
-export interface SetupDto {
-  /** Project folder on the host; null when the server does not know it. */
-  readonly hostProjectDir: string | null;
-}
-
 /**
  * Client of the local server's CV API. Keeps the list fresh: the server's event stream
  * ("cvs-changed") reloads the list and bumps `revision`, which the document URL carries
@@ -65,9 +59,6 @@ export class CvApi {
     url: `${API}/cvs`,
     timeout: REQUEST_TIMEOUT_MS,
   }));
-  readonly setup = httpResource<SetupDto>(() => ({ url: `${API}/setup`, timeout: REQUEST_TIMEOUT_MS }));
-  /** Markup Résumé as a Claude Desktop extension, a file to download and install. */
-  readonly desktopExtensionUrl = `${API}/claude/desktop-extension`;
   readonly claudeSessions = httpResource<readonly ClaudeSessionDto[]>(() => ({
     url: `${API}/claude/sessions`,
     timeout: REQUEST_TIMEOUT_MS,
@@ -85,7 +76,7 @@ export class CvApi {
       // "ready" after an earlier connection means the server is back: whatever it sent may be stale, and
       // whatever failed while it was down can load now. On the first connection only failures reload.
       events.addEventListener('ready', () => {
-        for (const resource of [this.cvs, this.setup, this.claudeSessions]) {
+        for (const resource of [this.cvs, this.claudeSessions]) {
           if (connectedBefore || resource.error() !== undefined) resource.reload();
         }
         if (connectedBefore) this.revision.update((revision) => revision + 1);
@@ -106,7 +97,7 @@ export class CvApi {
     connect();
 
     // status() goes error → reloading → error on each failed try, so the effect schedules the next one.
-    for (const resource of [this.cvs, this.setup, this.claudeSessions]) {
+    for (const resource of [this.cvs, this.claudeSessions]) {
       effect((onCleanup) => {
         if (resource.status() !== 'error') return;
         const timer = setTimeout(() => resource.reload(), RESOURCE_RETRY_MS);

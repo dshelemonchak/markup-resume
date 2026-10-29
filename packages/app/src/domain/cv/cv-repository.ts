@@ -15,6 +15,4 @@ export interface CvRepository {
    * this id already exists; the check and the write are one step, so two creates cannot both succeed.
    */
   create(id: CvId, html: string): Promise<boolean>;
-  /** Calls the listener whenever any CV is added, changed or removed. Returns an unsubscribe function. */
-  watch(listener: () => void): () => void;
 }

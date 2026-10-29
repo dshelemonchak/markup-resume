@@ -3,9 +3,8 @@
 #   docker compose exec dev pnpm install         install dependencies
 #   docker compose exec dev pnpm seed            put the template's example CV into ./data
 #   docker compose exec dev pnpm check           lint, format, typecheck, tests
-#   docker compose up -d app                     API on http://localhost:3000/api/v1
+#   docker compose up -d app                     API on http://localhost:3000/api/v1, MCP for Claude on /mcp
 #   docker compose up web                        Angular dev server on http://localhost:4200 (proxies /api to app)
-#   docker compose run --rm -T mcp               MCP server on stdio, started by Claude (see .mcp.json)
 # A database service is added when a database adapter exists (ADR-0012).
 
 # The project name, so containers and the network are named after the product whatever the folder is called.
@@ -35,9 +34,6 @@ services:
     environment:
       CV_DATA_DIR: /data
       PORT: '3000'
-      # Where the project lives on the host, for the "Connect Claude" hint in the UI.
-      # PWD is the folder compose was started from, normally the project folder.
-      HOST_PROJECT_DIR: ${PWD:-}
     ports:
       - '3000:3000'
 
@@ -48,24 +44,3 @@ services:
       - app
     ports:
       - '4200:4200'
-
-  # MCP server for Claude (ADR-0003). Not started by `up`: Claude runs it per session with
-  #   docker compose run --rm -T mcp
-  # -T: no pseudo-TTY, which would rewrite line endings and break JSON-RPC on stdout.
-  # Claude Code picks it up from .mcp.json. Claude Desktop installs it as the markup-resume.mcpb
-  # extension from the UI's "Connect Claude" dialog. The dialog also explains a manual entry for
-  # Settings → Developer → Edit Config, with absolute paths because GUI apps start without your
-  # shell's PATH or working directory:
-  #   "mcpServers": { "markup-resume": {
-  #     "command": "<output of `which docker`>",
-  #     "args": ["compose", "--project-directory", "/absolute/path/to/markup-resume", "run", "--rm", "-T", "mcp"] } }
-  mcp:
-    <<: *workspace
-    profiles: [mcp]
-    environment:
-      CV_DATA_DIR: /data
-      # Holds a presence connection to the app so the UI shows Claude as connected (ADR-0018).
-      # The app may be down; the MCP server works the same and reconnects when it is up.
-      CV_APP_URL: http://app:3000
-    command: node packages/app/src/mcp.ts
-    stdin_open: true

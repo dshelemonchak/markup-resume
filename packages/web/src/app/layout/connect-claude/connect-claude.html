@@ -47,41 +47,7 @@
       <h3 id="connect-claude-desktop" class="section-title">
         {{ 'connectClaude.desktop.title' | transloco }}
       </h3>
-      <a class="btn btn-primary btn-sm download" [href]="extensionUrl()" download="markup-resume.mcpb">
-        <i class="bi bi-download" aria-hidden="true"></i>
-        {{ 'connectClaude.desktop.download' | transloco }}
-      </a>
-      <ol class="steps">
-        <li [innerHTML]="'connectClaude.desktop.stepOpen' | transloco"></li>
-        <li>{{ 'connectClaude.desktop.stepInstall' | transloco }}</li>
-      </ol>
-
-      <details class="manual">
-        <summary>{{ 'connectClaude.withCode.summary' | transloco }}</summary>
-        <p>{{ 'connectClaude.withCode.text' | transloco }}</p>
-        <mr-copy-block class="block" [text]="prompt()" />
-      </details>
-
-      <details class="manual">
-        <summary>{{ 'connectClaude.manual.summary' | transloco }}</summary>
-        <ol class="steps">
-          <li [innerHTML]="'connectClaude.manual.stepOpen' | transloco"></li>
-          <li>{{ 'connectClaude.manual.stepQuit' | transloco }}</li>
-          <li [innerHTML]="'connectClaude.manual.stepAdd' | transloco"></li>
-          <li>
-            <span
-              [innerHTML]="'connectClaude.manual.stepDocker' | transloco: { docker: dockerPlaceholder }"
-            ></span>
-            @if (!projectDir()) {
-              <span
-                [innerHTML]="'connectClaude.manual.stepProject' | transloco: { project: projectPlaceholder }"
-              ></span>
-            }
-          </li>
-          <li>{{ 'connectClaude.manual.stepSave' | transloco }}</li>
-        </ol>
-        <mr-copy-block [text]="config()" />
-      </details>
+      <p>{{ 'connectClaude.desktop.text' | transloco }}</p>
     </section>
   </div>
 </dialog>

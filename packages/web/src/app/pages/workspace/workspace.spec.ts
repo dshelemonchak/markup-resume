@@ -47,7 +47,6 @@ describe('Workspace', () => {
     const http = TestBed.inject(HttpTestingController);
     TestBed.tick(); // issue the list request (the app stays unstable until it is answered)
     http.expectOne('/api/v1/cvs').flush(CVS);
-    http.expectOne('/api/v1/setup').flush({ hostProjectDir: '/Users/me/CV' });
     http.expectOne('/api/v1/claude/sessions').flush([]);
     await fixture.whenStable();
     const root = fixture.nativeElement as HTMLElement;
@@ -62,11 +61,6 @@ describe('Workspace', () => {
       'Second',
     ]);
     expect(frameSrc()).toBe('/api/v1/cvs/first/document?v=0');
-  });
-
-  it('puts the host project folder into the Connect Claude dialog', async () => {
-    const { root } = await render();
-    expect(root.querySelector('mr-connect-claude pre')!.textContent).toContain('/Users/me/CV');
   });
 
   it('keeps the selection and reloads list and preview when the server reports a change', async () => {
@@ -110,7 +104,6 @@ describe('Workspace', () => {
     expect(message()).toContain('Loading CVs');
 
     http.expectOne('/api/v1/cvs').error(new ProgressEvent('error'));
-    http.expectOne('/api/v1/setup').error(new ProgressEvent('error'));
     http.expectOne('/api/v1/claude/sessions').error(new ProgressEvent('error'));
     await fixture.whenStable();
     expect(message()).toContain('not reachable');
@@ -128,7 +121,6 @@ describe('Workspace', () => {
     FakeEventSource.last!.emit('ready');
     TestBed.tick();
     http.expectOne('/api/v1/cvs').flush(CVS);
-    http.expectOne('/api/v1/setup').flush({ hostProjectDir: null });
     http.expectOne('/api/v1/claude/sessions').flush([]);
     await fixture.whenStable();
     expect(root.querySelectorAll('mr-sidebar-item')).toHaveLength(2);
@@ -146,7 +138,6 @@ describe('Workspace', () => {
       };
       TestBed.tick();
       http.expectOne('/api/v1/cvs').flush('boom', { status: 500, statusText: 'Server Error' });
-      http.expectOne('/api/v1/setup').flush({ hostProjectDir: null });
       http.expectOne('/api/v1/claude/sessions').flush([]);
       await settle();
       expect(root.querySelector('mr-sidebar .empty')!.textContent).toContain('Could not load the CVs');

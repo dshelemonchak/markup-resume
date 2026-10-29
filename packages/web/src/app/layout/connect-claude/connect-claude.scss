@@ -50,39 +50,6 @@
   font-weight: 600;
 }
 
-.steps {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  margin: 0 0 12px;
-  padding-left: 20px;
-}
-
-.block {
-  margin-top: 8px;
-}
-
-.download {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  margin-bottom: 10px;
-}
-
-.manual {
-  margin-top: 12px;
-
-  summary {
-    color: var(--bs-secondary-color);
-    font-size: 13px;
-    cursor: pointer;
-  }
-
-  .steps {
-    margin-top: 8px;
-  }
-}
-
 .sessions {
   display: flex;
   flex-direction: column;

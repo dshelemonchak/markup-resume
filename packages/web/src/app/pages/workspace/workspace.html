@@ -12,12 +12,7 @@
   [failure]="exportFailure()"
   (downloadAnyway)="exportPdf(true)"
 />
-<mr-connect-claude
-  #connectClaude
-  [projectDir]="hostProjectDir()"
-  [extensionUrl]="desktopExtensionUrl"
-  [sessions]="claudeSessionLines()"
-/>
+<mr-connect-claude #connectClaude [sessions]="claudeSessionLines()" />
 <div
   class="document-column"
   mrPinchZoom

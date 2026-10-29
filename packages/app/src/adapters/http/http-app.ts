@@ -12,18 +12,13 @@ import {
   type PdfExportServices,
 } from '../../app/index.ts';
 import type { CvRepository } from '../../domain/index.ts';
-import { desktopExtension } from './desktop-extension.ts';
 
 const HEARTBEAT_MS = 25_000;
-const SESSION_ID = /^[\w-]{1,64}$/;
-const MAX_CLIENT_LENGTH = 64;
 /** Asset names: a flat file name, so a request can never leave the asset folder. */
 const ASSET_NAME = /^[\w-]+\.(woff2|svg)$/;
 const ASSET_TYPES = { woff2: 'font/woff2', svg: 'image/svg+xml' } as const;
 
 export interface HttpAppOptions {
-  /** Project folder on the host, when the server runs in a container; null if unknown. */
-  readonly hostProjectDir?: string | null;
   /** Folders of the style library's fonts and icons, which template styles load by URL (ADR-0007). */
   readonly fontsDir?: string;
   readonly iconsDir?: string;
@@ -39,15 +34,10 @@ export interface HttpAppOptions {
  *                                                 problems comes back as 422 with the list, unless forced
  *   GET  /api/v1/events                           server-sent events: "cvs-changed" when any CV changes,
  *                                                 "claude-changed" when a Claude session comes, goes or acts
- *   GET  /api/v1/setup                            what the UI needs to show how to connect Claude
  *   GET  /api/v1/fonts/:file, /api/v1/icons/:file the style library's fonts and icons, used by template styles
- *   GET  /api/v1/claude/desktop-extension         Markup Résumé as a Claude Desktop extension (markup-resume.mcpb)
  *   GET  /api/v1/claude/sessions                  Claude sessions connected now
- *   GET  /api/v1/claude/sessions/:id/presence     held open by the MCP server while Claude is connected
- *        ?client=<clientInfo.name>&version=<clientInfo.version>                         (ADR-0018)
- *   POST /api/v1/claude/sessions/:id/activity     the MCP server reports a tool call
  *
- * Returns the app and a close function that stops watching the storage and ends open
+ * Returns the app and a close function that stops listening for CV changes and ends open
  * streams, so the HTTP server can shut down without waiting for clients.
  */
 export function createHttpApp(
@@ -55,10 +45,9 @@ export function createHttpApp(
   cvChanges: CvChanges,
   options: HttpAppOptions = {},
 ): { app: Hono; close: () => void } {
-  // Two storage watchers and one session registry for all event-stream clients.
+  // One CV change listener and one session registry for all event-stream clients.
   const listeners = new Set<(event: string) => void>();
   const broadcast = (event: string) => listeners.forEach((listener) => listener(event));
-  const stopWatching = repository.watch(() => broadcast('cvs-changed'));
   const stopListening = cvChanges.onChange(() => broadcast('cvs-changed'));
   const sessions = new ClaudeSessions();
   sessions.onChange(() => broadcast('claude-changed'));
@@ -104,8 +93,6 @@ export function createHttpApp(
     }
   });
 
-  app.get('/setup', (c) => c.json({ hostProjectDir: options.hostProjectDir ?? null }));
-
   app.get('/fonts/:file', (c) => serveAsset(c, options.fontsDir, c.req.param('file')));
   app.get('/icons/:file', (c) => serveAsset(c, options.iconsDir, c.req.param('file')));
 
@@ -123,39 +110,10 @@ export function createHttpApp(
     }),
   );
 
-  app.get('/claude/desktop-extension', (c) =>
-    c.body(desktopExtension(options.hostProjectDir ?? null), 200, {
-      'Content-Type': 'application/zip',
-      'Content-Disposition': 'attachment; filename="markup-resume.mcpb"',
-    }),
-  );
-
   app.get('/claude/sessions', (c) => c.json(sessions.list()));
-
-  app.get('/claude/sessions/:id/presence', (c) => {
-    const id = c.req.param('id');
-    const client = c.req.query('client');
-    if (!SESSION_ID.test(id) || !client || client.length > MAX_CLIENT_LENGTH) {
-      return c.json({ error: 'invalid-session' }, 400);
-    }
-    const version = c.req.query('version')?.slice(0, MAX_CLIENT_LENGTH) || null;
-    return streamSSE(c, async (stream) => {
-      // The session lives exactly as long as this connection.
-      const disconnect = sessions.connect(id, client, version);
-      stream.onAbort(disconnect);
-      await stream.writeSSE({ event: 'ready', data: '{}' });
-      await keepOpen(stream, shutdown.signal);
-      disconnect();
-    });
-  });
-
-  app.post('/claude/sessions/:id/activity', (c) =>
-    sessions.touch(c.req.param('id')) ? c.body(null, 204) : c.json({ error: 'not-found' }, 404),
-  );
 
   const close = () => {
     shutdown.abort();
-    stopWatching();
     stopListening();
   };
 

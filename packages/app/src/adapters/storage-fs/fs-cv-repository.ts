@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { constants, type FSWatcher, watch } from 'node:fs';
+import { constants } from 'node:fs';
 import { copyFile, link, mkdir, readFile, readdir, rename, rm, stat, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import {
@@ -13,8 +13,6 @@ import {
 const DOCUMENT_FILE = 'document.html';
 const HISTORY_DIR = 'history';
 const DEFAULT_HISTORY_LIMIT = 3;
-/** Editors and Claude often write a file in several steps; one notification per burst is enough. */
-const WATCH_DEBOUNCE_MS = 100;
 
 /**
  * CV storage on disk (ADR-0012): one folder per CV.
@@ -90,18 +88,6 @@ export class FsCvRepository implements CvRepository {
     } finally {
       await rm(temp, { force: true });
     }
-  }
-
-  watch(listener: () => void): () => void {
-    let timer: ReturnType<typeof setTimeout> | undefined;
-    const watcher: FSWatcher = watch(this.cvsDir, { recursive: true }, () => {
-      clearTimeout(timer);
-      timer = setTimeout(listener, WATCH_DEBOUNCE_MS);
-    });
-    return () => {
-      clearTimeout(timer);
-      watcher.close();
-    };
   }
 
   private async summarize(id: CvId): Promise<CvSummary | null> {

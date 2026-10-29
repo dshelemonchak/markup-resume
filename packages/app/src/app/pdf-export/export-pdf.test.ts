@@ -7,7 +7,6 @@ const repository: CvRepository = {
   getDocument: (id) => Promise.resolve(id === 'sample' ? '<html></html>' : null),
   save: () => Promise.resolve(),
   create: () => Promise.resolve(true),
-  watch: () => () => {},
 };
 
 function services(text: string) {

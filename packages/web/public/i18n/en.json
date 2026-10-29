@@ -122,32 +122,17 @@
   },
   "connectClaude": {
     "title": "Connect Claude",
-    "intro": "Markup Résumé gives Claude tools to list, read and write your CVs. Claude starts the server itself through Docker, so keep Docker Desktop running.",
+    "intro": "Markup Résumé gives Claude tools to list, read and write your CVs. The app serves them itself while it is running.",
     "connectedNow": "Connected now",
     "lastUsed": "last used {{ time }}",
     "noToolCalls": "no tool calls yet",
     "code": {
       "title": "Claude Code",
-      "text": "Open this project folder in Claude Code. It finds the Markup Résumé server in <code>.mcp.json</code> and asks once to enable it."
+      "text": "Open this project folder in Claude Code. It finds the Markup Résumé server in <code>.mcp.json</code> and asks once to enable it. Run <code>/mcp</code> to check that it is connected."
     },
     "desktop": {
       "title": "Claude Desktop",
-      "download": "Download extension",
-      "stepOpen": "Open <code>markup-resume.mcpb</code> from Downloads, or drag it into <strong>Settings → Extensions</strong> in Claude Desktop.",
-      "stepInstall": "Check the project folder Claude Desktop asks for, and install."
-    },
-    "withCode": {
-      "summary": "Set up with Claude Code",
-      "text": "Paste this prompt into Claude Code in a terminal: it can edit files on this Mac and sets everything up. The Claude Desktop chat cannot change its own config, and the Code tab of Claude Desktop closes with the app, which has to quit for the change to stick."
-    },
-    "manual": {
-      "summary": "Set up manually",
-      "stepOpen": "Open <strong>Settings → Developer → Edit Config</strong> to find the file, and open it in an editor.",
-      "stepQuit": "Quit Claude Desktop (⌘Q) before editing: while it runs, it rewrites the file and drops new entries.",
-      "stepAdd": "Add the block below inside the file's outer <code>{ }</code>, next to what is already there, separated by a comma. If <code>\"mcpServers\"</code> exists, add just the <code>\"markup-resume\"</code> entry to it.",
-      "stepDocker": "Replace <code>{{ docker }}</code> with the output of <code>which docker</code>.",
-      "stepProject": "Replace <code>{{ project }}</code> with this project's folder.",
-      "stepSave": "Save the file and open Claude Desktop again."
+      "text": "Not available in this local setup yet: Claude Desktop connects only to servers with a public HTTPS address. It arrives with the hosted version."
     }
   }
 }
