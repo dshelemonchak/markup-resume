@@ -36,7 +36,6 @@ beforeEach(async () => {
       documents[id] = html;
       return Promise.resolve(true);
     },
-    watch: () => () => {},
   };
   const cvChanges = new CvChanges();
   const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();

@@ -59,10 +59,6 @@ export class Workspace {
     if (error !== undefined) return isUnreachable(error) ? 'unreachable' : 'failed';
     return cvs.hasValue() ? 'ready' : 'loading';
   });
-  protected readonly hostProjectDir = computed(() =>
-    this.api.setup.hasValue() ? this.api.setup.value().hostProjectDir : null,
-  );
-  protected readonly desktopExtensionUrl = this.api.desktopExtensionUrl;
 
   /** Ticks so that "2 min ago" stays current. */
   private readonly now = signal(new Date());

@@ -112,14 +112,4 @@ describe('FsCvRepository', () => {
       expect(await readdir(join(dataDir, 'cvs'))).toEqual([]);
     });
   });
-
-  it('notifies once per burst of changes', async () => {
-    let calls = 0;
-    const stop = repository.watch(() => calls++);
-    await addCv('watched', '<p>1</p>');
-    await writeFile(join(dataDir, 'cvs', 'watched', 'document.html'), '<p>2</p>');
-    await new Promise((resolve) => setTimeout(resolve, 400));
-    stop();
-    expect(calls).toBe(1);
-  });
 });

@@ -5,10 +5,10 @@ you see every change live, and the result exports to a PDF that reads correctly.
 
 ## Why
 
-- **Your own Claude, no extra service.** Markup Résumé runs a local MCP server, so Claude Desktop and Claude Code work
-  on your CVs directly through the Claude subscription you already have. There is no third-party plan or API key,
-  and Markup Résumé adds no limits of its own: ask Claude to tailor a CV to a vacancy, rewrite a section or start a new
-  version as often as your Claude plan allows. Markup Résumé runs on your machine and stores your CVs in a local folder.
+- **Your own Claude, no extra service.** Markup Résumé serves an MCP endpoint, so Claude works on your CVs directly
+  through the Claude subscription you already have. There is no third-party plan or API key, and Markup Résumé adds
+  no limits of its own: ask Claude to tailor a CV to a vacancy, rewrite a section or start a new version as often as
+  your Claude plan allows. Markup Résumé runs on your machine and stores your CVs in a local folder.
 - **A format Claude edits well.** Each CV is laid out in HTML and CSS: plain text that Claude reads and writes
   directly. A template owns the design and gives Claude its rules, so changing the wording never breaks the
   layout.
@@ -75,11 +75,13 @@ default Docker socket to be used" in Docker Desktop's advanced settings.
 
 ### Connecting Claude
 
-The **Connect Claude** dialog in the sidebar covers both clients:
+The MCP server is part of the app: a Streamable HTTP endpoint at `http://localhost:3000/mcp`, served while
+`app` is running. Accepted requests come from this machine only: the server checks the `Host` and `Origin` headers.
 
-- **Claude Code** — the server is configured in `.mcp.json` and is picked up automatically in this folder.
-- **Claude Desktop** — download `markup-resume.mcpb` from the dialog and install it under Settings → Extensions.
-  The extension starts the MCP server through Docker, so Docker Desktop must be running.
+- **Claude Code** — `.mcp.json` points to the endpoint, so Claude Code picks it up in this folder. Run `/mcp`
+  to check that `markup-resume` is connected.
+- **Claude Desktop** — not supported locally for now. Claude Desktop connects to remote servers through custom
+  connectors, which need a public HTTPS address with sign-in. That arrives with the hosted version.
 
 Example prompt: _"Read the classic template and create a CV for this vacancy: …"_
 
