@@ -1,4 +1,4 @@
-import type { CvId } from './cv.ts';
+import type { CvId } from '../cv/cv.ts';
 
 /** What the rendered page holds, to compare the PDF with. */
 export interface PageSnapshot {

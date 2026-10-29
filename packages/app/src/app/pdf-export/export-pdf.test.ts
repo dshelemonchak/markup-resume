@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { CvRepository, PdfFacts } from '../domain/index.ts';
+import type { CvRepository, PdfFacts } from '../../domain/index.ts';
 import { exportCvPdf, pdfFileName } from './export-pdf.ts';
 
 const repository: CvRepository = {

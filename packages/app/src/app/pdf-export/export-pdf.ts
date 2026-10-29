@@ -5,7 +5,7 @@ import {
   isValidCvId,
   type PdfProblem,
   type RenderCv,
-} from '../domain/index.ts';
+} from '../../domain/index.ts';
 
 /** What exporting a CV to PDF needs: the stored CVs, a browser to print with, and a PDF reader to check with. */
 export interface PdfExportServices {

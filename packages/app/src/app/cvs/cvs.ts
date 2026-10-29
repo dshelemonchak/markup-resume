@@ -7,7 +7,7 @@ import {
   type ParseMarkup,
   type TemplateCatalog,
   withTemplateStyles,
-} from '../domain/index.ts';
+} from '../../domain/index.ts';
 
 /** What storing a CV document needs: where it goes, the templates it may use, and an HTML parser. */
 export interface CvDocumentServices {
