@@ -4,6 +4,7 @@ import { join } from 'node:path';
 import { describe, expect, it, vi } from 'vitest';
 import type { CvRepository } from '../../domain/index.ts';
 import { type HttpAppOptions, createHttpApp } from './http-app.ts';
+import { CvChanges } from '../../app/index.ts';
 
 function setup(options?: HttpAppOptions) {
   let notify = () => {};
@@ -17,7 +18,7 @@ function setup(options?: HttpAppOptions) {
       return () => {};
     },
   };
-  const { app, close } = createHttpApp(repository, options);
+  const { app, close } = createHttpApp(repository, new CvChanges(), options);
   return { app, close, notify: () => notify() };
 }
 

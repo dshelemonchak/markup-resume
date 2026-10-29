@@ -18,3 +18,4 @@ export {
   type PdfExportServices,
   pdfFileName,
 } from './pdf-export/export-pdf.ts';
+export { CvChanges } from './cv-changes/cv-changes.ts';

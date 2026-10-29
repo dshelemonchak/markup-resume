@@ -6,7 +6,7 @@ import { templateCatalog } from '@markup-resume/styles';
 import { resolve } from 'node:path';
 import { parseMarkup } from './adapters/html-parse5/parse-markup.ts';
 import { FsCvRepository } from './adapters/storage-fs/fs-cv-repository.ts';
-import { createCvDocument } from './app/index.ts';
+import { createCvDocument, CvChanges } from './app/index.ts';
 
 const SAMPLE_ID = 'sample';
 
@@ -19,7 +19,7 @@ const example = ref ? templateCatalog.guide(ref)?.example : undefined;
 if (!example) throw new Error('The style library has no template with an example');
 
 const result = await createCvDocument(
-  { repository, templates: templateCatalog, parseMarkup },
+  { repository, templates: templateCatalog, parseMarkup, cvChanges: new CvChanges() },
   SAMPLE_ID,
   example,
 );

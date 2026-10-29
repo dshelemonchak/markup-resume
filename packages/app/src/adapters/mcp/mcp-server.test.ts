@@ -2,6 +2,7 @@ import { Client, InMemoryTransport } from '@modelcontextprotocol/client';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import type { CvRepository, TemplateCatalog } from '../../domain/index.ts';
 import { createMcpServer } from './mcp-server.ts';
+import { CvChanges } from '../../app/index.ts';
 
 const doc = (title: string) => `<!doctype html><html><meta name="cv:title" content="${title}"></html>`;
 
@@ -37,11 +38,17 @@ beforeEach(async () => {
     },
     watch: () => () => {},
   };
+  const cvChanges = new CvChanges();
   const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
   client = new Client({ name: 'test-client', version: '0.0.0' });
   await Promise.all([
     createMcpServer(
-      { repository, templates, parseMarkup: () => ({ tag: 'html', attributes: new Map(), children: [] }) },
+      {
+        repository,
+        cvChanges,
+        templates,
+        parseMarkup: () => ({ tag: 'html', attributes: new Map(), children: [] }),
+      },
       { onToolCall: () => toolCalls++ },
     ).connect(serverTransport),
     client.connect(clientTransport),
