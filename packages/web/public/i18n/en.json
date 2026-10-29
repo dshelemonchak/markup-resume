@@ -17,7 +17,12 @@
     }
   },
   "sidebarItem": {
-    "pinned": "Pinned"
+    "pinned": "Pinned",
+    "actions": "Actions for {{ title }}",
+    "pin": "Pin",
+    "unpin": "Unpin",
+    "rename": "Rename",
+    "delete": "Delete"
   },
   "claude": {
     "connect": "Connect Claude",

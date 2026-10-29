@@ -56,7 +56,7 @@ describe('Sidebar', () => {
 
     const emitted: string[] = [];
     fixture.componentInstance.selectCv.subscribe((id) => emitted.push(id));
-    root.querySelectorAll<HTMLButtonElement>('mr-sidebar-item button')[2]!.click();
+    root.querySelectorAll<HTMLButtonElement>('mr-sidebar-item .item-main')[2]!.click();
     expect(emitted).toEqual(['c']);
   });
 
