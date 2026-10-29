@@ -8,12 +8,14 @@ import {
   type TemplateCatalog,
   withTemplateStyles,
 } from '../../domain/index.ts';
+import type { CvChanges } from '../cv-changes/cv-changes.ts';
 
 /** What storing a CV document needs: where it goes, the templates it may use, and an HTML parser. */
 export interface CvDocumentServices {
   readonly repository: CvRepository;
   readonly templates: TemplateCatalog;
   readonly parseMarkup: ParseMarkup;
+  readonly cvChanges: CvChanges;
 }
 
 /** All CVs, most recently changed first. */
@@ -57,6 +59,7 @@ export async function saveCvDocument(
   if (current === null) return { kind: 'not-found' };
   if (current === incoming.html) return { kind: 'unchanged' };
   await repository.save(id, incoming.html);
+  services.cvChanges.notify(id);
   return { kind: 'saved' };
 }
 
@@ -71,9 +74,11 @@ export async function createCvDocument(
 ): Promise<CreateCvDocumentResult> {
   const incoming = prepareIncoming(services, id, html);
   if (incoming.kind !== 'ready') return incoming;
-  return (await services.repository.create(id, incoming.html))
-    ? { kind: 'created' }
-    : { kind: 'already-exists' };
+
+  const created = await services.repository.create(id, incoming.html);
+  if (!created) return { kind: 'already-exists' };
+  services.cvChanges.notify(id);
+  return { kind: 'created' };
 }
 
 type Rejection =

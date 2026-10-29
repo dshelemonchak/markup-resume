@@ -12,6 +12,7 @@ import { parseMarkup } from './adapters/html-parse5/parse-markup.ts';
 import { createMcpServer } from './adapters/mcp/mcp-server.ts';
 import { type PresenceReporter, reportPresence } from './adapters/presence-http/presence-reporter.ts';
 import { FsCvRepository } from './adapters/storage-fs/fs-cv-repository.ts';
+import { CvChanges } from './app/index.ts';
 
 const dataDir = resolve(process.env['CV_DATA_DIR'] ?? 'data');
 const appUrl = process.env['CV_APP_URL'];
@@ -21,7 +22,7 @@ await repository.init();
 
 let presence: PresenceReporter | undefined;
 const server = createMcpServer(
-  { repository, templates: templateCatalog, parseMarkup },
+  { repository, templates: templateCatalog, parseMarkup, cvChanges: new CvChanges() },
   { onToolCall: () => presence?.activity() },
 );
 

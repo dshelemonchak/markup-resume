@@ -10,6 +10,7 @@ import { createChromeRenderer } from './adapters/chrome-cdp/chrome-renderer.ts';
 import { createHttpApp } from './adapters/http/http-app.ts';
 import { inspectPdf } from './adapters/poppler/inspect-pdf.ts';
 import { FsCvRepository } from './adapters/storage-fs/fs-cv-repository.ts';
+import { CvChanges } from './app/index.ts';
 
 const dataDir = resolve(process.env['CV_DATA_DIR'] ?? 'data');
 const port = Number(process.env['PORT'] ?? 3000);
@@ -19,7 +20,9 @@ const chromePath = process.env['CHROME_PATH'];
 const repository = new FsCvRepository(dataDir);
 await repository.init();
 
-const { app, close } = createHttpApp(repository, {
+const cvChanges = new CvChanges();
+
+const { app, close } = createHttpApp(repository, cvChanges, {
   hostProjectDir: process.env['HOST_PROJECT_DIR'] || null,
   fontsDir,
   iconsDir,

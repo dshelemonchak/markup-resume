@@ -5,6 +5,7 @@ import { type Context, Hono } from 'hono';
 import { type SSEStreamingApi, streamSSE } from 'hono/streaming';
 import {
   ClaudeSessions,
+  CvChanges,
   exportCvPdf,
   getCvDocument,
   listCvs,
@@ -51,12 +52,14 @@ export interface HttpAppOptions {
  */
 export function createHttpApp(
   repository: CvRepository,
+  cvChanges: CvChanges,
   options: HttpAppOptions = {},
 ): { app: Hono; close: () => void } {
-  // One storage watcher and one session registry for all event-stream clients.
+  // Two storage watchers and one session registry for all event-stream clients.
   const listeners = new Set<(event: string) => void>();
   const broadcast = (event: string) => listeners.forEach((listener) => listener(event));
   const stopWatching = repository.watch(() => broadcast('cvs-changed'));
+  const stopListening = cvChanges.onChange(() => broadcast('cvs-changed'));
   const sessions = new ClaudeSessions();
   sessions.onChange(() => broadcast('claude-changed'));
   const shutdown = new AbortController();
@@ -153,6 +156,7 @@ export function createHttpApp(
   const close = () => {
     shutdown.abort();
     stopWatching();
+    stopListening();
   };
 
   return { app, close };
