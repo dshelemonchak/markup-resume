@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { CvRepository, CvSummary, ParseMarkup, TemplateCatalog } from '../domain/index.ts';
+import type { CvRepository, CvSummary, ParseMarkup, TemplateCatalog } from '../../domain/index.ts';
 import { createCvDocument, getCvDocument, listCvs, MAX_CV_DOCUMENT_BYTES, saveCvDocument } from './cvs.ts';
 
 const templates: TemplateCatalog = {

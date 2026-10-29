@@ -1,5 +1,5 @@
-import { checkMarkup, type MarkupSchema, type ParseMarkup } from './cv-markup.ts';
-import { readCvMeta } from './cv-meta.ts';
+import { checkMarkup, type MarkupSchema, type ParseMarkup } from '../markup/cv-markup.ts';
+import { readCvMeta } from '../document/cv-meta.ts';
 
 /** Port: the templates a CV can name in <meta name="cv:template" content="classic@0.0.2"> (ADR-0006). */
 export interface TemplateCatalog {
