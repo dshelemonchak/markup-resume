@@ -1,9 +1,13 @@
 // Design tokens of the tool's UI (not the CVs): every colour the components use is defined here, so a theme
-// changes this file only. Components read them as CSS custom properties.
+// changes this file only. Components read them as CSS custom properties. The dark theme follows the system
+// setting (prefers-color-scheme) and overrides only the values that differ, at the end of the file.
 :root {
+  color-scheme: light dark; // native controls and scrollbars follow the theme too
+
   // Base colours as RGB channels, so the tokens below can add their own transparency.
-  --mr-ink-rgb: 15 23 42; // dark slate: shadows, separators, overlays
-  --mr-light-rgb: 255 255 255; // white: glass, hover and selection fills
+  --mr-ink-rgb: 15 23 42; // contrast to the background: separators, pressed and code fills
+  --mr-light-rgb: 255 255 255; // fills on glass: panels, hover, selection
+  --mr-shadow-rgb: 15 23 42; // shadows and backdrops, dark in every theme
 
   // App background and its two blurred colour glows.
   --mr-surface-base: #eef1f6;
@@ -27,7 +31,7 @@
   --mr-glass-border: rgb(var(--mr-light-rgb) / var(--mr-glass-border-alpha));
   --mr-glass-shadow:
     inset 0 1px 0 rgb(var(--mr-light-rgb) / var(--mr-glass-highlight-alpha)),
-    0 8px 32px rgb(var(--mr-ink-rgb) / var(--mr-glass-shadow-alpha));
+    0 8px 32px rgb(var(--mr-shadow-rgb) / var(--mr-glass-shadow-alpha));
 
   // Lines: a hairline between areas, and a short vertical bar between controls.
   --mr-separator: rgb(var(--mr-ink-rgb) / 0.08);
@@ -48,12 +52,15 @@
   // Status dot ring, scrollbars, modal backdrops.
   --mr-dot-ring: rgb(var(--mr-ink-rgb) / 0.2);
   --mr-scrollbar: rgb(var(--mr-ink-rgb) / 0.25);
-  --mr-backdrop: rgb(var(--mr-ink-rgb) / 0.25);
+  --mr-backdrop: rgb(var(--mr-shadow-rgb) / 0.25);
 
   // Shadows: a raised list item, the CV sheet, dialogs.
-  --mr-shadow-raised: 0 2px 8px rgb(var(--mr-ink-rgb) / 0.06);
-  --mr-shadow-sheet: 0 12px 40px rgb(var(--mr-ink-rgb) / 0.14), 0 1px 3px rgb(var(--mr-ink-rgb) / 0.08);
-  --mr-shadow-dialog: 0 24px 64px rgb(var(--mr-ink-rgb) / 0.2), 0 1px 3px rgb(var(--mr-ink-rgb) / 0.08);
+  --mr-shadow-raised: 0 2px 8px rgb(var(--mr-shadow-rgb) / 0.06);
+  --mr-shadow-sheet: 0 12px 40px rgb(var(--mr-shadow-rgb) / 0.14), 0 1px 3px rgb(var(--mr-shadow-rgb) / 0.08);
+  --mr-shadow-dialog: 0 24px 64px rgb(var(--mr-shadow-rgb) / 0.2), 0 1px 3px rgb(var(--mr-shadow-rgb) / 0.08);
+
+  // The logo mark next to the app name.
+  --mr-brand: var(--bs-dark);
 
   // The CV sheet is paper in every theme: the PDF is white.
   --mr-paper: #fff;
@@ -63,4 +70,44 @@
 
   // Layout rhythm.
   --mr-gap: 12px;
+}
+
+// Dark theme: neutral graphite greys, close to macOS, without a blue cast. Bootstrap's own dark greys are
+// bluish, so its surface and text colours are set here too. The CV sheet stays white (--mr-paper): the PDF
+// is paper.
+@media (prefers-color-scheme: dark) {
+  :root {
+    // Bootstrap surfaces and text.
+    --bs-body-bg: #1c1c1e;
+    --bs-body-bg-rgb: 28, 28, 30;
+    --bs-secondary-bg: #2c2c2e;
+    --bs-secondary-bg-rgb: 44, 44, 46;
+    --bs-tertiary-bg: #242426;
+    --bs-tertiary-bg-rgb: 36, 36, 38;
+    --bs-border-color: #3a3a3c;
+    --bs-body-color: #e5e5e7;
+    --bs-body-color-rgb: 229, 229, 231;
+    --bs-secondary-color: rgb(235 235 245 / 0.6);
+    --bs-tertiary-color: rgb(235 235 245 / 0.35);
+
+    --mr-ink-rgb: 235 235 245; // light grey: separators read as faint light lines
+    --mr-light-rgb: 44 44 46; // graphite: fills sit just above the background
+    --mr-shadow-rgb: 0 0 0;
+
+    --mr-surface-base: #161618;
+    --mr-glow-opacity: 0.08;
+
+    --mr-glass-opacity: 0.6;
+    --mr-glass-shadow-alpha: 0.35;
+
+    --mr-notice-bg: rgb(var(--mr-ink-rgb) / 0.08);
+    --mr-backdrop: rgb(var(--mr-shadow-rgb) / 0.5);
+    --mr-shadow-raised: 0 2px 8px rgb(var(--mr-shadow-rgb) / 0.3);
+    --mr-shadow-sheet: 0 12px 40px rgb(var(--mr-shadow-rgb) / 0.5), 0 1px 3px rgb(var(--mr-shadow-rgb) / 0.4);
+    --mr-shadow-dialog:
+      0 24px 64px rgb(var(--mr-shadow-rgb) / 0.6), 0 1px 3px rgb(var(--mr-shadow-rgb) / 0.4);
+
+    --mr-brand: var(--bs-body-color);
+    --mr-dummy-color: rgb(234 134 143 / 0.4);
+  }
 }
