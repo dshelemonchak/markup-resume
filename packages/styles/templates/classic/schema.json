@@ -56,7 +56,7 @@
     "cv-domain": { "tags": ["p"], "parents": ["cv-project-header"] },
     "cv-achievements": { "tags": ["ul"], "parents": ["cv-project"] },
 
-    "cv-languages": { "tags": ["section"], "parents": ["cv-main"], "first": "cv-languages-header" },
+    "cv-languages": { "tags": ["section"], "parents": ["cv-sidebar"], "first": "cv-languages-header" },
     "cv-languages-header": { "tags": ["h2"], "parents": ["cv-languages"] },
     "cv-language-list": { "tags": ["ul"], "parents": ["cv-languages"] }
   }

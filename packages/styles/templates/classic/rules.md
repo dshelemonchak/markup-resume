@@ -1,7 +1,7 @@
 # Template "classic" (version 0.0.2)
 
-One A4 page: name and headline, a summary across the page, then a narrow sidebar (contacts, skills, education)
-next to the main column (experience, languages). The design comes from the template; the document only holds
+One A4 page: name and headline, a summary across the page, then a narrow sidebar (contacts, skills, education,
+languages) next to the main column (experience). The design comes from the template; the document only holds
 content and the class names below.
 
 ## The document
@@ -29,10 +29,10 @@ main.cv-page
     ├── aside.cv-sidebar
     │   ├── section.cv-contacts         h2.cv-contacts-header, then ul.cv-contact-list
     │   ├── section.cv-skills           h2.cv-skills-header, then div.cv-skill-group …
-    │   └── section.cv-education        h2.cv-education-header, then article.cv-school …
+    │   ├── section.cv-education        h2.cv-education-header, then article.cv-school …
+    │   └── section.cv-languages        h2.cv-languages-header, then ul.cv-language-list
     └── div.cv-main
-        ├── section.cv-experience       h2.cv-experience-header, then article.cv-employer …
-        └── section.cv-languages        h2.cv-languages-header, then ul.cv-language-list
+        └── section.cv-experience       h2.cv-experience-header, then article.cv-employer …
 ```
 
 Every section starts with its heading: an `<h2>` with the section's own header class, e.g.
