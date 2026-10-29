@@ -18,12 +18,12 @@
 }
 
 .fit[aria-pressed='true'] {
-  background: rgb(15 23 42 / 0.08);
+  background: var(--mr-pressed-bg);
 }
 
 .divider {
   width: 1px;
   height: 16px;
   margin: 0 4px;
-  background: rgb(15 23 42 / 0.12);
+  background: var(--mr-divider);
 }

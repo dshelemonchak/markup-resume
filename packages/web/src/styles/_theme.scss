@@ -1,6 +1,10 @@
-// Design tokens of the tool's UI (not the CVs).
-// Components read them as CSS custom properties.
+// Design tokens of the tool's UI (not the CVs): every colour the components use is defined here, so a theme
+// changes this file only. Components read them as CSS custom properties.
 :root {
+  // Base colours as RGB channels, so the tokens below can add their own transparency.
+  --mr-ink-rgb: 15 23 42; // dark slate: shadows, separators, overlays
+  --mr-light-rgb: 255 255 255; // white: glass, hover and selection fills
+
   // App background and its two blurred colour glows.
   --mr-surface-base: #eef1f6;
   --mr-glow-opacity: 0.4;
@@ -18,12 +22,44 @@
   --mr-glass-radius-compact: 12px;
 
   // …and the values components use, derived from them.
-  --mr-glass-bg: rgb(255 255 255 / var(--mr-glass-opacity));
+  --mr-glass-bg: rgb(var(--mr-light-rgb) / var(--mr-glass-opacity));
   --mr-glass-blur: blur(var(--mr-glass-blur-radius)) saturate(var(--mr-glass-saturation));
-  --mr-glass-border: rgb(255 255 255 / var(--mr-glass-border-alpha));
+  --mr-glass-border: rgb(var(--mr-light-rgb) / var(--mr-glass-border-alpha));
   --mr-glass-shadow:
-    inset 0 1px 0 rgb(255 255 255 / var(--mr-glass-highlight-alpha)),
-    0 8px 32px rgb(15 23 42 / var(--mr-glass-shadow-alpha));
+    inset 0 1px 0 rgb(var(--mr-light-rgb) / var(--mr-glass-highlight-alpha)),
+    0 8px 32px rgb(var(--mr-ink-rgb) / var(--mr-glass-shadow-alpha));
+
+  // Lines: a hairline between areas, and a short vertical bar between controls.
+  --mr-separator: rgb(var(--mr-ink-rgb) / 0.08);
+  --mr-divider: rgb(var(--mr-ink-rgb) / 0.12);
+
+  // Fills of controls on glass.
+  --mr-control-bg: rgb(var(--mr-light-rgb) / 0.6); // buttons
+  --mr-input-bg: rgb(var(--mr-light-rgb) / 0.7); // text fields
+  --mr-pressed-bg: rgb(var(--mr-ink-rgb) / 0.08); // a toggle that is on
+  --mr-code-bg: rgb(var(--mr-ink-rgb) / 0.06); // code snippets
+  --mr-notice-bg: rgb(231 241 255 / 0.85); // the notice pill in the header
+
+  // List items in the sidebar.
+  --mr-item-hover-bg: rgb(var(--mr-light-rgb) / 0.5);
+  --mr-item-selected-bg: rgb(var(--mr-light-rgb) / 0.9);
+  --mr-item-selected-border: rgb(var(--mr-light-rgb) / 0.95);
+
+  // Status dot ring, scrollbars, modal backdrops.
+  --mr-dot-ring: rgb(var(--mr-ink-rgb) / 0.2);
+  --mr-scrollbar: rgb(var(--mr-ink-rgb) / 0.25);
+  --mr-backdrop: rgb(var(--mr-ink-rgb) / 0.25);
+
+  // Shadows: a raised list item, the CV sheet, dialogs.
+  --mr-shadow-raised: 0 2px 8px rgb(var(--mr-ink-rgb) / 0.06);
+  --mr-shadow-sheet: 0 12px 40px rgb(var(--mr-ink-rgb) / 0.14), 0 1px 3px rgb(var(--mr-ink-rgb) / 0.08);
+  --mr-shadow-dialog: 0 24px 64px rgb(var(--mr-ink-rgb) / 0.2), 0 1px 3px rgb(var(--mr-ink-rgb) / 0.08);
+
+  // The CV sheet is paper in every theme: the PDF is white.
+  --mr-paper: #fff;
+
+  // Stripes of the "dummy" overlay on placeholder UI: Bootstrap danger, muted.
+  --mr-dummy-color: rgb(220 53 69 / 0.38);
 
   // Layout rhythm.
   --mr-gap: 12px;

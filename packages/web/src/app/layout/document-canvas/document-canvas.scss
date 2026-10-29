@@ -16,7 +16,7 @@
   padding-bottom: var(--mr-canvas-inset-bottom, 24px);
   // Thin, translucent scrollbar: it runs under the floating header's right edge.
   scrollbar-width: thin;
-  scrollbar-color: rgb(15 23 42 / 0.25) transparent;
+  scrollbar-color: var(--mr-scrollbar) transparent;
 }
 
 .sheet {
@@ -24,10 +24,8 @@
   margin: 0 auto;
   overflow: hidden;
   border-radius: 2px;
-  background: #fff;
-  box-shadow:
-    0 12px 40px rgb(15 23 42 / 0.14),
-    0 1px 3px rgb(15 23 42 / 0.08);
+  background: var(--mr-paper);
+  box-shadow: var(--mr-shadow-sheet);
 }
 
 // The iframe keeps the document's real size; the sheet around it takes the scaled size.
