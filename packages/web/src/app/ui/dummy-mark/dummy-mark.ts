@@ -6,13 +6,14 @@ const FONT_SIZE_PX = 10;
 const CHAR_WIDTH_PX = FONT_SIZE_PX * 0.6;
 /** Space between repetitions, both ways. */
 const GAP_PX = 16; // 1rem
-const COLOR = 'rgb(220 53 69 / 0.38)'; // Bootstrap danger, muted
+/** The pattern is a mask: only where it is opaque matters; the colour is --mr-dummy-color in the theme. */
+const MASK_FILL = '#000';
 
 const patterns = new Map<string, string>();
 
 /**
- * The repeated word as an SVG pattern rotated by 45°, for the CSS background of the overlay.
- * The SVG has no size of its own, so as a background it fills the element without scaling.
+ * The repeated word as an SVG pattern rotated by 45°, for the CSS mask of the overlay.
+ * The SVG has no size of its own, so as a mask it covers the element without scaling.
  */
 export function dummyPattern(text: string): string {
   let pattern = patterns.get(text);
@@ -23,7 +24,7 @@ export function dummyPattern(text: string): string {
     const svg =
       `<svg xmlns="http://www.w3.org/2000/svg">` +
       `<defs><pattern id="p" width="${width}" height="${height}" patternUnits="userSpaceOnUse" patternTransform="rotate(-45)">` +
-      `<text x="0" y="${FONT_SIZE_PX}" font-family="ui-monospace, Menlo, monospace" font-size="${FONT_SIZE_PX}" fill="${COLOR}">${escaped}</text>` +
+      `<text x="0" y="${FONT_SIZE_PX}" font-family="ui-monospace, Menlo, monospace" font-size="${FONT_SIZE_PX}" fill="${MASK_FILL}">${escaped}</text>` +
       `</pattern></defs><rect width="100%" height="100%" fill="url(#p)"/></svg>`;
     pattern = `url("data:image/svg+xml,${encodeURIComponent(svg)}")`;
     patterns.set(text, pattern);

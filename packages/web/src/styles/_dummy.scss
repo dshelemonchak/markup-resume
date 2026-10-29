@@ -10,6 +10,8 @@
   inset: 0;
   z-index: 1;
   border-radius: inherit;
-  background-image: var(--mr-dummy-pattern);
+  // The pattern is a mask over a flat colour, so the colour can come from the theme.
+  background-color: var(--mr-dummy-color);
+  mask-image: var(--mr-dummy-pattern);
   pointer-events: none;
 }

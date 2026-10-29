@@ -8,7 +8,7 @@
   align-items: center;
   gap: 12px;
   padding: 10px 20px;
-  border-bottom: 1px solid rgb(15 23 42 / 0.07);
+  border-bottom: 1px solid var(--mr-separator);
 }
 
 .title {
@@ -28,7 +28,7 @@
   margin-left: auto;
   padding: 4px 10px;
   border-radius: 999px;
-  background: rgb(231 241 255 / 0.85);
+  background: var(--mr-notice-bg);
   color: var(--bs-primary-text-emphasis);
   font-size: 13px;
 }
