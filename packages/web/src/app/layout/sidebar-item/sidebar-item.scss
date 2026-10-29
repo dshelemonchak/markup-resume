@@ -3,16 +3,9 @@
 }
 
 .item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
-  padding: 8px;
+  position: relative;
   border: 1px solid transparent;
   border-radius: 10px;
-  background: none;
-  color: inherit;
-  text-align: left;
 
   &:hover {
     background: var(--mr-item-hover-bg);
@@ -26,6 +19,74 @@
     .title {
       font-weight: 600;
     }
+  }
+
+  // The menu shows on hover, and while the keyboard is inside the item, so Tab reaches its button.
+  &:hover,
+  &:focus-within {
+    .item-menu {
+      display: flex;
+    }
+  }
+}
+
+// Selects the CV: the whole row, under the menu.
+.item-main {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 8px;
+  border: 0;
+  border-radius: inherit;
+  background: none;
+  color: inherit;
+  text-align: left;
+}
+
+// A sibling of the main button, laid over its right end: a click here never selects the CV.
+.item-menu {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 1;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  width: 50px;
+  height: 100%;
+  border-radius: 10px;
+
+  &.open {
+    display: flex;
+  }
+}
+
+.item-menu-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: none;
+  color: var(--bs-secondary-color);
+
+  &:hover {
+    background: var(--mr-pressed-bg);
+    color: var(--bs-body-color);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--bs-primary);
+    outline-offset: 1px;
+  }
+
+  // ngbDropdownToggle adds Bootstrap's .dropdown-toggle, which draws a caret; the icon says it already.
+  &::after {
+    display: none;
   }
 }
 

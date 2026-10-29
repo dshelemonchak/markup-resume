@@ -1,16 +1,44 @@
-<button
-  type="button"
-  class="item"
-  [class.selected]="selected()"
-  [attr.aria-current]="selected() ? 'true' : null"
-  (click)="selectCv.emit(item().id)"
->
-  <span class="status" [class]="item().status" aria-hidden="true"></span>
-  <span class="text">
-    <span class="title">{{ item().title }}</span>
-    <span class="subtitle">{{ item().subtitle }}</span>
-  </span>
-  @if (item().pinned) {
-    <i class="bi bi-pin-angle pin" role="img" [attr.aria-label]="'sidebarItem.pinned' | transloco"></i>
-  }
-</button>
+<div class="item" [class.selected]="selected()">
+  <button
+    type="button"
+    class="item-main"
+    [attr.aria-current]="selected() ? 'true' : null"
+    (click)="selectCv.emit(item().id)"
+  >
+    <span class="status" [class]="item().status" aria-hidden="true"></span>
+    <span class="text">
+      <span class="title">{{ item().title }}</span>
+      <span class="subtitle">{{ item().subtitle }}</span>
+    </span>
+    @if (item().pinned) {
+      <i class="bi bi-pin-angle pin" role="img" [attr.aria-label]="'sidebarItem.pinned' | transloco"></i>
+    }
+  </button>
+
+  <!-- The menu goes to <body>: the CV list scrolls and would clip it. -->
+  <div
+    class="item-menu"
+    [class.open]="menuOpen()"
+    mr-glass-panel
+    ngbDropdown
+    container="body"
+    placement="bottom-end"
+    (openChange)="menuOpen.set($event)"
+  >
+    <button
+      type="button"
+      class="item-menu-btn"
+      ngbDropdownToggle
+      [attr.aria-label]="'sidebarItem.actions' | transloco: { title: item().title }"
+    >
+      <i class="bi bi-three-dots-vertical" aria-hidden="true"></i>
+    </button>
+    <div ngbDropdownMenu mr-glass-panel variant="compact">
+      <button type="button" ngbDropdownItem>
+        {{ (item().pinned ? 'sidebarItem.unpin' : 'sidebarItem.pin') | transloco }}
+      </button>
+      <button type="button" ngbDropdownItem>{{ 'sidebarItem.rename' | transloco }}</button>
+      <button type="button" ngbDropdownItem>{{ 'sidebarItem.delete' | transloco }}</button>
+    </div>
+  </div>
+</div>

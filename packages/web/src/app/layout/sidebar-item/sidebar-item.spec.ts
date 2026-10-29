@@ -15,7 +15,12 @@ async function render(selected: boolean) {
   fixture.componentRef.setInput('item', ITEM);
   fixture.componentRef.setInput('selected', selected);
   await fixture.whenStable();
-  return { fixture, button: (fixture.nativeElement as HTMLElement).querySelector('button')! };
+  const root = fixture.nativeElement as HTMLElement;
+  return {
+    fixture,
+    button: root.querySelector<HTMLButtonElement>('.item-main')!,
+    menu: root.querySelector<HTMLButtonElement>('.item-menu-btn')!,
+  };
 }
 
 describe('SidebarItem', () => {
@@ -38,5 +43,15 @@ describe('SidebarItem', () => {
     fixture.componentInstance.selectCv.subscribe((id) => emitted.push(id));
     button.click();
     expect(emitted).toEqual(['cv-1']);
+  });
+
+  it('has a menu button beside the row, named after the CV, that does not select it', async () => {
+    const { fixture, button, menu } = await render(false);
+    expect(button.contains(menu)).toBe(false);
+    expect(menu.getAttribute('aria-label')).toBe('Actions for Title');
+    const emitted: string[] = [];
+    fixture.componentInstance.selectCv.subscribe((id) => emitted.push(id));
+    menu.click();
+    expect(emitted).toEqual([]);
   });
 });

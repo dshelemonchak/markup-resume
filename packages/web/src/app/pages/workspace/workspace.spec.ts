@@ -71,7 +71,7 @@ describe('Workspace', () => {
 
   it('keeps the selection and reloads list and preview when the server reports a change', async () => {
     const { fixture, http, root, frameSrc } = await render();
-    root.querySelectorAll<HTMLButtonElement>('mr-sidebar-item button')[1]!.click();
+    root.querySelectorAll<HTMLButtonElement>('mr-sidebar-item .item-main')[1]!.click();
     await fixture.whenStable();
     expect(frameSrc()).toBe('/api/v1/cvs/second/document?v=0');
 
