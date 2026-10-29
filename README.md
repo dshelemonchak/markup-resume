@@ -63,6 +63,16 @@ Open http://localhost:4200.
 
 CVs are stored in `./data`, which is excluded from git.
 
+### Running from a JetBrains IDE
+
+WebStorm and IntelliJ IDEA pick up the shared run configuration **app + web** from `.run/`. It starts both
+services with Docker Compose and shows each container's log in the Services tool window (⌘8).
+
+If the IDE reports `Cannot connect to the Docker daemon at unix:///var/run/docker.sock`, Docker Desktop is using
+its per-user socket. Either point the IDE's Docker connection at it, under Settings → Build, Execution,
+Deployment → Docker, with the Engine API URL `unix://<your home>/.docker/run/docker.sock`. Or enable "Allow the
+default Docker socket to be used" in Docker Desktop's advanced settings.
+
 ### Connecting Claude
 
 The **Connect Claude** dialog in the sidebar covers both clients:
