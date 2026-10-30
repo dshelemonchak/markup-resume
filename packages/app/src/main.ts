@@ -16,6 +16,7 @@ import { FsCvRepository } from './adapters/storage-fs/fs-cv-repository.ts';
 import { createDatabase } from './adapters/storage-pg/database.ts';
 import { CvChanges } from './app/index.ts';
 import { sql } from 'kysely';
+import { migrateToLatest } from './adapters/storage-pg/migration.ts';
 
 // --- Configuration ---
 
@@ -32,6 +33,7 @@ if (!databaseUrl) {
 
 const db = createDatabase(databaseUrl);
 await sql`select 1`.execute(db);
+await migrateToLatest(db);
 
 const repository = new FsCvRepository(dataDir);
 await repository.init();
