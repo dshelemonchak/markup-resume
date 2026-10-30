@@ -11,6 +11,7 @@
     "start": "node src/main.ts",
     "dev": "node --watch src/main.ts",
     "seed": "node src/seed.ts",
+    "db:types": "kysely-codegen --dialect postgres --out-file src/adapters/storage-pg/schema.ts --exclude-pattern 'kysely_*' && prettier --write src/adapters/storage-pg/schema.ts",
     "typecheck": "tsc --noEmit",
     "test": "vitest run --passWithNoTests"
   },
@@ -18,6 +19,7 @@
     "@modelcontextprotocol/client": "^2.4.0",
     "@types/node": "^24.19.2",
     "@types/pg": "^8.23.1",
+    "kysely-codegen": "^0.20.0",
     "typescript": "~6.0.3",
     "vitest": "^5.0.5"
   },
