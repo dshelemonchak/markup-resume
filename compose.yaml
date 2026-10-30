@@ -25,6 +25,22 @@ x-workspace: &workspace
   shm_size: 1gb
 
 services:
+  db:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_USER: markup
+      POSTGRES_PASSWORD: markup
+      POSTGRES_DB: markup
+    volumes:
+      - db-data:/var/lib/postgresql
+    ports:
+      - '127.0.0.1:5433:5432'
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U markup -d markup']
+      interval: 2s
+      timeout: 3s
+      retries: 15
+
   dev:
     <<: *workspace
 
@@ -36,6 +52,9 @@ services:
       PORT: '3000'
     ports:
       - '3000:3000'
+    depends_on:
+      db:
+        condition: service_healthy
 
   web:
     <<: *workspace
@@ -44,3 +63,9 @@ services:
       - app
     ports:
       - '4200:4200'
+
+volumes:
+  db-data:
+    name: markup-resume-db
+    labels:
+      com.markup-resume.purpose: database
