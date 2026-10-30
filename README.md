@@ -56,17 +56,21 @@ Requirements: Docker (Docker Desktop on macOS). All tooling runs in containers.
 docker compose up -d dev
 docker compose exec dev pnpm install
 docker compose exec dev pnpm seed        # adds a fictional example CV to ./data
-docker compose up -d app web
+docker compose up -d app web              # also starts Postgres (db), which app waits for
 ```
 
 Open http://localhost:4200.
 
-CVs are stored in `./data`, which is excluded from git.
+CVs are stored in `./data`, which is excluded from git. The app also connects to a Postgres database at startup
+and applies its schema migrations. The database lives in the Docker volume `markup-resume-db`, is reachable from
+this machine on `localhost:5433` (user, password and database: `markup`), and is reset with
+`docker compose down -v`.
 
 ### Running from a JetBrains IDE
 
-WebStorm and IntelliJ IDEA pick up the shared run configuration **app + web** from `.run/`. It starts both
-services with Docker Compose and shows each container's log in the Services tool window (⌘8).
+WebStorm and IntelliJ IDEA pick up the shared run configurations from `.run/`. **app + web** starts both services,
+and the database with them, with Docker Compose. **db** starts only the database. The Services tool window (⌘8)
+shows each container's log.
 
 If the IDE reports `Cannot connect to the Docker daemon at unix:///var/run/docker.sock`, Docker Desktop is using
 its per-user socket. Either point the IDE's Docker connection at it, under Settings → Build, Execution,
