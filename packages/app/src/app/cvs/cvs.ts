@@ -1,4 +1,5 @@
 import {
+  type CanonicalCvHtml,
   type CvRepository,
   type CvSummary,
   type CvTemplateRef,
@@ -94,7 +95,7 @@ function prepareIncoming(
   { templates, parseMarkup }: CvDocumentServices,
   id: string,
   html: string,
-): { readonly kind: 'ready'; readonly html: string; readonly template: CvTemplateRef } | Rejection {
+): { readonly kind: 'ready'; readonly html: CanonicalCvHtml; readonly template: CvTemplateRef } | Rejection {
   if (!isValidCvId(id)) {
     return { kind: 'invalid-id' };
   }

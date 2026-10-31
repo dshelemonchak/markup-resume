@@ -3,6 +3,7 @@
 export { type CvId, type CvSummary, isValidCvId } from './cv/cv.ts';
 export { checkCvDocument } from './document/cv-document.ts';
 export {
+  type CanonicalCvHtml,
   type CvDocumentValidation,
   type CvTemplateRef,
   validateCvDocument,
