@@ -10,7 +10,7 @@ describe.each(templateCatalog.refs())('template %s', (ref) => {
   const guide = templateCatalog.guide(ref)!;
 
   it('has an example that passes its schema', () => {
-    expect(checkMarkup(parseMarkup(guide.example), schema)).toEqual([]);
+    expect(checkMarkup(parseMarkup(guide.example).tree, schema)).toEqual([]);
   });
 
   it('explains every class of its schema in its rules', () => {

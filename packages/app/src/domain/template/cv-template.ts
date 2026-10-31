@@ -64,5 +64,5 @@ export function checkTemplateMarkup(
 ): readonly string[] {
   const ref = readCvMeta(html, 'cv:template');
   const schema = ref === null ? null : catalog.schema(ref);
-  return schema ? checkMarkup(parse(html), schema) : [];
+  return schema ? checkMarkup(parse(html).tree, schema) : [];
 }

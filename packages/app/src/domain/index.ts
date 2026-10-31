@@ -7,6 +7,7 @@ export {
   checkMarkup,
   type MarkupElement,
   type MarkupSchema,
+  type ParsedMarkup,
   type ParseMarkup,
 } from './markup/cv-markup.ts';
 export {
