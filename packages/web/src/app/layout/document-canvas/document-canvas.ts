@@ -26,7 +26,7 @@ const PAGE = { width: 794, height: 1123 } as const;
  * Preview of one CV document. The CV is a standalone HTML file rendered in a sandboxed iframe,
  * so the app's styles and the CV's styles never mix and the preview matches the PDF render:
  * no scripts run inside (no allow-scripts), but same origin lets the app measure the document
- * and switch its data-cv-mode (visual / ATS).
+ * and switch its data-resume-mode (visual / ATS).
  *
  * The zoom setting is owned outside (the controls live in the status bar); the canvas turns it
  * into a scale, since only the canvas knows the space available for "fit".
@@ -101,7 +101,7 @@ export class DocumentCanvas {
   private applyMode(mode: PreviewMode): void {
     const document = this.frame().nativeElement.contentDocument;
     if (!document?.documentElement) return;
-    document.documentElement.setAttribute('data-cv-mode', mode);
+    document.documentElement.setAttribute('data-resume-mode', mode);
     this.measure(document);
   }
 

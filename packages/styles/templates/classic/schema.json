@@ -2,62 +2,81 @@
   "$comment": "The markup accepted for documents on this template; rules.md explains the same to Claude. Every element in the page carries one class from \"classes\" (plus its kind class, if it has \"oneOf\"), or no class and a tag from \"plainElements\". \"parents\": the classes of the nearest classed ancestor it may sit in; empty for the page itself. \"first\": the class of the element that must open it.",
   "plainElements": ["p", "ul", "li", "a", "strong", "time", "h3", "span"],
   "classes": {
-    "cv-page": { "tags": ["main"], "parents": [] },
+    "resume-page": { "tags": ["main"], "parents": [] },
 
-    "cv-header": { "tags": ["header"], "parents": ["cv-page"] },
-    "cv-name": { "tags": ["h1"], "parents": ["cv-header"] },
-    "cv-headline": { "tags": ["p"], "parents": ["cv-header"] },
+    "resume-header": { "tags": ["header"], "parents": ["resume-page"] },
+    "resume-name": { "tags": ["h1"], "parents": ["resume-header"] },
+    "resume-headline": { "tags": ["p"], "parents": ["resume-header"] },
 
-    "cv-summary": { "tags": ["section"], "parents": ["cv-page"], "first": "cv-summary-header" },
-    "cv-summary-header": { "tags": ["h2"], "parents": ["cv-summary"] },
+    "resume-summary": { "tags": ["section"], "parents": ["resume-page"], "first": "resume-summary-header" },
+    "resume-summary-header": { "tags": ["h2"], "parents": ["resume-summary"] },
 
-    "cv-columns": { "tags": ["div"], "parents": ["cv-page"] },
-    "cv-sidebar": { "tags": ["aside"], "parents": ["cv-columns"] },
-    "cv-main": { "tags": ["div"], "parents": ["cv-columns"] },
+    "resume-columns": { "tags": ["div"], "parents": ["resume-page"] },
+    "resume-sidebar": { "tags": ["aside"], "parents": ["resume-columns"] },
+    "resume-main": { "tags": ["div"], "parents": ["resume-columns"] },
 
-    "cv-contacts": { "tags": ["section"], "parents": ["cv-sidebar"], "first": "cv-contacts-header" },
-    "cv-contacts-header": { "tags": ["h2"], "parents": ["cv-contacts"] },
-    "cv-contact-list": { "tags": ["ul"], "parents": ["cv-contacts"] },
-    "cv-contact": {
+    "resume-contacts": {
+      "tags": ["section"],
+      "parents": ["resume-sidebar"],
+      "first": "resume-contacts-header"
+    },
+    "resume-contacts-header": { "tags": ["h2"], "parents": ["resume-contacts"] },
+    "resume-contact-list": { "tags": ["ul"], "parents": ["resume-contacts"] },
+    "resume-contact": {
       "tags": ["li"],
-      "parents": ["cv-contact-list"],
+      "parents": ["resume-contact-list"],
       "oneOf": [
-        "cv-contact-email",
-        "cv-contact-phone",
-        "cv-contact-linkedin",
-        "cv-contact-github",
-        "cv-contact-telegram",
-        "cv-contact-website",
-        "cv-contact-location"
+        "resume-contact-email",
+        "resume-contact-phone",
+        "resume-contact-linkedin",
+        "resume-contact-github",
+        "resume-contact-telegram",
+        "resume-contact-website",
+        "resume-contact-location"
       ]
     },
 
-    "cv-skills": { "tags": ["section"], "parents": ["cv-sidebar"], "first": "cv-skills-header" },
-    "cv-skills-header": { "tags": ["h2"], "parents": ["cv-skills"] },
-    "cv-skill-group": { "tags": ["div"], "parents": ["cv-skills"] },
-    "cv-skill-list": { "tags": ["ul"], "parents": ["cv-skill-group"] },
+    "resume-skills": { "tags": ["section"], "parents": ["resume-sidebar"], "first": "resume-skills-header" },
+    "resume-skills-header": { "tags": ["h2"], "parents": ["resume-skills"] },
+    "resume-skill-group": { "tags": ["div"], "parents": ["resume-skills"] },
+    "resume-skill-list": { "tags": ["ul"], "parents": ["resume-skill-group"] },
 
-    "cv-education": { "tags": ["section"], "parents": ["cv-sidebar"], "first": "cv-education-header" },
-    "cv-education-header": { "tags": ["h2"], "parents": ["cv-education"] },
-    "cv-school": { "tags": ["article"], "parents": ["cv-education"] },
-    "cv-school-name": { "tags": ["h3"], "parents": ["cv-school"] },
-    "cv-degree": { "tags": ["div"], "parents": ["cv-school"] },
-    "cv-degree-name": { "tags": ["p"], "parents": ["cv-degree"] },
-    "cv-dates": { "tags": ["p"], "parents": ["cv-degree", "cv-employer-header", "cv-project-header"] },
+    "resume-education": {
+      "tags": ["section"],
+      "parents": ["resume-sidebar"],
+      "first": "resume-education-header"
+    },
+    "resume-education-header": { "tags": ["h2"], "parents": ["resume-education"] },
+    "resume-school": { "tags": ["article"], "parents": ["resume-education"] },
+    "resume-school-name": { "tags": ["h3"], "parents": ["resume-school"] },
+    "resume-degree": { "tags": ["div"], "parents": ["resume-school"] },
+    "resume-degree-name": { "tags": ["p"], "parents": ["resume-degree"] },
+    "resume-dates": {
+      "tags": ["p"],
+      "parents": ["resume-degree", "resume-employer-header", "resume-project-header"]
+    },
 
-    "cv-experience": { "tags": ["section"], "parents": ["cv-main"], "first": "cv-experience-header" },
-    "cv-experience-header": { "tags": ["h2"], "parents": ["cv-experience"] },
-    "cv-employer": { "tags": ["article"], "parents": ["cv-experience"] },
-    "cv-employer-header": { "tags": ["div"], "parents": ["cv-employer"] },
-    "cv-employer-name": { "tags": ["h3"], "parents": ["cv-employer-header"] },
-    "cv-project": { "tags": ["div"], "parents": ["cv-employer"] },
-    "cv-project-header": { "tags": ["div"], "parents": ["cv-project"] },
-    "cv-role": { "tags": ["h4"], "parents": ["cv-project-header"] },
-    "cv-domain": { "tags": ["p"], "parents": ["cv-project-header"] },
-    "cv-achievements": { "tags": ["ul"], "parents": ["cv-project"] },
+    "resume-experience": {
+      "tags": ["section"],
+      "parents": ["resume-main"],
+      "first": "resume-experience-header"
+    },
+    "resume-experience-header": { "tags": ["h2"], "parents": ["resume-experience"] },
+    "resume-employer": { "tags": ["article"], "parents": ["resume-experience"] },
+    "resume-employer-header": { "tags": ["div"], "parents": ["resume-employer"] },
+    "resume-employer-name": { "tags": ["h3"], "parents": ["resume-employer-header"] },
+    "resume-project": { "tags": ["div"], "parents": ["resume-employer"] },
+    "resume-project-header": { "tags": ["div"], "parents": ["resume-project"] },
+    "resume-role": { "tags": ["h4"], "parents": ["resume-project-header"] },
+    "resume-domain": { "tags": ["p"], "parents": ["resume-project-header"] },
+    "resume-achievements": { "tags": ["ul"], "parents": ["resume-project"] },
 
-    "cv-languages": { "tags": ["section"], "parents": ["cv-sidebar"], "first": "cv-languages-header" },
-    "cv-languages-header": { "tags": ["h2"], "parents": ["cv-languages"] },
-    "cv-language-list": { "tags": ["ul"], "parents": ["cv-languages"] }
+    "resume-languages": {
+      "tags": ["section"],
+      "parents": ["resume-sidebar"],
+      "first": "resume-languages-header"
+    },
+    "resume-languages-header": { "tags": ["h2"], "parents": ["resume-languages"] },
+    "resume-language-list": { "tags": ["ul"], "parents": ["resume-languages"] }
   }
 }

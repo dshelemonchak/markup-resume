@@ -1,26 +1,26 @@
 import { describe, expect, it } from 'vitest';
-import type { CanonicalCvHtml, PdfFacts } from '../../domain/index.ts';
-import { MemoryCvStore } from '../testing/memory-cv-store.ts';
-import { exportCvPdf, pdfFileName } from './export-pdf.ts';
+import type { CanonicalResumeHtml, PdfFacts } from '../../domain/index.ts';
+import { InMemoryResumeRepository } from '../testing/in-memory-resume-repository.ts';
+import { exportResumePdf, pdfFileName } from './export-pdf.ts';
 
-const store = new MemoryCvStore();
-await store.create({
+const repository = new InMemoryResumeRepository();
+await repository.create({
   slug: 'sample',
   title: 'Sample',
-  html: '<html></html>' as CanonicalCvHtml,
-  template: { name: 'classic', version: '0.0.2' },
+  html: '<html></html>' as CanonicalResumeHtml,
+  template: { name: 'classic', version: '0.0.3' },
   author: 'system',
 });
 
-function services(text: string) {
+function dependencies(text: string) {
   const rendered: string[] = [];
   const facts: PdfFacts = { fonts: [], text, links: [] };
   return {
     rendered,
-    services: {
-      store,
-      renderCv: (id: string) => {
-        rendered.push(id);
+    dependencies: {
+      repository,
+      renderPdf: (slug: string) => {
+        rendered.push(slug);
         return Promise.resolve({
           pdf: new Uint8Array([1, 2, 3]),
           page: { title: 'Alex – CV', blocks: ['Hello world'], links: [] },
@@ -31,15 +31,15 @@ function services(text: string) {
   };
 }
 
-describe('exportCvPdf', () => {
+describe('exportResumePdf', () => {
   it('returns the PDF, named after the title, with what the check found', async () => {
-    expect(await exportCvPdf(services('Hello world').services, 'sample')).toEqual({
+    expect(await exportResumePdf(dependencies('Hello world').dependencies, 'sample')).toEqual({
       kind: 'exported',
       pdf: new Uint8Array([1, 2, 3]),
       fileName: 'Alex – CV.pdf',
       problems: [],
     });
-    const result = await exportCvPdf(services('Hello').services, 'sample');
+    const result = await exportResumePdf(dependencies('Hello').dependencies, 'sample');
     expect(
       result.kind === 'exported' &&
         result.problems.some(
@@ -48,10 +48,10 @@ describe('exportCvPdf', () => {
     ).toBe(true);
   });
 
-  it('renders nothing for an invalid id or a missing CV', async () => {
-    const { services: deps, rendered } = services('');
-    expect(await exportCvPdf(deps, '../x')).toEqual({ kind: 'invalid-id' });
-    expect(await exportCvPdf(deps, 'missing')).toEqual({ kind: 'not-found' });
+  it('renders nothing for an invalid slug or a missing CV', async () => {
+    const { dependencies: deps, rendered } = dependencies('');
+    expect(await exportResumePdf(deps, '../x')).toEqual({ kind: 'invalid-slug' });
+    expect(await exportResumePdf(deps, 'missing')).toEqual({ kind: 'not-found' });
     expect(rendered).toEqual([]);
   });
 });

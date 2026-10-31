@@ -1,47 +1,48 @@
 // Domain layer: types, ports (interfaces) and pure logic. No I/O and no imports
 // from other layers or third-party runtime packages (ADR-0010).
-export { type CvId, type CvSummary, isValidCvId } from './cv/cv.ts';
-export { type CvAddress, formatCvAddress, parseCvAddress } from './cv/cv-address.ts';
-export { checkCvDocument } from './document/cv-document.ts';
+export { type ResumeSlug, isValidResumeSlug } from './resume/resume.ts';
+export { type ResumeAddress, formatResumeAddress, parseResumeAddress } from './resume/resume-address.ts';
+export { checkDocumentBasics } from './document/document-basics.ts';
 export {
-  type CanonicalCvHtml,
-  type CvDocumentValidation,
-  type CvTemplateRef,
-  validateCvDocument,
-} from './document/validate-cv-document.ts';
+  type CanonicalResumeHtml,
+  type ResumeDocumentValidation,
+  type TemplateRef,
+  validateResumeDocument,
+} from './document/validate-resume-document.ts';
 export {
   type ClassRule,
   checkMarkup,
   type MarkupElement,
   type MarkupSchema,
-  type ParsedMarkup,
-  type ParseMarkup,
-} from './markup/cv-markup.ts';
+  type ParsedHtml,
+  type HtmlParser,
+} from './markup/markup.ts';
 export {
   checkPdf,
-  type InspectPdf,
+  type PdfInspector,
   type PageLink,
   type PageSnapshot,
   type PdfFacts,
   type PdfFont,
   type PdfProblem,
-  type RenderCv,
-  type RenderedCv,
-} from './pdf/cv-pdf.ts';
+  type PdfRenderer,
+  type RenderedResume,
+} from './pdf/pdf-check.ts';
 export type {
-  CvListing,
-  CvStore,
-  NewCv,
-  NewRevision,
+  ResumeListItem,
+  ResumeRepository,
+  CreateResumeInput,
+  WriteRevisionInput,
   RevisionAuthor,
   RevisionKind,
-  StoredRevision,
-  WriteResult,
-} from './cv/cv-store.ts';
+  ResumeRevision,
+  WriteRevisionResult,
+} from './resume/resume-repository.ts';
 export {
   type TemplateCatalog,
   type TemplateGuide,
   type TemplateStylesResult,
   withTemplateStyles,
-} from './template/cv-template.ts';
-export { readCvTitle } from './document/cv-title.ts';
+} from './template/template.ts';
+export { readResumeTitle } from './document/resume-title.ts';
+export { upgradeLegacyVocabulary } from './document/legacy-vocabulary.ts';

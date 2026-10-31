@@ -6,10 +6,10 @@ import { fontsDir, iconsDir, templateCatalog } from './index.ts';
 describe('templateCatalog', () => {
   it('serves every listed template: its CSS, rules and example', () => {
     for (const ref of templateCatalog.refs()) {
-      expect(templateCatalog.styles(ref)).toContain('.cv-page');
+      expect(templateCatalog.styles(ref)).toContain('.resume-page');
       const guide = templateCatalog.guide(ref);
       expect(guide?.rules).toContain(`version ${ref.split('@')[1]!}`);
-      expect(guide?.example).toContain(`<meta name="cv:template" content="${ref}" />`);
+      expect(guide?.example).toContain(`<meta name="resume:template" content="${ref}" />`);
     }
   });
 
@@ -21,7 +21,7 @@ describe('templateCatalog', () => {
 
 describe('asset folders', () => {
   it('hold the fonts and icons the classic template loads', () => {
-    const css = templateCatalog.styles('classic@0.0.2') ?? '';
+    const css = templateCatalog.styles('classic@0.0.3') ?? '';
     const urls = [...css.matchAll(/url\('\/api\/v1\/(fonts|icons)\/([\w.-]+)'\)/g)];
     expect(urls.length).toBeGreaterThan(0);
     for (const [, kind, file] of urls) {

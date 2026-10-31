@@ -23,8 +23,8 @@ class FakeEventSource {
 }
 
 const CVS = [
-  { id: 'first', title: 'First', updatedAt: '2026-10-27T10:00:00.000Z' },
-  { id: 'second', title: 'Second', updatedAt: '2026-10-26T10:00:00.000Z' },
+  { slug: 'first', title: 'First', updatedAt: '2026-10-27T10:00:00.000Z' },
+  { slug: 'second', title: 'Second', updatedAt: '2026-10-26T10:00:00.000Z' },
 ];
 
 describe('Workspace', () => {
@@ -46,7 +46,7 @@ describe('Workspace', () => {
     const fixture = TestBed.createComponent(Workspace);
     const http = TestBed.inject(HttpTestingController);
     TestBed.tick(); // issue the list request (the app stays unstable until it is answered)
-    http.expectOne('/api/v1/cvs').flush(CVS);
+    http.expectOne('/api/v1/resumes').flush(CVS);
     http.expectOne('/api/v1/claude/sessions').flush([]);
     await fixture.whenStable();
     const root = fixture.nativeElement as HTMLElement;
@@ -60,20 +60,20 @@ describe('Workspace', () => {
       'First',
       'Second',
     ]);
-    expect(frameSrc()).toBe('/api/v1/cvs/first/document?v=0');
+    expect(frameSrc()).toBe('/api/v1/resumes/first/document?v=0');
   });
 
   it('keeps the selection and reloads list and preview when the server reports a change', async () => {
     const { fixture, http, root, frameSrc } = await render();
     root.querySelectorAll<HTMLButtonElement>('mr-sidebar-item .item-main')[1]!.click();
     await fixture.whenStable();
-    expect(frameSrc()).toBe('/api/v1/cvs/second/document?v=0');
+    expect(frameSrc()).toBe('/api/v1/resumes/second/document?v=0');
 
-    FakeEventSource.last!.emit('cvs-changed');
+    FakeEventSource.last!.emit('resume-changed');
     TestBed.tick();
-    http.expectOne('/api/v1/cvs').flush(CVS);
+    http.expectOne('/api/v1/resumes').flush(CVS);
     await fixture.whenStable();
-    expect(frameSrc()).toBe('/api/v1/cvs/second/document?v=1');
+    expect(frameSrc()).toBe('/api/v1/resumes/second/document?v=1');
   });
 
   it('shows Claude as connected when the server reports a session', async () => {
@@ -103,7 +103,7 @@ describe('Workspace', () => {
     TestBed.tick(); // the requests are pending, so the app is not stable yet
     expect(message()).toContain('Loading CVs');
 
-    http.expectOne('/api/v1/cvs').error(new ProgressEvent('error'));
+    http.expectOne('/api/v1/resumes').error(new ProgressEvent('error'));
     http.expectOne('/api/v1/claude/sessions').error(new ProgressEvent('error'));
     await fixture.whenStable();
     expect(message()).toContain('not reachable');
@@ -120,7 +120,7 @@ describe('Workspace', () => {
     expect(FakeEventSource.created).toBe(before + 1);
     FakeEventSource.last!.emit('ready');
     TestBed.tick();
-    http.expectOne('/api/v1/cvs').flush(CVS);
+    http.expectOne('/api/v1/resumes').flush(CVS);
     http.expectOne('/api/v1/claude/sessions').flush([]);
     await fixture.whenStable();
     expect(root.querySelectorAll('mr-sidebar-item')).toHaveLength(2);
@@ -137,7 +137,7 @@ describe('Workspace', () => {
         TestBed.tick();
       };
       TestBed.tick();
-      http.expectOne('/api/v1/cvs').flush('boom', { status: 500, statusText: 'Server Error' });
+      http.expectOne('/api/v1/resumes').flush('boom', { status: 500, statusText: 'Server Error' });
       http.expectOne('/api/v1/claude/sessions').flush([]);
       await settle();
       expect(root.querySelector('mr-sidebar .empty')!.textContent).toContain('Could not load the CVs');
@@ -145,7 +145,7 @@ describe('Workspace', () => {
 
       await vi.advanceTimersByTimeAsync(5_000);
       TestBed.tick();
-      http.expectOne('/api/v1/cvs').flush(CVS);
+      http.expectOne('/api/v1/resumes').flush(CVS);
       await settle();
       expect(root.querySelectorAll('mr-sidebar-item')).toHaveLength(2);
     } finally {
@@ -179,7 +179,7 @@ describe('Workspace', () => {
 
     root.querySelector<HTMLButtonElement>('mr-document-header .export')!.click();
     http
-      .expectOne('/api/v1/cvs/first/pdf')
+      .expectOne('/api/v1/resumes/first/pdf')
       .flush(
         new Blob([
           JSON.stringify({ error: 'pdf-check-failed', problems: [{ code: 'font-type3', font: 'Shapes' }] }),
@@ -198,7 +198,7 @@ describe('Workspace', () => {
     [...root.querySelectorAll<HTMLButtonElement>('mr-export-report button')]
       .find((button) => button.textContent.includes('Download anyway'))!
       .click();
-    http.expectOne('/api/v1/cvs/first/pdf?force=1').flush(new Blob(['%PDF-']), {
+    http.expectOne('/api/v1/resumes/first/pdf?force=1').flush(new Blob(['%PDF-']), {
       headers: {
         'Content-Disposition': `attachment; filename="First.pdf"; filename*=UTF-8''First%20%E2%80%93%20CV.pdf`,
       },
