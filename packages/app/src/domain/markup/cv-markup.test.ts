@@ -98,6 +98,58 @@ describe('checkMarkup', () => {
     ]);
   });
 
+  it('keeps out every other way to load, embed, submit or run something', () => {
+    const inHead = [el('base'), el('link'), el('iframe'), el('noscript'), el('template')];
+    for (const element of inHead) {
+      expect(
+        checkMarkup(doc([element], el('section', 'cv-skills', header())), schema),
+        element.tag,
+      ).not.toEqual([]);
+    }
+
+    const inPage = [
+      el('form'),
+      el('input'),
+      el('button'),
+      el('iframe'),
+      el('object'),
+      el('embed'),
+      el('svg'),
+      el('math'),
+      el('video'),
+      el('style'),
+      withAttributes(el('p'), { srcdoc: '<script>x()</script>' }),
+      withAttributes(el('p'), { onmouseover: 'x()' }),
+      withAttributes(el('p'), { id: 'x' }),
+    ];
+    for (const element of inPage) {
+      const page = doc([], el('section', 'cv-skills', header(), element));
+      expect(
+        checkMarkup(page, schema),
+        `${element.tag} ${[...element.attributes.keys()].join(' ')}`,
+      ).not.toEqual([]);
+    }
+  });
+
+  it('lets links go only to https, http, mailto and tel', () => {
+    const link = (href: string) =>
+      doc([], el('section', 'cv-skills', header(), withAttributes(el('a'), { href })));
+    for (const href of ['https://example.com', 'http://example.com', 'mailto:a@example.com', 'tel:+351000']) {
+      expect(checkMarkup(link(href), schema), href).toEqual([]);
+    }
+    for (const href of [
+      'JaVaScRiPt:alert(1)',
+      '  javascript:alert(1)',
+      'vbscript:msgbox(1)',
+      'data:text/html,<script>alert(1)</script>',
+      '//evil.example',
+      '/relative',
+      'file:///etc/passwd',
+    ]) {
+      expect(checkMarkup(link(href), schema), href).not.toEqual([]);
+    }
+  });
+
   it('lets <meta> carry only charset, or name and content with a known name', () => {
     const meta = (attributes: Record<string, string>) => withAttributes(el('meta'), attributes);
     const problems = (...head: MarkupElement[]) =>
