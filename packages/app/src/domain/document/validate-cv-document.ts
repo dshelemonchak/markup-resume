@@ -3,6 +3,13 @@ import { type TemplateCatalog, withTemplateStyles } from '../template/cv-templat
 import { checkCvDocument } from './cv-document.ts';
 import { readCvMeta } from './cv-meta.ts';
 
+/**
+ * HTML that passed validateCvDocument: canonical, checked against its template, with the template styles in. The
+ * brand exists only for the compiler; at run time it is a plain string. Only validateCvDocument makes one, so a
+ * storage port that asks for it cannot be handed unchecked HTML.
+ */
+export type CanonicalCvHtml = string & { readonly __brand: 'CanonicalCvHtml' };
+
 /** A template a document names in cv:template, "classic@0.0.2" split at the last "@". */
 export interface CvTemplateRef {
   readonly name: string;
@@ -11,7 +18,7 @@ export interface CvTemplateRef {
 
 export type CvDocumentValidation =
   | { readonly kind: 'invalid'; readonly problems: readonly string[] }
-  | { readonly kind: 'valid'; readonly html: string; readonly template: CvTemplateRef };
+  | { readonly kind: 'valid'; readonly html: CanonicalCvHtml; readonly template: CvTemplateRef };
 
 /**
  * The one way in for a CV document, whatever sent it (ADR-0024). The template styles are put in, the result is
@@ -43,7 +50,8 @@ export function validateCvDocument(
   if (problems.length > 0) {
     return { kind: 'invalid', problems };
   }
-  return { kind: 'valid', html: parsed.html, template };
+  // The one place a string becomes CanonicalCvHtml: it is the canonical form of the tree that passed the checks.
+  return { kind: 'valid', html: parsed.html as CanonicalCvHtml, template };
 }
 
 /** "classic@0.0.2" as a name and a version, or null when it is not in that form. */

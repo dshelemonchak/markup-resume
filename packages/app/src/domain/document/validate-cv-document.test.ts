@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import type { CvRepository } from '../cv/cv-repository.ts';
 import type { MarkupElement, MarkupSchema, ParseMarkup } from '../markup/cv-markup.ts';
 import type { TemplateCatalog } from '../template/cv-template.ts';
 import { validateCvDocument } from './validate-cv-document.ts';
@@ -78,5 +79,16 @@ describe('validateCvDocument', () => {
     const result = validateCvDocument('<p>no document</p>', catalog, parse);
     expect(result.kind).toBe('invalid');
     expect(result.kind === 'invalid' && result.problems.length).toBeGreaterThan(1);
+  });
+
+  it('is the only source of HTML the storage port accepts', () => {
+    const save: CvRepository['save'] = () => Promise.resolve();
+    // @ts-expect-error A plain string is not CanonicalCvHtml: unchecked HTML must not reach storage.
+    void save('sample', '<p>unchecked</p>');
+
+    const result = validateCvDocument(doc(), catalog, fakeParse(page).parse);
+    if (result.kind === 'valid') {
+      void save('sample', result.html);
+    }
   });
 });

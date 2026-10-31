@@ -2,7 +2,11 @@ import { mkdir, mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promis
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
+import type { CanonicalCvHtml } from '../../domain/index.ts';
 import { FsCvRepository } from './fs-cv-repository.ts';
+
+/** Marks test HTML as checked: the adapter stores whatever it is given, so these tests skip the boundary. */
+const canonical = (html: string) => html as CanonicalCvHtml;
 
 let dataDir: string;
 let repository: FsCvRepository;
@@ -49,7 +53,7 @@ describe('FsCvRepository', () => {
 
     it('replaces the document and keeps the previous version in history', async () => {
       await addCv('sample', '<p>v1</p>');
-      await repository.save('sample', '<p>v2</p>');
+      await repository.save('sample', canonical('<p>v2</p>'));
 
       expect(await repository.getDocument('sample')).toBe('<p>v2</p>');
       const history = await readdir(historyDir());
@@ -60,7 +64,9 @@ describe('FsCvRepository', () => {
     it('keeps only the newest versions, up to the history limit', async () => {
       repository = new FsCvRepository(dataDir, { historyLimit: 2 });
       await addCv('sample', '<p>v1</p>');
-      for (const version of ['v2', 'v3', 'v4', 'v5']) await repository.save('sample', `<p>${version}</p>`);
+      for (const version of ['v2', 'v3', 'v4', 'v5']) {
+        await repository.save('sample', canonical(`<p>${version}</p>`));
+      }
 
       const history = (await readdir(historyDir())).sort();
       const contents = await Promise.all(history.map((name) => readFile(join(historyDir(), name), 'utf8')));
@@ -70,20 +76,22 @@ describe('FsCvRepository', () => {
 
     it('leaves no temp files behind', async () => {
       await addCv('sample', '<p>v1</p>');
-      await repository.save('sample', '<p>v2</p>');
+      await repository.save('sample', canonical('<p>v2</p>'));
       expect((await readdir(join(dataDir, 'cvs', 'sample'))).sort()).toEqual(['document.html', 'history']);
     });
 
     it('rejects unknown and invalid ids without creating anything', async () => {
-      await expect(repository.save('missing', '<p></p>')).rejects.toThrow();
-      await expect(repository.save('../outside', '<p></p>')).rejects.toThrow('Invalid CV id');
+      await expect(repository.save('missing', canonical('<p></p>'))).rejects.toThrow();
+      await expect(repository.save('../outside', canonical('<p></p>'))).rejects.toThrow('Invalid CV id');
       expect(await readdir(join(dataDir, 'cvs'))).toEqual([]);
     });
   });
 
   describe('create', () => {
     it('stores a new CV that is then listed and read like any other', async () => {
-      expect(await repository.create('fresh', '<meta name="cv:title" content="Fresh">')).toBe(true);
+      expect(await repository.create('fresh', canonical('<meta name="cv:title" content="Fresh">'))).toBe(
+        true,
+      );
       expect(await repository.getDocument('fresh')).toBe('<meta name="cv:title" content="Fresh">');
       expect((await repository.list()).map(({ id, title }) => ({ id, title }))).toEqual([
         { id: 'fresh', title: 'Fresh' },
@@ -93,22 +101,22 @@ describe('FsCvRepository', () => {
 
     it('leaves an existing CV untouched and reports false', async () => {
       await addCv('sample', '<p>v1</p>');
-      expect(await repository.create('sample', '<p>other</p>')).toBe(false);
+      expect(await repository.create('sample', canonical('<p>other</p>'))).toBe(false);
       expect(await repository.getDocument('sample')).toBe('<p>v1</p>');
       expect(await readdir(join(dataDir, 'cvs', 'sample'))).toEqual(['document.html']);
     });
 
     it('lets only one of two simultaneous creates succeed', async () => {
       const results = await Promise.all([
-        repository.create('race', '<p>a</p>'),
-        repository.create('race', '<p>b</p>'),
+        repository.create('race', canonical('<p>a</p>')),
+        repository.create('race', canonical('<p>b</p>')),
       ]);
       expect(results.filter(Boolean)).toHaveLength(1);
       expect(await repository.getDocument('race')).toBe(results[0] ? '<p>a</p>' : '<p>b</p>');
     });
 
     it('rejects an invalid id without creating anything', async () => {
-      await expect(repository.create('../outside', '<p></p>')).rejects.toThrow('Invalid CV id');
+      await expect(repository.create('../outside', canonical('<p></p>'))).rejects.toThrow('Invalid CV id');
       expect(await readdir(join(dataDir, 'cvs'))).toEqual([]);
     });
   });

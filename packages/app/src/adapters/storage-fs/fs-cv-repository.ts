@@ -3,6 +3,7 @@ import { constants } from 'node:fs';
 import { copyFile, link, mkdir, readFile, readdir, rename, rm, stat, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import {
+  type CanonicalCvHtml,
   type CvId,
   type CvRepository,
   type CvSummary,
@@ -54,8 +55,10 @@ export class FsCvRepository implements CvRepository {
     }
   }
 
-  async save(id: CvId, html: string): Promise<void> {
-    if (!isValidCvId(id)) throw new Error(`Invalid CV id: ${JSON.stringify(id)}`);
+  async save(id: CvId, html: CanonicalCvHtml): Promise<void> {
+    if (!isValidCvId(id)) {
+      throw new Error(`Invalid CV id: ${JSON.stringify(id)}`);
+    }
     const path = this.documentPath(id);
     // Copy the current version first: a crash after this point leaves an extra history entry, never a loss.
     await this.archive(id);
@@ -71,8 +74,10 @@ export class FsCvRepository implements CvRepository {
     await this.pruneHistory(id);
   }
 
-  async create(id: CvId, html: string): Promise<boolean> {
-    if (!isValidCvId(id)) throw new Error(`Invalid CV id: ${JSON.stringify(id)}`);
+  async create(id: CvId, html: CanonicalCvHtml): Promise<boolean> {
+    if (!isValidCvId(id)) {
+      throw new Error(`Invalid CV id: ${JSON.stringify(id)}`);
+    }
     const path = this.documentPath(id);
     await mkdir(join(this.cvsDir, id), { recursive: true });
     // Unlike rename, link never replaces the target: it fails with EEXIST, so creating is check-and-write
@@ -83,7 +88,9 @@ export class FsCvRepository implements CvRepository {
       await link(temp, path);
       return true;
     } catch (error) {
-      if (isAlreadyExists(error)) return false;
+      if (isAlreadyExists(error)) {
+        return false;
+      }
       throw error;
     } finally {
       await rm(temp, { force: true });
