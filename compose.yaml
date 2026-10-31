@@ -50,7 +50,6 @@ services:
     <<: *workspace
     command: pnpm --filter @markup-resume/app dev
     environment:
-      CV_DATA_DIR: /data
       PORT: '3000'
       DATABASE_URL: postgres://markup:markup@db:5432/markup
     ports:

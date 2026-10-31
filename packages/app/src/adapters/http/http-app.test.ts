@@ -2,19 +2,22 @@ import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import type { CvRepository } from '../../domain/index.ts';
+import type { CanonicalCvHtml } from '../../domain/index.ts';
 import { type HttpAppOptions, createHttpApp } from './http-app.ts';
 import { CvChanges } from '../../app/index.ts';
+import { MemoryCvStore } from '../../app/testing/memory-cv-store.ts';
 
 function setup(options?: HttpAppOptions) {
   const cvChanges = new CvChanges();
-  const repository: CvRepository = {
-    list: () => Promise.resolve([{ id: 'sample', title: 'Sample', updatedAt: '2026-10-27T00:00:00.000Z' }]),
-    getDocument: (id) => Promise.resolve(id === 'sample' ? '<html><body>CV</body></html>' : null),
-    save: () => Promise.resolve(),
-    create: () => Promise.resolve(true),
-  };
-  const { app, close } = createHttpApp(repository, cvChanges, options);
+  const store = new MemoryCvStore();
+  void store.create({
+    slug: 'sample',
+    title: 'Sample',
+    html: '<html><body>CV</body></html>' as CanonicalCvHtml,
+    template: { name: 'classic', version: '0.0.2' },
+    author: 'system',
+  });
+  const { app, close } = createHttpApp(store, cvChanges, options);
   return { app, close, notify: () => cvChanges.notify('sample') };
 }
 
@@ -23,7 +26,7 @@ describe('HTTP API v1', () => {
     const response = await setup().app.request('/api/v1/cvs');
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual([
-      { id: 'sample', title: 'Sample', updatedAt: '2026-10-27T00:00:00.000Z' },
+      { id: 'sample', title: 'Sample', updatedAt: '2026-10-31T10:00:01.000Z' },
     ]);
   });
 

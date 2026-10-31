@@ -1,7 +1,8 @@
-import { describe, expect, it } from 'vitest';
-import type { CvRepository, CvSummary, ParseMarkup, TemplateCatalog } from '../../domain/index.ts';
-import { createCvDocument, getCvDocument, listCvs, MAX_CV_DOCUMENT_BYTES, saveCvDocument } from './cvs.ts';
+import { beforeEach, describe, expect, it } from 'vitest';
+import type { ParseMarkup, TemplateCatalog } from '../../domain/index.ts';
 import { CvChanges } from '../cv-changes/cv-changes.ts';
+import { MemoryCvStore } from '../testing/memory-cv-store.ts';
+import { createCvDocument, getCvDocument, listCvs, MAX_CV_DOCUMENT_BYTES, saveCvDocument } from './cvs.ts';
 
 const templates: TemplateCatalog = {
   refs: () => ['classic@0.0.2'],
@@ -25,180 +26,136 @@ const stored = (title: string) =>
     '  <style id="cv-lib" data-cv-lib="classic@0.0.2">\np {}\n  </style>\n</head>',
   );
 
-const services = (repository: CvRepository, cvChanges = new CvChanges()) => ({
-  repository,
-  templates,
-  parseMarkup,
-  cvChanges,
+let store: MemoryCvStore;
+let cvChanges: CvChanges;
+let notified: string[];
+
+const services = () => ({ store, templates, parseMarkup, cvChanges });
+
+beforeEach(() => {
+  store = new MemoryCvStore();
+  cvChanges = new CvChanges();
+  notified = [];
+  cvChanges.onChange((id) => notified.push(id));
 });
 
-/** A CvChanges that records the ids it announces, as a subscriber would see them. */
-function recordChanges() {
-  const cvChanges = new CvChanges();
-  const notified: string[] = [];
-  cvChanges.onChange((id) => notified.push(id));
-  return { cvChanges, notified };
-}
-
-function fakeRepository(cvs: CvSummary[], documents: Record<string, string> = {}): CvRepository {
-  return {
-    list: () => Promise.resolve(cvs),
-    getDocument: (id) => Promise.resolve(documents[id] ?? null),
-    save: () => Promise.resolve(),
-    create: () => Promise.resolve(true),
-  };
+/** A CV "sample" at revision 1, created before the test starts listening. */
+async function withSample(title = 'Old') {
+  await createCvDocument(services(), 'sample', doc(title), 'system');
+  notified.length = 0;
 }
 
 describe('listCvs', () => {
-  it('returns the most recently changed CVs first', async () => {
-    const repository = fakeRepository([
-      { id: 'old', title: 'Old', updatedAt: '2026-01-01T00:00:00.000Z' },
-      { id: 'new', title: 'New', updatedAt: '2026-10-01T00:00:00.000Z' },
+  it('lists the CVs by slug, most recently changed first', async () => {
+    await createCvDocument(services(), 'older', doc('Older'), 'system');
+    await createCvDocument(services(), 'newer', doc('Newer'), 'system');
+    expect(await listCvs(store)).toEqual([
+      expect.objectContaining({ id: 'newer', title: 'Newer' }),
+      expect.objectContaining({ id: 'older', title: 'Older' }),
     ]);
-    expect((await listCvs(repository)).map((cv) => cv.id)).toEqual(['new', 'old']);
   });
 });
 
 describe('getCvDocument', () => {
-  const repository = fakeRepository([], { sample: '<html></html>' });
-
-  it('returns the document when it exists', async () => {
-    expect(await getCvDocument(repository, 'sample')).toEqual({ kind: 'found', html: '<html></html>' });
+  it('returns the current document', async () => {
+    await withSample();
+    expect(await getCvDocument(store, 'sample')).toEqual({ kind: 'found', html: stored('Old') });
   });
 
   it('distinguishes an invalid id from a missing CV', async () => {
-    expect(await getCvDocument(repository, '../secret')).toEqual({ kind: 'invalid-id' });
-    expect(await getCvDocument(repository, 'missing')).toEqual({ kind: 'not-found' });
+    expect(await getCvDocument(store, '../secret')).toEqual({ kind: 'invalid-id' });
+    expect(await getCvDocument(store, 'missing')).toEqual({ kind: 'not-found' });
   });
 });
 
 describe('saveCvDocument', () => {
-  function setup() {
-    const documents: Record<string, string> = { sample: stored('Old') };
-    const saves: string[] = [];
-    const repository: CvRepository = {
-      ...fakeRepository([], documents),
-      save: (id, html) => {
-        saves.push(id);
-        documents[id] = html;
-        return Promise.resolve();
-      },
-    };
-    return { repository, documents, saves };
-  }
+  it('writes the next revision by its author, takes the title from it and announces the change', async () => {
+    await withSample();
+    expect(await saveCvDocument(services(), 'sample', doc('New'), 'claude')).toEqual({ kind: 'saved' });
 
-  it('saves a valid document of an existing CV and announces the change', async () => {
-    const { repository, documents, saves } = setup();
-    const { cvChanges, notified } = recordChanges();
-    expect(await saveCvDocument(services(repository, cvChanges), 'sample', doc('New'))).toEqual({
-      kind: 'saved',
+    expect(await store.read('sample')).toMatchObject({
+      number: 2,
+      basedOn: 1,
+      author: 'claude',
+      html: stored('New'),
     });
-    expect(saves).toEqual(['sample']);
-    expect(documents['sample']).toBe(stored('New'));
+    expect((await listCvs(store))[0]).toMatchObject({ id: 'sample', title: 'New' });
     expect(notified).toEqual(['sample']);
   });
 
-  it('does not write or announce a document identical to the stored one', async () => {
-    const { repository, saves } = setup();
-    const { cvChanges, notified } = recordChanges();
-    expect(await saveCvDocument(services(repository, cvChanges), 'sample', doc('Old'))).toEqual({
-      kind: 'unchanged',
-    });
-    expect(saves).toEqual([]);
+  it('does not write or announce a document identical to the current one', async () => {
+    await withSample();
+    expect(await saveCvDocument(services(), 'sample', doc('Old'), 'claude')).toEqual({ kind: 'unchanged' });
+    expect(await store.read('sample')).toMatchObject({ number: 1 });
     expect(notified).toEqual([]);
   });
 
   it('rejects invalid ids and missing CVs without writing', async () => {
-    const { repository, saves } = setup();
-    expect(await saveCvDocument(services(repository), '../secret', doc('New'))).toEqual({
+    expect(await saveCvDocument(services(), '../secret', doc('New'), 'claude')).toEqual({
       kind: 'invalid-id',
     });
-    expect(await saveCvDocument(services(repository), 'missing', doc('New'))).toEqual({ kind: 'not-found' });
-    expect(saves).toEqual([]);
+    expect(await saveCvDocument(services(), 'missing', doc('New'), 'claude')).toEqual({ kind: 'not-found' });
+    expect(await store.list()).toEqual([]);
   });
 
   it('measures the size limit in UTF-8 bytes, not characters', async () => {
-    const { repository, saves } = setup();
+    await withSample();
     // Two bytes per Cyrillic letter: under the limit in characters, over it in bytes.
     const filler = 'ж'.repeat(MAX_CV_DOCUMENT_BYTES / 2);
-    const result = await saveCvDocument(services(repository), 'sample', doc(filler));
-    expect(result).toMatchObject({ kind: 'too-large', limitBytes: MAX_CV_DOCUMENT_BYTES });
-    expect(saves).toEqual([]);
-  });
-
-  it('stores the document with the styles of the template it names', async () => {
-    const { repository, documents } = setup();
-    expect(await saveCvDocument(services(repository), 'sample', doc('New'))).toEqual({ kind: 'saved' });
-    expect(documents['sample']).toContain('<style id="cv-lib" data-cv-lib="classic@0.0.2">\np {}');
-    // The stored document, sent back as it is, changes nothing.
-    expect(await saveCvDocument(services(repository), 'sample', documents['sample']!)).toEqual({
-      kind: 'unchanged',
+    expect(await saveCvDocument(services(), 'sample', doc(filler), 'claude')).toMatchObject({
+      kind: 'too-large',
+      limitBytes: MAX_CV_DOCUMENT_BYTES,
     });
+    expect(await store.read('sample')).toMatchObject({ number: 1 });
   });
 
-  it('rejects a template that does not exist', async () => {
-    const { repository, saves } = setup();
-    expect(await saveCvDocument(services(repository), 'sample', doc('New', 'modern@1'))).toMatchObject({
+  it('stores the document with the styles of its template, and the same document again changes nothing', async () => {
+    await withSample();
+    await saveCvDocument(services(), 'sample', doc('New'), 'claude');
+    const current = (await store.read('sample'))!.html;
+    expect(current).toContain('<style id="cv-lib" data-cv-lib="classic@0.0.2">\np {}');
+    expect(await saveCvDocument(services(), 'sample', current, 'claude')).toEqual({ kind: 'unchanged' });
+  });
+
+  it('returns the problems of a document it cannot store', async () => {
+    await withSample();
+    expect(await saveCvDocument(services(), 'sample', doc('New', 'modern@1'), 'claude')).toMatchObject({
       kind: 'invalid-document',
       problems: [expect.stringContaining('Unknown template "modern@1"')],
     });
-    expect(saves).toEqual([]);
-  });
-
-  it('returns the problems of a broken document', async () => {
-    const { repository, saves } = setup();
-    const result = await saveCvDocument(services(repository), 'sample', doc('New').replace('</html>', ''));
-    expect(result).toEqual({
+    expect(await saveCvDocument(services(), 'sample', doc('New').replace('</html>', ''), 'claude')).toEqual({
       kind: 'invalid-document',
       problems: ['The document must end with </html>; it may have been cut off.'],
     });
-    expect(saves).toEqual([]);
+    expect(await store.read('sample')).toMatchObject({ number: 1 });
   });
 });
 
 describe('createCvDocument', () => {
-  function setup(existing: string[] = []) {
-    const created: string[] = [];
-    const repository: CvRepository = {
-      ...fakeRepository([]),
-      create: (id) => {
-        if (existing.includes(id)) return Promise.resolve(false);
-        created.push(id);
-        return Promise.resolve(true);
-      },
-    };
-    return { repository, created };
-  }
-
-  it('creates a CV under a free id and announces it', async () => {
-    const { repository, created } = setup();
-    const { cvChanges, notified } = recordChanges();
-    expect(await createCvDocument(services(repository, cvChanges), 'fresh', doc('New'))).toEqual({
-      kind: 'created',
-    });
-    expect(created).toEqual(['fresh']);
+  it('creates a CV at revision 1 by its author and announces it', async () => {
+    expect(await createCvDocument(services(), 'fresh', doc('Fresh'), 'claude')).toEqual({ kind: 'created' });
+    expect(await store.read('fresh')).toMatchObject({ number: 1, author: 'claude', html: stored('Fresh') });
+    expect((await listCvs(store))[0]).toMatchObject({ id: 'fresh', title: 'Fresh' });
     expect(notified).toEqual(['fresh']);
   });
 
   it('reports an id that is already taken, announcing nothing', async () => {
-    const { repository } = setup(['sample']);
-    const { cvChanges, notified } = recordChanges();
-    expect(await createCvDocument(services(repository, cvChanges), 'sample', doc('New'))).toEqual({
+    await withSample();
+    expect(await createCvDocument(services(), 'sample', doc('Other'), 'claude')).toEqual({
       kind: 'already-exists',
     });
     expect(notified).toEqual([]);
   });
 
-  it('checks the id and the document before touching the repository', async () => {
-    const { repository, created } = setup();
-    expect(await createCvDocument(services(repository), '../secret', doc('New'))).toEqual({
+  it('checks the id and the document before touching the store', async () => {
+    expect(await createCvDocument(services(), '../secret', doc('New'), 'claude')).toEqual({
       kind: 'invalid-id',
     });
     expect(
-      await createCvDocument(services(repository), 'fresh', doc('New').replace('</html>', '')),
+      await createCvDocument(services(), 'fresh', doc('New').replace('</html>', ''), 'claude'),
     ).toMatchObject({
       kind: 'invalid-document',
     });
-    expect(created).toEqual([]);
+    expect(await store.list()).toEqual([]);
   });
 });

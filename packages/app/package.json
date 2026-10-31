@@ -11,6 +11,7 @@
     "start": "node src/main.ts",
     "dev": "node --watch src/main.ts",
     "seed": "node src/seed.ts",
+    "import:files": "node src/import-files.ts",
     "db:types": "kysely-codegen --dialect postgres --out-file src/adapters/storage-pg/schema.ts --exclude-pattern 'kysely_*' && prettier --write src/adapters/storage-pg/schema.ts",
     "typecheck": "tsc --noEmit",
     "test": "vitest run --passWithNoTests --exclude '**/*.db.test.ts'",
