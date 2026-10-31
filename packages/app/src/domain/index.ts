@@ -3,6 +3,11 @@
 export { type CvId, type CvSummary, isValidCvId } from './cv/cv.ts';
 export { checkCvDocument } from './document/cv-document.ts';
 export {
+  type CvDocumentValidation,
+  type CvTemplateRef,
+  validateCvDocument,
+} from './document/validate-cv-document.ts';
+export {
   type ClassRule,
   checkMarkup,
   type MarkupElement,
@@ -23,7 +28,6 @@ export {
 } from './pdf/cv-pdf.ts';
 export type { CvRepository } from './cv/cv-repository.ts';
 export {
-  checkTemplateMarkup,
   type TemplateCatalog,
   type TemplateGuide,
   type TemplateStylesResult,

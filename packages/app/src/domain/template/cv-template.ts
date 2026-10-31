@@ -1,4 +1,4 @@
-import { checkMarkup, type MarkupSchema, type ParseMarkup } from '../markup/cv-markup.ts';
+import type { MarkupSchema } from '../markup/cv-markup.ts';
 import { readCvMeta } from '../document/cv-meta.ts';
 
 /** Port: the templates a CV can name in <meta name="cv:template" content="classic@0.0.2"> (ADR-0006). */
@@ -51,18 +51,4 @@ export function withTemplateStyles(html: string, catalog: TemplateCatalog): Temp
     kind: 'styled',
     html: withoutStyles.slice(0, head.index) + block + withoutStyles.slice(head.index),
   };
-}
-
-/**
- * Checks the markup of a document against the schema of the template it names. A document without a template,
- * or with an unknown one (withTemplateStyles reports that), has nothing to be checked against.
- */
-export function checkTemplateMarkup(
-  html: string,
-  catalog: TemplateCatalog,
-  parse: ParseMarkup,
-): readonly string[] {
-  const ref = readCvMeta(html, 'cv:template');
-  const schema = ref === null ? null : catalog.schema(ref);
-  return schema ? checkMarkup(parse(html).tree, schema) : [];
 }
