@@ -36,6 +36,8 @@ export interface ClassRule {
 }
 
 const HEAD_TAGS = new Set(['meta', 'title', 'style']);
+/** The only <meta name> values a document may carry; anything else, http-equiv above all, is kept out. */
+const META_NAMES = new Set(['cv:title', 'cv:template', 'viewport', 'author']);
 const ATTRIBUTES: Readonly<Record<string, readonly string[]>> = {
   '*': ['class'],
   a: ['class', 'href'],
@@ -60,6 +62,10 @@ export function checkMarkup(html: MarkupElement, schema: MarkupSchema): readonly
     else if (element.tag === 'style' && element.attributes.get('id') !== 'cv-lib') {
       problems.push(
         '<style> is not allowed: the template does all the styling (Markup Résumé adds <style id="cv-lib">).',
+      );
+    } else if (element.tag === 'meta' && !isAllowedMeta(element)) {
+      problems.push(
+        `<meta> may only carry charset, or name and content with a name of ${[...META_NAMES].join(', ')}.`,
       );
     }
   }
@@ -146,6 +152,19 @@ function checkAttributes(element: MarkupElement, where: string, problems: string
       problems.push(`The link "${value}"${where} must start with https://, mailto: or tel:.`);
     }
   }
+}
+
+/**
+ * A <meta> with charset alone, or with exactly name and content and an allowed name. Other attributes would let a
+ * document act on its own: <meta http-equiv="refresh"> navigates the viewer away without any script.
+ */
+function isAllowedMeta(element: MarkupElement): boolean {
+  const { attributes } = element;
+  if (attributes.size === 1 && attributes.has('charset')) {
+    return true;
+  }
+  const name = attributes.get('name');
+  return attributes.size === 2 && attributes.has('content') && name !== undefined && META_NAMES.has(name);
 }
 
 function classesOf(element: MarkupElement): string[] {
