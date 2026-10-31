@@ -59,7 +59,25 @@ describe('listCvs', () => {
 describe('getCvDocument', () => {
   it('returns the current document', async () => {
     await withSample();
-    expect(await getCvDocument(store, 'sample')).toEqual({ kind: 'found', html: stored('Old') });
+    expect(await getCvDocument(store, 'sample')).toEqual({
+      kind: 'found',
+      slug: 'sample',
+      html: stored('Old'),
+      number: 1,
+      current: 1,
+    });
+  });
+
+  it('returns an earlier revision by its address', async () => {
+    await withSample();
+    await saveCvDocument(services(), 'sample', doc('New'), 'claude');
+    expect(await getCvDocument(store, 'sample@1')).toMatchObject({
+      number: 1,
+      current: 2,
+      html: stored('Old'),
+    });
+    expect(await getCvDocument(store, 'sample@9')).toEqual({ kind: 'not-found' });
+    expect(await getCvDocument(store, 'sample@0')).toEqual({ kind: 'invalid-id' });
   });
 
   it('distinguishes an invalid id from a missing CV', async () => {
@@ -71,7 +89,13 @@ describe('getCvDocument', () => {
 describe('saveCvDocument', () => {
   it('writes the next revision by its author, takes the title from it and announces the change', async () => {
     await withSample();
-    expect(await saveCvDocument(services(), 'sample', doc('New'), 'claude')).toEqual({ kind: 'saved' });
+    expect(await saveCvDocument(services(), 'sample', doc('New'), 'claude')).toEqual({
+      kind: 'saved',
+      slug: 'sample',
+      number: 2,
+      basedOn: 1,
+      basedOnCurrent: true,
+    });
 
     expect(await store.read('sample')).toMatchObject({
       number: 2,
@@ -88,6 +112,40 @@ describe('saveCvDocument', () => {
     expect(await saveCvDocument(services(), 'sample', doc('Old'), 'claude')).toEqual({ kind: 'unchanged' });
     expect(await store.read('sample')).toMatchObject({ number: 1 });
     expect(notified).toEqual([]);
+  });
+
+  it('builds on the revision an address names, and says when newer ones are left out', async () => {
+    await withSample();
+    await saveCvDocument(services(), 'sample', doc('Second'), 'claude');
+    expect(await saveCvDocument(services(), 'sample@1', doc('From the first'), 'claude')).toEqual({
+      kind: 'saved',
+      slug: 'sample',
+      number: 3,
+      basedOn: 1,
+      basedOnCurrent: false,
+    });
+    expect(await store.read('sample')).toMatchObject({
+      number: 3,
+      basedOn: 1,
+      html: stored('From the first'),
+    });
+  });
+
+  it('writes a new revision when an address names the base, even for the current document', async () => {
+    await withSample();
+    expect(await saveCvDocument(services(), 'sample@1', doc('Old'), 'claude')).toMatchObject({
+      kind: 'saved',
+      number: 2,
+      basedOnCurrent: true,
+    });
+  });
+
+  it('reports a revision that does not exist without writing', async () => {
+    await withSample();
+    expect(await saveCvDocument(services(), 'sample@9', doc('New'), 'claude')).toEqual({
+      kind: 'unknown-revision',
+    });
+    expect(await store.read('sample')).toMatchObject({ number: 1 });
   });
 
   it('rejects invalid ids and missing CVs without writing', async () => {

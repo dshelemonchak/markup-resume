@@ -26,7 +26,7 @@ describe('HTTP API v1', () => {
     const response = await setup().app.request('/api/v1/cvs');
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual([
-      { id: 'sample', title: 'Sample', updatedAt: '2026-10-31T10:00:01.000Z' },
+      { id: 'sample', title: 'Sample', updatedAt: '2026-10-31T10:00:01.000Z', revision: 1 },
     ]);
   });
 
