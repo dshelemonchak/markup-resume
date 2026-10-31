@@ -183,4 +183,47 @@ describe('PostgresResumeRepository', () => {
     await repository.write(newRevision('older', 'v2'));
     expect((await repository.list()).map((resume) => resume.slug)).toEqual(['older', 'newer']);
   });
+
+  it('toggles the pin without a revision or a change to updated_at', async () => {
+    await repository.create(newResume('senior-angular'));
+    const [before] = await repository.list();
+    expect(before).toMatchObject({ pinned: false });
+
+    expect(await repository.togglePinned('senior-angular')).toEqual({ kind: 'toggled', pinned: true });
+    expect((await repository.list())[0]).toMatchObject({
+      pinned: true,
+      revision: 1,
+      updatedAt: before!.updatedAt,
+    });
+
+    expect(await repository.togglePinned('senior-angular')).toEqual({ kind: 'toggled', pinned: false });
+    expect((await repository.list())[0]).toMatchObject({ pinned: false });
+  });
+
+  it('lets two quick toggles take turns, so the CV ends where it started', async () => {
+    await repository.create(newResume('senior-angular'));
+    const results = await Promise.all([
+      repository.togglePinned('senior-angular'),
+      repository.togglePinned('senior-angular'),
+    ]);
+    expect(results.map((result) => (result.kind === 'toggled' ? result.pinned : null)).sort()).toEqual([
+      false,
+      true,
+    ]);
+    expect((await repository.list())[0]).toMatchObject({ pinned: false });
+  });
+
+  it("does not pin another owner's CV, a CV in the trash or a missing one", async () => {
+    await repository.create(newResume('mine'));
+    await repository.create(newResume('trashed'));
+    await db.updateTable('resumes').set({ deleted_at: new Date() }).where('slug', '=', 'trashed').execute();
+    const other = (
+      await db.insertInto('users').values({ name: 'Other' }).returning('id').executeTakeFirstOrThrow()
+    ).id;
+
+    expect(await new PostgresResumeRepository(db, other).togglePinned('mine')).toEqual({ kind: 'not-found' });
+    expect(await repository.togglePinned('trashed')).toEqual({ kind: 'not-found' });
+    expect(await repository.togglePinned('missing')).toEqual({ kind: 'not-found' });
+    expect((await repository.list())[0]).toMatchObject({ slug: 'mine', pinned: false });
+  });
 });

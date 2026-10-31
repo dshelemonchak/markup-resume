@@ -7,6 +7,7 @@ import type {
   WriteRevisionInput,
   ResumeRevision,
   WriteRevisionResult,
+  TogglePinnedResult,
 } from '../../domain/index.ts';
 import type { Database } from './database.ts';
 
@@ -30,7 +31,13 @@ export class PostgresResumeRepository implements ResumeRepository {
     const rows = await this.db
       .selectFrom('resumes')
       .innerJoin('resume_revisions', 'resume_revisions.id', 'resumes.current_revision_id')
-      .select(['resumes.slug', 'resumes.title', 'resumes.updated_at', 'resume_revisions.number'])
+      .select([
+        'resumes.slug',
+        'resumes.title',
+        'resumes.updated_at',
+        'resume_revisions.number',
+        'resumes.pinned_at',
+      ])
       .where('resumes.owner_id', '=', this.ownerId)
       .where('resumes.deleted_at', 'is', null)
       .orderBy('resumes.updated_at', 'desc')
@@ -40,6 +47,7 @@ export class PostgresResumeRepository implements ResumeRepository {
       title: row.title,
       revision: row.number,
       updatedAt: row.updated_at.toISOString(),
+      pinned: !!row.pinned_at,
     }));
   }
 
@@ -189,6 +197,35 @@ export class PostgresResumeRepository implements ResumeRepository {
         number,
         basedOn: base.number,
         basedOnCurrent: base.id === resume.current_revision_id,
+      };
+    });
+  }
+
+  async togglePinned(slug: string): Promise<TogglePinnedResult> {
+    return this.db.transaction().execute(async (trx) => {
+      const resume = await trx
+        .selectFrom('resumes')
+        .select(['id', 'pinned_at'])
+        .where('owner_id', '=', this.ownerId)
+        .where('slug', '=', slug)
+        .where('deleted_at', 'is', null)
+        .forUpdate()
+        .executeTakeFirst();
+
+      if (!resume) {
+        return { kind: 'not-found' };
+      }
+
+      let pinnedAt: Date | null = null;
+      if (resume.pinned_at === null) {
+        pinnedAt = new Date();
+      }
+
+      await trx.updateTable('resumes').set({ pinned_at: pinnedAt }).where('id', '=', resume.id).execute();
+
+      return {
+        kind: 'toggled',
+        pinned: pinnedAt !== null,
       };
     });
   }

@@ -5,6 +5,7 @@ import type {
   WriteRevisionInput,
   ResumeRevision,
   WriteRevisionResult,
+  TogglePinnedResult,
 } from '../../domain/index.ts';
 
 interface MemoryResume {
@@ -12,6 +13,7 @@ interface MemoryResume {
   current: number;
   updatedAt: string;
   readonly revisions: ResumeRevision[];
+  pinnedAt: string | null;
 }
 
 /**
@@ -29,6 +31,7 @@ export class InMemoryResumeRepository implements ResumeRepository {
         title: resume.title,
         revision: resume.current,
         updatedAt: resume.updatedAt,
+        pinned: !!resume.pinnedAt,
       }))
       .sort((a, b) => b.updatedAt.localeCompare(a.updatedAt));
     return Promise.resolve(listing);
@@ -50,6 +53,7 @@ export class InMemoryResumeRepository implements ResumeRepository {
       title: resume.title,
       current: 1,
       updatedAt: now,
+      pinnedAt: null,
       revisions: [
         {
           slug: resume.slug,
@@ -94,6 +98,26 @@ export class InMemoryResumeRepository implements ResumeRepository {
     resume.title = revision.title;
     resume.updatedAt = now;
     return Promise.resolve({ kind: 'written', number, basedOn: base, basedOnCurrent });
+  }
+
+  togglePinned(slug: string): Promise<TogglePinnedResult> {
+    const resume = this.resumes.get(slug);
+
+    if (!resume) {
+      return Promise.resolve({ kind: 'not-found' });
+    }
+
+    let pinnedAt: string | null = null;
+    if (resume.pinnedAt === null) {
+      pinnedAt = new Date().toISOString();
+    }
+
+    resume.pinnedAt = pinnedAt;
+
+    return Promise.resolve({
+      kind: 'toggled',
+      pinned: pinnedAt !== null,
+    });
   }
 
   /** Every change gets a later time, so "most recently changed first" is deterministic. */

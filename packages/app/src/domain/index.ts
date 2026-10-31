@@ -37,6 +37,7 @@ export type {
   RevisionKind,
   ResumeRevision,
   WriteRevisionResult,
+  TogglePinnedResult,
 } from './resume/resume-repository.ts';
 export {
   type TemplateCatalog,

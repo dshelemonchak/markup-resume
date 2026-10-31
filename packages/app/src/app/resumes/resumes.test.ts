@@ -8,6 +8,7 @@ import {
   listResumes,
   MAX_RESUME_DOCUMENT_BYTES,
   saveResumeDocument,
+  toggleResumePin,
 } from './resumes.ts';
 
 const templates: TemplateCatalog = {
@@ -237,5 +238,30 @@ describe('createResumeDocument', () => {
       kind: 'invalid-document',
     });
     expect(await repository.list()).toEqual([]);
+  });
+});
+
+describe('toggleResumePin', () => {
+  it('pins a CV, unpins it on the next call, and announces each change', async () => {
+    await withSample();
+    expect(await toggleResumePin(dependencies(), 'sample')).toEqual({ kind: 'toggled', pinned: true });
+    expect((await listResumes(repository))[0]).toMatchObject({ slug: 'sample', pinned: true });
+
+    expect(await toggleResumePin(dependencies(), 'sample')).toEqual({ kind: 'toggled', pinned: false });
+    expect((await listResumes(repository))[0]).toMatchObject({ slug: 'sample', pinned: false });
+    expect(notified).toEqual(['sample', 'sample']);
+  });
+
+  it('writes no revision and leaves the time of the last change alone', async () => {
+    await withSample();
+    const [before] = await listResumes(repository);
+    await toggleResumePin(dependencies(), 'sample');
+    expect((await listResumes(repository))[0]).toMatchObject({ revision: 1, updatedAt: before!.updatedAt });
+  });
+
+  it('reports an invalid slug and a missing CV, announcing nothing', async () => {
+    expect(await toggleResumePin(dependencies(), '../secret')).toEqual({ kind: 'invalid-slug' });
+    expect(await toggleResumePin(dependencies(), 'missing')).toEqual({ kind: 'not-found' });
+    expect(notified).toEqual([]);
   });
 });

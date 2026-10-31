@@ -10,6 +10,8 @@ export {
   MAX_RESUME_DOCUMENT_BYTES,
   saveResumeDocument,
   type SaveResumeDocumentResult,
+  toggleResumePin,
+  type ToggleResumePinResult,
 } from './resumes/resumes.ts';
 export { type ClaudeSession, ClaudeSessions } from './claude/claude-sessions.ts';
 export {

@@ -16,6 +16,12 @@ export interface ResumeRepository {
    * one. The repository picks the number; the CV's title follows the document's resume:title (the last action wins).
    */
   write(revision: WriteRevisionInput): Promise<WriteRevisionResult>;
+  /**
+   * Pins the CV if it is not pinned and unpins it if it is, in one step, so two quick calls never read the same
+   * state. Writes no revision and leaves updated_at alone: pinning is not a change to the CV. A CV that does not
+   * exist, or is deleted, is not-found.
+   */
+  togglePinned(slug: string): Promise<TogglePinnedResult>;
 }
 
 export type RevisionAuthor = 'user' | 'claude' | 'system';
@@ -30,6 +36,7 @@ export interface ResumeListItem {
   readonly revision: number;
   /** ISO 8601. */
   readonly updatedAt: string;
+  readonly pinned: boolean;
 }
 
 export interface ResumeRevision {
@@ -76,3 +83,6 @@ export type WriteRevisionResult =
     }
   | { readonly kind: 'not-found' }
   | { readonly kind: 'unknown-base' };
+
+export type TogglePinnedResult =
+  { readonly kind: 'toggled'; readonly pinned: boolean } | { readonly kind: 'not-found' };

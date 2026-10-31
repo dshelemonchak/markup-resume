@@ -96,6 +96,7 @@ describe('MCP server', () => {
           updatedAt: '2026-10-31T10:00:01.000Z',
           revision: 1,
           address: 'sample@1',
+          pinned: false,
         },
       ],
     });
