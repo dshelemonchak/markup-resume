@@ -28,6 +28,16 @@ export {
   type RenderedCv,
 } from './pdf/cv-pdf.ts';
 export type { CvRepository } from './cv/cv-repository.ts';
+export type {
+  CvListing,
+  CvStore,
+  NewCv,
+  NewRevision,
+  RevisionAuthor,
+  RevisionKind,
+  StoredRevision,
+  WriteResult,
+} from './cv/cv-store.ts';
 export {
   type TemplateCatalog,
   type TemplateGuide,

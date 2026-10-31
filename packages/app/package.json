@@ -13,7 +13,8 @@
     "seed": "node src/seed.ts",
     "db:types": "kysely-codegen --dialect postgres --out-file src/adapters/storage-pg/schema.ts --exclude-pattern 'kysely_*' && prettier --write src/adapters/storage-pg/schema.ts",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run --passWithNoTests"
+    "test": "vitest run --passWithNoTests --exclude '**/*.db.test.ts'",
+    "test:db": "vitest run .db.test"
   },
   "devDependencies": {
     "@modelcontextprotocol/client": "^2.4.0",
