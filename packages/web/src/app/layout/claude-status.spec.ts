@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { TranslocoService } from '@jsverse/transloco';
-import type { ClaudeSessionDto } from '../api/cv-api';
+import type { ClaudeSessionDto } from '../api/resume-api';
 import { claudeSessionLines, claudeStatus, timeAgo } from './claude-status';
 
 const NOW = new Date('2026-10-28T12:00:00.000Z');

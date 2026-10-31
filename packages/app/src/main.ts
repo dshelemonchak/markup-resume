@@ -5,13 +5,13 @@
 import { serve } from '@hono/node-server';
 import { fontsDir, iconsDir, templateCatalog } from '@markup-resume/styles';
 import { Hono } from 'hono';
-import { createChromeRenderer } from './adapters/chrome-cdp/chrome-renderer.ts';
-import { parseMarkup } from './adapters/html-parse5/parse-markup.ts';
-import { createHttpApp } from './adapters/http/http-app.ts';
-import { createMcpHttpApp } from './adapters/mcp/mcp-http.ts';
-import { inspectPdf } from './adapters/poppler/inspect-pdf.ts';
-import { openCvStore } from './adapters/storage-pg/open-cv-store.ts';
-import { CvChanges } from './app/index.ts';
+import { createChromeRenderer } from './adapters/chrome-pdf-renderer/chrome-renderer.ts';
+import { parseHtml } from './adapters/parse5-html-parser/parse-html.ts';
+import { createHttpApp } from './adapters/http-api/http-app.ts';
+import { createMcpHttpApp } from './adapters/mcp-server/mcp-http.ts';
+import { inspectPdf } from './adapters/poppler-pdf-inspector/inspect-pdf.ts';
+import { connectResumeRepository } from './adapters/postgres-storage/connect-resume-repository.ts';
+import { ResumeChanges } from './app/index.ts';
 
 // --- Configuration ---
 
@@ -26,24 +26,24 @@ if (!databaseUrl) {
 // --- Storage ---
 
 // CVs and their revisions live in Postgres (ADR-0025), for the local owner until sign-in exists.
-const { db, store } = await openCvStore(databaseUrl);
+const { db, repository } = await connectResumeRepository(databaseUrl);
 
 // --- Shared by the adapters ---
 
-const cvChanges = new CvChanges();
+const resumeChanges = new ResumeChanges();
 
 // --- Entry points: the HTTP API and the MCP server ---
 
-const { app, close } = createHttpApp(store, cvChanges, {
+const { app, close } = createHttpApp(repository, resumeChanges, {
   fontsDir,
   iconsDir,
   // Chrome runs next to this server and opens the CV from it, over IPv4 like the server listens.
   ...(chromePath && {
-    pdf: { renderCv: createChromeRenderer({ chromePath, appUrl: `http://127.0.0.1:${port}` }), inspectPdf },
+    pdf: { renderPdf: createChromeRenderer({ chromePath, appUrl: `http://127.0.0.1:${port}` }), inspectPdf },
   }),
 });
 
-const mcp = createMcpHttpApp({ store, templates: templateCatalog, parseMarkup, cvChanges });
+const mcp = createMcpHttpApp({ repository, templates: templateCatalog, parseHtml, resumeChanges });
 
 const root = new Hono();
 root.route('/', app);

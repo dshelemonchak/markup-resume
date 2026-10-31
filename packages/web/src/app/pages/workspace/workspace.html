@@ -1,9 +1,9 @@
 <mr-sidebar
   class="sidebar"
-  [items]="cvs()"
+  [items]="resumes()"
   [listState]="listState()"
-  [selectedId]="selectedId()"
-  (selectCv)="selectedId.set($event)"
+  [selectedSlug]="selectedSlug()"
+  (selectResume)="selectedSlug.set($event)"
   [claude]="claudeStatus()"
   (connectClaude)="connectClaude.open()"
 />
@@ -23,7 +23,7 @@
 >
   <mr-document-header
     class="header"
-    [cv]="selectedCv()"
+    [resume]="selectedResume()"
     [(mode)]="mode"
     [exporting]="exporting()"
     (exportPdf)="exportPdf()"

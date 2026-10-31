@@ -12,8 +12,8 @@ import {
   viewChild,
 } from '@angular/core';
 import { TranslocoPipe } from '@jsverse/transloco';
-import { CvApi, type PdfProblemDto } from '../../api/cv-api';
-import { toCvListItem } from '../../api/to-cv-list-item';
+import { ResumeApi, type PdfProblemDto } from '../../api/resume-api';
+import { toResumeListItem } from '../../api/to-resume-list-item';
 import { injectLocale, injectTranslate } from '../../i18n/i18n';
 import { claudeSessionLines, claudeStatus } from '../../layout/claude-status';
 import { ConnectClaude } from '../../layout/connect-claude/connect-claude';
@@ -23,7 +23,7 @@ import { DocumentFooter } from '../../layout/document-footer/document-footer';
 import { DocumentHeader } from '../../layout/document-header/document-header';
 import { ExportReport } from '../../layout/export-report/export-report';
 import type { PreviewMode } from '../../layout/preview-mode';
-import type { CvListState } from '../../layout/cv-list-item';
+import type { ResumeListState } from '../../layout/resume-list-item';
 import { Sidebar } from '../../layout/sidebar/sidebar';
 import { PinchZoom } from '../../ui/pinch-zoom/pinch-zoom';
 import type { ZoomSetting } from '../../ui/zoom';
@@ -46,18 +46,20 @@ import type { ZoomSetting } from '../../ui/zoom';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class Workspace {
-  private readonly api = inject(CvApi);
+  private readonly api = inject(ResumeApi);
   private readonly locale = injectLocale();
 
   // value() throws while a resource is in its error state (server down), so read it only when there is one.
-  protected readonly cvs = computed(() =>
-    (this.api.cvs.hasValue() ? this.api.cvs.value() : []).map((cv) => toCvListItem(cv, this.locale())),
+  protected readonly resumes = computed(() =>
+    (this.api.resumes.hasValue() ? this.api.resumes.value() : []).map((resume) =>
+      toResumeListItem(resume, this.locale()),
+    ),
   );
-  protected readonly listState = computed<CvListState>(() => {
-    const cvs = this.api.cvs;
-    const error = cvs.error();
+  protected readonly listState = computed<ResumeListState>(() => {
+    const resumes = this.api.resumes;
+    const error = resumes.error();
     if (error !== undefined) return isUnreachable(error) ? 'unreachable' : 'failed';
-    return cvs.hasValue() ? 'ready' : 'loading';
+    return resumes.hasValue() ? 'ready' : 'loading';
   });
 
   /** Ticks so that "2 min ago" stays current. */
@@ -74,17 +76,19 @@ export class Workspace {
   );
 
   /** Keeps the user's choice while it still exists after a reload; otherwise the first CV. */
-  protected readonly selectedId = linkedSignal<readonly { id: string }[], string | null>({
-    source: this.cvs,
-    computation: (cvs, previous) =>
-      previous && cvs.some((cv) => cv.id === previous.value) ? previous.value : (cvs[0]?.id ?? null),
+  protected readonly selectedSlug = linkedSignal<readonly { slug: string }[], string | null>({
+    source: this.resumes,
+    computation: (resumes, previous) =>
+      previous && resumes.some((resume) => resume.slug === previous.value)
+        ? previous.value
+        : (resumes[0]?.slug ?? null),
   });
-  protected readonly selectedCv = computed(
-    () => this.cvs().find((cv) => cv.id === this.selectedId()) ?? null,
+  protected readonly selectedResume = computed(
+    () => this.resumes().find((resume) => resume.slug === this.selectedSlug()) ?? null,
   );
   protected readonly documentSrc = computed(() => {
-    const id = this.selectedId();
-    return id ? this.api.documentUrl(id, this.api.revision()) : null;
+    const slug = this.selectedSlug();
+    return slug ? this.api.documentUrl(slug, this.api.revision()) : null;
   });
 
   protected readonly exporting = signal(false);
@@ -108,11 +112,11 @@ export class Workspace {
 
   /** Exports the selected CV; when the PDF check finds problems, shows them instead (unless forced). */
   protected async exportPdf(force = false): Promise<void> {
-    const id = this.selectedId();
-    if (!id || this.exporting()) return;
+    const slug = this.selectedSlug();
+    if (!slug || this.exporting()) return;
     this.exporting.set(true);
     try {
-      const result = await this.api.exportPdf(id, force);
+      const result = await this.api.exportPdf(slug, force);
       if (result.kind === 'downloaded') return;
       this.exportProblems.set(result.kind === 'problems' ? result.problems : []);
       this.exportFailure.set(result.kind === 'failed' ? result.message : null);

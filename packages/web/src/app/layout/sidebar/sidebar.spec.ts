@@ -1,17 +1,17 @@
 import { TestBed } from '@angular/core/testing';
-import type { CvListItem } from '../cv-list-item';
+import type { ResumeListItem } from '../resume-list-item';
 import { Sidebar } from './sidebar';
 
-const ITEMS: readonly CvListItem[] = [
-  { id: 'a', title: 'Pinned one', subtitle: 'a', status: 'valid', pinned: true },
-  { id: 'b', title: 'Other one', subtitle: 'b', status: 'valid', pinned: false },
-  { id: 'c', title: 'Other two', subtitle: 'c', status: 'not-exported', pinned: false },
+const ITEMS: readonly ResumeListItem[] = [
+  { slug: 'a', title: 'Pinned one', subtitle: 'a', status: 'valid', pinned: true },
+  { slug: 'b', title: 'Other one', subtitle: 'b', status: 'valid', pinned: false },
+  { slug: 'c', title: 'Other two', subtitle: 'c', status: 'not-exported', pinned: false },
 ];
 
-async function render(items: readonly CvListItem[], selectedId: string | null = null) {
+async function render(items: readonly ResumeListItem[], selectedSlug: string | null = null) {
   const fixture = TestBed.createComponent(Sidebar);
   fixture.componentRef.setInput('items', items);
-  fixture.componentRef.setInput('selectedId', selectedId);
+  fixture.componentRef.setInput('selectedSlug', selectedSlug);
   await fixture.whenStable();
   return { fixture, root: fixture.nativeElement as HTMLElement };
 }
@@ -55,7 +55,7 @@ describe('Sidebar', () => {
     expect(root.querySelector('[aria-current="true"] .title')?.textContent).toBe('Other one');
 
     const emitted: string[] = [];
-    fixture.componentInstance.selectCv.subscribe((id) => emitted.push(id));
+    fixture.componentInstance.selectResume.subscribe((id) => emitted.push(id));
     root.querySelectorAll<HTMLButtonElement>('mr-sidebar-item .item-main')[2]!.click();
     expect(emitted).toEqual(['c']);
   });

@@ -1,11 +1,11 @@
 // Composition root for `pnpm seed`: puts the classic template's example CV (fictional) into the database, so a
-// fresh checkout has something to show. It goes through the same use case as Claude's create_cv, so the
+// fresh checkout has something to show. It goes through the same use case as Claude's create_resume, so the
 // template's styles are inserted and its markup is checked. Never overwrites a CV.
 //   DATABASE_URL  Postgres connection string (required)
 import { templateCatalog } from '@markup-resume/styles';
-import { parseMarkup } from './adapters/html-parse5/parse-markup.ts';
-import { openCvStore } from './adapters/storage-pg/open-cv-store.ts';
-import { createCvDocument, CvChanges } from './app/index.ts';
+import { parseHtml } from './adapters/parse5-html-parser/parse-html.ts';
+import { connectResumeRepository } from './adapters/postgres-storage/connect-resume-repository.ts';
+import { createResumeDocument, ResumeChanges } from './app/index.ts';
 
 const SAMPLE_ID = 'sample';
 
@@ -13,7 +13,7 @@ const databaseUrl = process.env['DATABASE_URL'];
 if (!databaseUrl) {
   throw new Error('DATABASE_URL is not set, e.g. postgres://user:password@host:5432/db');
 }
-const { db, store } = await openCvStore(databaseUrl);
+const { db, repository } = await connectResumeRepository(databaseUrl);
 
 const [ref] = templateCatalog.refs();
 const example = ref ? templateCatalog.guide(ref)?.example : undefined;
@@ -22,8 +22,8 @@ if (!example) {
 }
 
 try {
-  const result = await createCvDocument(
-    { store, templates: templateCatalog, parseMarkup, cvChanges: new CvChanges() },
+  const result = await createResumeDocument(
+    { repository, templates: templateCatalog, parseHtml, resumeChanges: new ResumeChanges() },
     SAMPLE_ID,
     example,
     'system',

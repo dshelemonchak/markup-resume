@@ -12,10 +12,10 @@ export const fontsDir = fileURLToPath(new URL('fonts/inter/', PACKAGE_DIR));
 export const iconsDir = fileURLToPath(new URL('icons/', PACKAGE_DIR));
 
 /**
- * The templates by reference: what a document names in <meta name="cv:template">, "<name>@<semver>",
+ * The templates by reference: what a document names in <meta name="resume:template">, "<name>@<semver>",
  * mapped to its folder under templates/.
  */
-const TEMPLATES: ReadonlyMap<string, string> = new Map([['classic@0.0.2', 'classic']]);
+const TEMPLATES: ReadonlyMap<string, string> = new Map([['classic@0.0.3', 'classic']]);
 
 /** One file of a template, or null when there is no template with this reference. */
 function read(
@@ -44,7 +44,7 @@ export const templateCatalog = {
   },
 };
 
-/** The shape of schema.json; Markup Résumé's MarkupSchema in packages/app/src/domain/cv-markup.ts. */
+/** The shape of schema.json; Markup Résumé's MarkupSchema in packages/app/src/domain/markup/markup.ts. */
 export interface TemplateSchema {
   readonly plainElements: readonly string[];
   readonly classes: Readonly<

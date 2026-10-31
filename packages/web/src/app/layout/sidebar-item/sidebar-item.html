@@ -3,7 +3,7 @@
     type="button"
     class="item-main"
     [attr.aria-current]="selected() ? 'true' : null"
-    (click)="selectCv.emit(item().id)"
+    (click)="selectResume.emit(item().slug)"
   >
     <span class="status" [class]="item().status" aria-hidden="true"></span>
     <span class="text">

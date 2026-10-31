@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, input, output, signal } from '@angular/core';
 import { TranslocoPipe } from '@jsverse/transloco';
-import type { CvListItem } from '../cv-list-item';
+import type { ResumeListItem } from '../resume-list-item';
 import { GlassPanel } from '../../ui/glass-panel/glass-panel';
 import { NgbDropdown, NgbDropdownItem, NgbDropdownMenu, NgbDropdownToggle } from '@ng-bootstrap/ng-bootstrap';
 
@@ -13,9 +13,9 @@ import { NgbDropdown, NgbDropdownItem, NgbDropdownMenu, NgbDropdownToggle } from
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SidebarItem {
-  readonly item = input.required<CvListItem>();
+  readonly item = input.required<ResumeListItem>();
   readonly selected = input(false);
-  readonly selectCv = output<string>();
+  readonly selectResume = output<string>();
 
   /** The actions menu is open: its button stays visible after the pointer leaves the row. */
   protected readonly menuOpen = signal(false);

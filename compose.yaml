@@ -20,7 +20,8 @@ x-workspace: &workspace
     - .:/workspace
     - ./data:/data
   environment:
-    CV_DATA_DIR: /data
+    # Where pnpm import:files reads CVs that an earlier version kept as files.
+    LEGACY_RESUME_DIR: /data
     # The dev toolbox reaches the database too, e.g. to generate table types (pnpm db:types).
     DATABASE_URL: postgres://markup:markup@db:5432/markup
   # Chromium needs more shared memory than Docker's 64 MB default.

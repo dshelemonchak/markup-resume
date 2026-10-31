@@ -1,8 +1,8 @@
 <header mr-glass-panel class="header">
   <div class="title-row">
-    @if (cv(); as cv) {
-      <h1 class="title">{{ cv.title }}</h1>
-      <span class="file">{{ cv.id }}.html</span>
+    @if (resume(); as resume) {
+      <h1 class="title">{{ resume.title }}</h1>
+      <span class="file">{{ resume.slug }}.html</span>
       @if (badge(); as badge) {
         <span class="badge" [class]="badge.css">{{ badge.key | transloco }}</span>
       }
@@ -19,7 +19,7 @@
     <button
       type="button"
       class="btn btn-primary btn-sm export"
-      [disabled]="!cv() || exporting()"
+      [disabled]="!resume() || exporting()"
       (click)="exportPdf.emit()"
     >
       @if (exporting()) {

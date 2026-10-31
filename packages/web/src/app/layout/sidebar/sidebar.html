@@ -12,9 +12,9 @@
 
   <!-- Placeholder: search is not implemented yet. -->
   <div mrDummy>
-    <label for="cv-search" class="visually-hidden">{{ 'sidebar.search' | transloco }}</label>
+    <label for="resume-search" class="visually-hidden">{{ 'sidebar.search' | transloco }}</label>
     <input
-      id="cv-search"
+      id="resume-search"
       type="search"
       class="form-control form-control-sm search"
       [placeholder]="'sidebar.search' | transloco"
@@ -26,12 +26,12 @@
       <section class="group" aria-labelledby="sidebar-pinned">
         <h2 id="sidebar-pinned" class="group-title">{{ 'sidebar.pinned' | transloco }}</h2>
         <ul class="items">
-          @for (item of pinned(); track item.id) {
+          @for (item of pinned(); track item.slug) {
             <li>
               <mr-sidebar-item
                 [item]="item"
-                [selected]="item.id === selectedId()"
-                (selectCv)="selectCv.emit($event)"
+                [selected]="item.slug === selectedSlug()"
+                (selectResume)="selectResume.emit($event)"
               />
             </li>
           }
@@ -42,12 +42,12 @@
     <section class="group" aria-labelledby="sidebar-all">
       <h2 id="sidebar-all" class="group-title">{{ 'sidebar.allCvs' | transloco }}</h2>
       <ul class="items">
-        @for (item of others(); track item.id) {
+        @for (item of others(); track item.slug) {
           <li>
             <mr-sidebar-item
               [item]="item"
-              [selected]="item.id === selectedId()"
-              (selectCv)="selectCv.emit($event)"
+              [selected]="item.slug === selectedSlug()"
+              (selectResume)="selectResume.emit($event)"
             />
           </li>
         } @empty {

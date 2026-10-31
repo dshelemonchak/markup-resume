@@ -8,7 +8,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { TranslocoPipe } from '@jsverse/transloco';
-import type { PdfProblemDto } from '../../api/cv-api';
+import type { PdfProblemDto } from '../../api/resume-api';
 import { injectTranslate } from '../../i18n/i18n';
 import { pdfProblemLines } from '../pdf-problem-text';
 

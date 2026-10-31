@@ -26,7 +26,7 @@ you see every change live, and the result exports to a PDF that reads correctly.
 - **Templates with a design system.** Each template defines its styles, a machine-readable schema of allowed
   classes and nesting, rules for Claude, and an example document. The bundled `classic` template reproduces its
   reference design to within 0.3 mm.
-- **MCP tools for Claude:** `list_cvs`, `read_cv`, `read_template`, `create_cv`, `write_cv`.
+- **MCP tools for Claude:** `list_resumes`, `read_resume`, `read_template`, `create_resume`, `write_resume`.
 - **Markup validation on every write.** Documents that break the template schema are rejected with a list of
   problems for Claude to fix. Rejected content includes unknown classes, misplaced blocks, inline styles, scripts
   and external resources. Markup Résumé inserts the template CSS itself.
@@ -69,14 +69,14 @@ this machine on `localhost:5433` (user, password and database: `markup`), and is
 
 ### Moving CVs from an earlier version
 
-Earlier versions kept CVs as files in `./data/cvs/<id>/document.html`. To move them into the database, once:
+Earlier versions kept CVs as files in `./data/cvs/<slug>/document.html`. To move them into the database, once:
 
 ```bash
 docker compose exec dev pnpm import:files
 ```
 
-Each document goes through the same checks as a write from Claude and becomes the CV's first revision; earlier
-versions in `history/` stay behind. A CV that is already in the database is skipped, and a document that fails the
+Each document is moved to the current template version (`classic@0.0.2` becomes `classic@0.0.3`), goes through the
+same checks as a write from Claude and becomes the CV's first revision; earlier versions in `history/` stay behind. A CV that is already in the database is skipped, and a document that fails the
 checks is listed with its problems, so it can be fixed and the import run again.
 
 ### Running from a JetBrains IDE

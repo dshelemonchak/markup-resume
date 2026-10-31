@@ -1,19 +1,19 @@
 import { TestBed } from '@angular/core/testing';
-import type { CvListItem } from '../cv-list-item';
+import type { ResumeListItem } from '../resume-list-item';
 import { DocumentHeader } from './document-header';
 import type { PreviewMode } from '../preview-mode';
 
-const CV: CvListItem = {
-  id: 'senior-angular',
+const CV: ResumeListItem = {
+  slug: 'senior-angular',
   title: 'Senior Angular',
   subtitle: '',
   status: 'warning',
   pinned: false,
 };
 
-async function render(cv: CvListItem | null, mode: PreviewMode = 'visual') {
+async function render(resume: ResumeListItem | null, mode: PreviewMode = 'visual') {
   const fixture = TestBed.createComponent(DocumentHeader);
-  fixture.componentRef.setInput('cv', cv);
+  fixture.componentRef.setInput('resume', resume);
   fixture.componentRef.setInput('mode', mode);
   await fixture.whenStable();
   return { fixture, root: fixture.nativeElement as HTMLElement };

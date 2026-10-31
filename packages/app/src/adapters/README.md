@@ -2,12 +2,12 @@
 
 Implementations of domain ports and entry points, one sub-folder per adapter:
 
-- `storage-pg/` — CVs and their revisions in Postgres, migrations and the local owner;
-- `http/` — the HTTP API and event stream for the UI;
-- `mcp/` — the MCP server for Claude, served over HTTP at `/mcp`;
-- `html-parse5/` — parses a CV the way a browser does, for the markup check;
-- `chrome-cdp/` — prints a CV to PDF with Chromium;
-- `poppler/` — reads fonts, text and links back out of a PDF.
+- `postgres-storage/` — resumes and their revisions in Postgres, migrations and the local owner;
+- `http-api/` — the HTTP API and event stream for the UI;
+- `mcp-server/` — the MCP server for Claude, served over HTTP at `/mcp`;
+- `parse5-html-parser/` — parses a resume the way a browser does, for the markup check;
+- `chrome-pdf-renderer/` — prints a resume to PDF with Chromium;
+- `poppler-pdf-inspector/` — reads fonts, text and links back out of a PDF.
 
 The composition roots that wire them together are `../main.ts` (the app: HTTP API and MCP), `../seed.ts` and
 `../import-files.ts`.

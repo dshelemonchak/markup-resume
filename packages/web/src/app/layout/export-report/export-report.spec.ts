@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import type { PdfProblemDto } from '../../api/cv-api';
+import type { PdfProblemDto } from '../../api/resume-api';
 import { ExportReport } from './export-report';
 
 describe('ExportReport', () => {

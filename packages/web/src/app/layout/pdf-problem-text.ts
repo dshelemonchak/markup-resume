@@ -1,4 +1,4 @@
-import type { PdfProblemDto } from '../api/cv-api';
+import type { PdfProblemDto } from '../api/resume-api';
 
 /** How many words or problems a list shows before "and N more". */
 const SHOWN = 10;

@@ -1,11 +1,11 @@
 import { TestBed } from '@angular/core/testing';
-import type { CvListItem } from '../cv-list-item';
+import type { ResumeListItem } from '../resume-list-item';
 import { SidebarItem } from './sidebar-item';
 
-const ITEM: CvListItem = {
-  id: 'cv-1',
+const ITEM: ResumeListItem = {
+  slug: 'resume-1',
   title: 'Title',
-  subtitle: 'cv-1 · edited',
+  subtitle: 'resume-1 · edited',
   status: 'warning',
   pinned: true,
 };
@@ -27,7 +27,7 @@ describe('SidebarItem', () => {
   it('shows title, subtitle, status and the pin', async () => {
     const { button } = await render(false);
     expect(button.querySelector('.title')?.textContent).toBe('Title');
-    expect(button.querySelector('.subtitle')?.textContent).toBe('cv-1 · edited');
+    expect(button.querySelector('.subtitle')?.textContent).toBe('resume-1 · edited');
     expect(button.querySelector('.status')?.classList.contains('warning')).toBe(true);
     expect(button.querySelector('[aria-label="Pinned"]')).not.toBeNull();
   });
@@ -40,9 +40,9 @@ describe('SidebarItem', () => {
   it('emits its id when clicked', async () => {
     const { fixture, button } = await render(false);
     const emitted: string[] = [];
-    fixture.componentInstance.selectCv.subscribe((id) => emitted.push(id));
+    fixture.componentInstance.selectResume.subscribe((id) => emitted.push(id));
     button.click();
-    expect(emitted).toEqual(['cv-1']);
+    expect(emitted).toEqual(['resume-1']);
   });
 
   it('has a menu button beside the row, named after the CV, that does not select it', async () => {
@@ -50,7 +50,7 @@ describe('SidebarItem', () => {
     expect(button.contains(menu)).toBe(false);
     expect(menu.getAttribute('aria-label')).toBe('Actions for Title');
     const emitted: string[] = [];
-    fixture.componentInstance.selectCv.subscribe((id) => emitted.push(id));
+    fixture.componentInstance.selectResume.subscribe((id) => emitted.push(id));
     menu.click();
     expect(emitted).toEqual([]);
   });
