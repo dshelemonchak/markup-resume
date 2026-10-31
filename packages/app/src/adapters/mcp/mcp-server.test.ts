@@ -1,8 +1,9 @@
 import { Client, InMemoryTransport } from '@modelcontextprotocol/client';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
-import type { CvRepository, TemplateCatalog } from '../../domain/index.ts';
+import type { CanonicalCvHtml, TemplateCatalog } from '../../domain/index.ts';
 import { createMcpServer } from './mcp-server.ts';
 import { CvChanges } from '../../app/index.ts';
+import { MemoryCvStore } from '../../app/testing/memory-cv-store.ts';
 
 const doc = (title: string) =>
   `<!doctype html><html><head><meta name="cv:title" content="${title}"><meta name="cv:template" content="classic@0.0.2"></head><body></body></html>`;
@@ -20,37 +21,32 @@ const templates: TemplateCatalog = {
   schema: () => null,
 };
 
-let documents: Record<string, string>;
+let store: MemoryCvStore;
 let client: Client;
 let toolCalls: number;
 
+/** The current document of a CV, or undefined. */
+const current = async (slug: string) => (await store.read(slug))?.html;
+
 /** A real MCP client talking to the server over linked in-memory transports: the whole protocol, no stdio. */
 beforeEach(async () => {
-  documents = { sample: doc('Sample') };
+  store = new MemoryCvStore();
+  // Put in as stored, past the boundary, so the tests see exactly what they put in.
+  await store.create({
+    slug: 'sample',
+    title: 'Sample',
+    html: doc('Sample') as CanonicalCvHtml,
+    template: { name: 'classic', version: '0.0.2' },
+    author: 'system',
+  });
   toolCalls = 0;
-  const repository: CvRepository = {
-    list: () =>
-      Promise.resolve(
-        Object.keys(documents).map((id) => ({ id, title: id, updatedAt: '2026-10-28T00:00:00.000Z' })),
-      ),
-    getDocument: (id) => Promise.resolve(documents[id] ?? null),
-    save: (id, html) => {
-      documents[id] = html;
-      return Promise.resolve();
-    },
-    create: (id, html) => {
-      if (id in documents) return Promise.resolve(false);
-      documents[id] = html;
-      return Promise.resolve(true);
-    },
-  };
   const cvChanges = new CvChanges();
   const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
   client = new Client({ name: 'test-client', version: '0.0.0' });
   await Promise.all([
     createMcpServer(
       {
-        repository,
+        store,
         cvChanges,
         templates,
         parseMarkup: (html) => ({ tree: { tag: 'html', attributes: new Map(), children: [] }, html }),
@@ -88,7 +84,7 @@ describe('MCP server', () => {
   it('lists CVs as text and structured content', async () => {
     const result = await client.callTool({ name: 'list_cvs', arguments: {} });
     expect(result.structuredContent).toEqual({
-      cvs: [{ id: 'sample', title: 'sample', updatedAt: '2026-10-28T00:00:00.000Z' }],
+      cvs: [{ id: 'sample', title: 'Sample', updatedAt: '2026-10-31T10:00:01.000Z' }],
     });
     expect(JSON.parse(textOf(result))).toEqual(result.structuredContent);
   });
@@ -106,7 +102,7 @@ describe('MCP server', () => {
   it('writes a CV, then reports the same document as unchanged', async () => {
     const saved = await client.callTool({ name: 'write_cv', arguments: { id: 'sample', html: doc('New') } });
     expect(saved.isError).toBeFalsy();
-    expect(documents['sample']).toBe(stored('New'));
+    expect(await current('sample')).toBe(stored('New'));
 
     const again = await client.callTool({ name: 'write_cv', arguments: { id: 'sample', html: doc('New') } });
     expect(textOf(again)).toContain('nothing was written');
@@ -116,7 +112,7 @@ describe('MCP server', () => {
     const result = await client.callTool({ name: 'write_cv', arguments: { id: 'sample', html: '<p>cut' } });
     expect(result.isError).toBe(true);
     expect(textOf(result)).toContain('- The document must end with </html>');
-    expect(documents['sample']).toBe(doc('Sample'));
+    expect(await current('sample')).toBe(doc('Sample'));
   });
 
   it('creates a CV under a new id, and never replaces an existing one', async () => {
@@ -125,7 +121,7 @@ describe('MCP server', () => {
       arguments: { id: 'fresh', html: doc('Fresh') },
     });
     expect(created.isError).toBeFalsy();
-    expect(documents['fresh']).toBe(stored('Fresh'));
+    expect(await current('fresh')).toBe(stored('Fresh'));
 
     const taken = await client.callTool({
       name: 'create_cv',
@@ -133,14 +129,14 @@ describe('MCP server', () => {
     });
     expect(taken.isError).toBe(true);
     expect(textOf(taken)).toContain('already exists');
-    expect(documents['sample']).toBe(doc('Sample'));
+    expect(await current('sample')).toBe(doc('Sample'));
   });
 
   it('rejects a broken new document without creating it', async () => {
     const result = await client.callTool({ name: 'create_cv', arguments: { id: 'fresh', html: '<p>cut' } });
     expect(result.isError).toBe(true);
     expect(textOf(result)).toContain('- The document must end with </html>');
-    expect(documents).not.toHaveProperty('fresh');
+    expect(await current('fresh')).toBeUndefined();
   });
 
   it('tells Claude in the handshake to read the template before writing', () => {
@@ -166,7 +162,10 @@ describe('MCP server', () => {
   it('reports every tool call', async () => {
     await client.callTool({ name: 'list_cvs', arguments: {} });
     await client.callTool({ name: 'read_cv', arguments: { id: 'sample' } });
-    await client.callTool({ name: 'write_cv', arguments: { id: 'sample', html: documents['sample']! } });
+    await client.callTool({
+      name: 'write_cv',
+      arguments: { id: 'sample', html: (await current('sample'))! },
+    });
     expect(toolCalls).toBe(3);
   });
 });

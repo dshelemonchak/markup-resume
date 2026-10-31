@@ -44,7 +44,7 @@ const instructions = (refs: readonly string[]) =>
  * composition root connects it to stdio and tests connect it to an in-memory client.
  */
 export function createMcpServer(services: CvDocumentServices, options: McpServerOptions = {}): McpServer {
-  const { repository, templates } = services;
+  const { store, templates } = services;
   const server = new McpServer(
     { name: 'markup-resume', version: '0.0.0' },
     { instructions: instructions(templates.refs()) },
@@ -63,7 +63,7 @@ export function createMcpServer(services: CvDocumentServices, options: McpServer
     },
     async () => {
       options.onToolCall?.();
-      const cvs = await listCvs(repository);
+      const cvs = await listCvs(store);
       const output = { cvs: [...cvs] };
       return { content: [text(JSON.stringify(output, null, 2))], structuredContent: output };
     },
@@ -82,7 +82,7 @@ export function createMcpServer(services: CvDocumentServices, options: McpServer
     },
     async ({ id }) => {
       options.onToolCall?.();
-      const result = await getCvDocument(repository, id);
+      const result = await getCvDocument(store, id);
       switch (result.kind) {
         case 'found':
           return { content: [text(result.html)] };
@@ -115,7 +115,7 @@ export function createMcpServer(services: CvDocumentServices, options: McpServer
     },
     async ({ id, html }) => {
       options.onToolCall?.();
-      const result = await saveCvDocument(services, id, html);
+      const result = await saveCvDocument(services, id, html, 'claude');
       switch (result.kind) {
         case 'saved':
           return { content: [text(`Saved CV "${id}". The previous version is in its history.`)] };
@@ -155,7 +155,7 @@ export function createMcpServer(services: CvDocumentServices, options: McpServer
     },
     async ({ id, html }) => {
       options.onToolCall?.();
-      const result = await createCvDocument(services, id, html);
+      const result = await createCvDocument(services, id, html, 'claude');
       switch (result.kind) {
         case 'created':
           return { content: [text(`Created CV "${id}". The user sees it in the Markup Résumé viewer.`)] };

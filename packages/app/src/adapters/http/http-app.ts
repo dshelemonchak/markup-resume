@@ -11,7 +11,7 @@ import {
   listCvs,
   type PdfExportServices,
 } from '../../app/index.ts';
-import type { CvRepository } from '../../domain/index.ts';
+import type { CvStore } from '../../domain/index.ts';
 
 const HEARTBEAT_MS = 25_000;
 /** Asset names: a flat file name, so a request can never leave the asset folder. */
@@ -23,7 +23,7 @@ export interface HttpAppOptions {
   readonly fontsDir?: string;
   readonly iconsDir?: string;
   /** Printing to PDF and checking it; without it, PDF export answers 501. */
-  readonly pdf?: Omit<PdfExportServices, 'repository'>;
+  readonly pdf?: Omit<PdfExportServices, 'store'>;
 }
 
 /**
@@ -41,7 +41,7 @@ export interface HttpAppOptions {
  * streams, so the HTTP server can shut down without waiting for clients.
  */
 export function createHttpApp(
-  repository: CvRepository,
+  store: CvStore,
   cvChanges: CvChanges,
   options: HttpAppOptions = {},
 ): { app: Hono; close: () => void } {
@@ -55,10 +55,10 @@ export function createHttpApp(
 
   const app = new Hono().basePath('/api/v1');
 
-  app.get('/cvs', async (c) => c.json(await listCvs(repository)));
+  app.get('/cvs', async (c) => c.json(await listCvs(store)));
 
   app.get('/cvs/:id/document', async (c) => {
-    const result = await getCvDocument(repository, c.req.param('id'));
+    const result = await getCvDocument(store, c.req.param('id'));
     switch (result.kind) {
       case 'invalid-id':
         return c.json({ error: 'invalid-id' }, 400);
@@ -75,7 +75,7 @@ export function createHttpApp(
 
   app.get('/cvs/:id/pdf', async (c) => {
     if (!options.pdf) return c.json({ error: 'pdf-unavailable' }, 501);
-    const result = await exportCvPdf({ repository, ...options.pdf }, c.req.param('id'));
+    const result = await exportCvPdf({ store, ...options.pdf }, c.req.param('id'));
     switch (result.kind) {
       case 'invalid-id':
         return c.json({ error: 'invalid-id' }, 400);

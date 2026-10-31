@@ -1,13 +1,16 @@
 import { describe, expect, it } from 'vitest';
-import type { CvRepository, PdfFacts } from '../../domain/index.ts';
+import type { CanonicalCvHtml, PdfFacts } from '../../domain/index.ts';
+import { MemoryCvStore } from '../testing/memory-cv-store.ts';
 import { exportCvPdf, pdfFileName } from './export-pdf.ts';
 
-const repository: CvRepository = {
-  list: () => Promise.resolve([]),
-  getDocument: (id) => Promise.resolve(id === 'sample' ? '<html></html>' : null),
-  save: () => Promise.resolve(),
-  create: () => Promise.resolve(true),
-};
+const store = new MemoryCvStore();
+await store.create({
+  slug: 'sample',
+  title: 'Sample',
+  html: '<html></html>' as CanonicalCvHtml,
+  template: { name: 'classic', version: '0.0.2' },
+  author: 'system',
+});
 
 function services(text: string) {
   const rendered: string[] = [];
@@ -15,7 +18,7 @@ function services(text: string) {
   return {
     rendered,
     services: {
-      repository,
+      store,
       renderCv: (id: string) => {
         rendered.push(id);
         return Promise.resolve({

@@ -8,7 +8,7 @@ you see every change live, and the result exports to a PDF that reads correctly.
 - **Your own Claude, no extra service.** Markup Résumé serves an MCP endpoint, so Claude works on your CVs directly
   through the Claude subscription you already have. There is no third-party plan or API key, and Markup Résumé adds
   no limits of its own: ask Claude to tailor a CV to a vacancy, rewrite a section or start a new version as often as
-  your Claude plan allows. Markup Résumé runs on your machine and stores your CVs in a local folder.
+  your Claude plan allows. Markup Résumé runs on your machine and stores your CVs in a local database.
 - **A format Claude edits well.** Each CV is laid out in HTML and CSS: plain text that Claude reads and writes
   directly. A template owns the design and gives Claude its rules, so changing the wording never breaks the
   layout.
@@ -20,8 +20,9 @@ you see every change live, and the result exports to a PDF that reads correctly.
 
 ## Features
 
-- **One document per CV.** Content and the template reference live in one standalone HTML file. There is no
-  database and no separate content model.
+- **One document per CV, with its full history.** Content and the template reference live in one standalone HTML
+  document with no separate content model. Every change is kept as a revision in Postgres, recording who made it
+  and which revision it was based on.
 - **Templates with a design system.** Each template defines its styles, a machine-readable schema of allowed
   classes and nesting, rules for Claude, and an example document. The bundled `classic` template reproduces its
   reference design to within 0.3 mm.
@@ -55,16 +56,28 @@ Requirements: Docker (Docker Desktop on macOS). All tooling runs in containers.
 ```bash
 docker compose up -d dev
 docker compose exec dev pnpm install
-docker compose exec dev pnpm seed        # adds a fictional example CV to ./data
+docker compose exec dev pnpm seed        # adds a fictional example CV to the database
 docker compose up -d app web              # also starts Postgres (db), which app waits for
 ```
 
 Open http://localhost:4200.
 
-CVs are stored in `./data`, which is excluded from git. The app also connects to a Postgres database at startup
-and applies its schema migrations. The database lives in the Docker volume `markup-resume-db`, is reachable from
+CVs and their revisions are stored in Postgres. The app connects to it at startup and applies its schema migrations.
+Until sign-in exists, every CV belongs to one local user, created on first start. The database lives in the Docker volume `markup-resume-db`, is reachable from
 this machine on `localhost:5433` (user, password and database: `markup`), and is reset with
 `docker compose down -v`.
+
+### Moving CVs from an earlier version
+
+Earlier versions kept CVs as files in `./data/cvs/<id>/document.html`. To move them into the database, once:
+
+```bash
+docker compose exec dev pnpm import:files
+```
+
+Each document goes through the same checks as a write from Claude and becomes the CV's first revision; earlier
+versions in `history/` stay behind. A CV that is already in the database is skipped, and a document that fails the
+checks is listed with its problems, so it can be fixed and the import run again.
 
 ### Running from a JetBrains IDE
 
@@ -102,7 +115,7 @@ The server follows a ports-and-adapters layout:
 
 - `domain` — types and pure rules, including the markup and PDF checks;
 - `app` — use cases;
-- adapters — file storage, HTTP, MCP, Chromium over the DevTools Protocol, poppler, parse5.
+- adapters — Postgres storage (Kysely), HTTP, MCP, Chromium over the DevTools Protocol, poppler, parse5.
 
 Import boundaries between the layers are enforced by ESLint. The HTTP API and the MCP server are two entry points
 to the same use cases.

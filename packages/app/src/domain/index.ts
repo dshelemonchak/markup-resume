@@ -27,7 +27,6 @@ export {
   type RenderCv,
   type RenderedCv,
 } from './pdf/cv-pdf.ts';
-export type { CvRepository } from './cv/cv-repository.ts';
 export type {
   CvListing,
   CvStore,
