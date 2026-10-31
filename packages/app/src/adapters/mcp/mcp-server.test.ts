@@ -46,7 +46,7 @@ beforeEach(async () => {
         repository,
         cvChanges,
         templates,
-        parseMarkup: () => ({ tag: 'html', attributes: new Map(), children: [] }),
+        parseMarkup: (html) => ({ tree: { tag: 'html', attributes: new Map(), children: [] }, html }),
       },
       { onToolCall: () => toolCalls++ },
     ).connect(serverTransport),

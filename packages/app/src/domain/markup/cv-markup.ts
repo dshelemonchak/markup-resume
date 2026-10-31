@@ -6,8 +6,16 @@ export interface MarkupElement {
   readonly children: readonly MarkupElement[];
 }
 
-/** Port: turns HTML into the element tree a browser would build from it. */
-export type ParseMarkup = (html: string) => MarkupElement;
+/** A document after one parse: the element tree for the checks, and the same parse serialized back. */
+export interface ParsedMarkup {
+  /** The <html> element. */
+  readonly tree: MarkupElement;
+  /** The document as a browser understands it, serialized back: canonical HTML (ADR-0024). */
+  readonly html: string;
+}
+
+/** Port: turns HTML into the element tree a browser would build from it, and that tree as canonical HTML. */
+export type ParseMarkup = (html: string) => ParsedMarkup;
 
 /** The markup a template accepts (its schema.json). */
 export interface MarkupSchema {
