@@ -1,3 +1,4 @@
+import { readCvMeta } from './cv-meta.ts';
 import { readCvTitle } from './cv-title.ts';
 
 const DOCTYPE_AT_START = /^\s*<!doctype html\b/i;
@@ -18,6 +19,9 @@ export function checkCvDocument(html: string): readonly string[] {
   }
   if (readCvTitle(html) === null) {
     problems.push('The document must keep <meta name="cv:title" content="…"> with a non-empty title.');
+  }
+  if (readCvMeta(html, 'cv:template') === null) {
+    problems.push('The document must name its template in <meta name="cv:template" content="…">.');
   }
   return problems;
 }

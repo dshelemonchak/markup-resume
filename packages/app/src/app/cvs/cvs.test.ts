@@ -10,10 +10,20 @@ const templates: TemplateCatalog = {
   schema: () => null,
 };
 
-// No template in these tests has a schema, so the parser is never asked.
-const parseMarkup: ParseMarkup = () => {
-  throw new Error('not expected to parse');
-};
+// No template in these tests has a schema, so the tree is never looked at; the document comes back as it was.
+const parseMarkup: ParseMarkup = (html) => ({
+  tree: { tag: 'html', attributes: new Map(), children: [] },
+  html,
+});
+
+/** A whole document naming a template; `stored` is the same after the template styles were put in. */
+const doc = (title: string, template = 'classic@0.0.2') =>
+  `<!doctype html><html><head><meta name="cv:title" content="${title}"><meta name="cv:template" content="${template}"></head><body></body></html>`;
+const stored = (title: string) =>
+  doc(title).replace(
+    '</head>',
+    '  <style id="cv-lib" data-cv-lib="classic@0.0.2">\np {}\n  </style>\n</head>',
+  );
 
 const services = (repository: CvRepository, cvChanges = new CvChanges()) => ({
   repository,
@@ -63,10 +73,8 @@ describe('getCvDocument', () => {
 });
 
 describe('saveCvDocument', () => {
-  const doc = (title: string) => `<!doctype html><html><meta name="cv:title" content="${title}"></html>`;
-
   function setup() {
-    const documents: Record<string, string> = { sample: doc('Old') };
+    const documents: Record<string, string> = { sample: stored('Old') };
     const saves: string[] = [];
     const repository: CvRepository = {
       ...fakeRepository([], documents),
@@ -86,7 +94,7 @@ describe('saveCvDocument', () => {
       kind: 'saved',
     });
     expect(saves).toEqual(['sample']);
-    expect(documents['sample']).toBe(doc('New'));
+    expect(documents['sample']).toBe(stored('New'));
     expect(notified).toEqual(['sample']);
   });
 
@@ -120,11 +128,7 @@ describe('saveCvDocument', () => {
 
   it('stores the document with the styles of the template it names', async () => {
     const { repository, documents } = setup();
-    const sent = doc('New').replace(
-      '<meta',
-      '<head><meta name="cv:template" content="classic@0.0.2"></head><meta',
-    );
-    expect(await saveCvDocument(services(repository), 'sample', sent)).toEqual({ kind: 'saved' });
+    expect(await saveCvDocument(services(repository), 'sample', doc('New'))).toEqual({ kind: 'saved' });
     expect(documents['sample']).toContain('<style id="cv-lib" data-cv-lib="classic@0.0.2">\np {}');
     // The stored document, sent back as it is, changes nothing.
     expect(await saveCvDocument(services(repository), 'sample', documents['sample']!)).toEqual({
@@ -134,11 +138,7 @@ describe('saveCvDocument', () => {
 
   it('rejects a template that does not exist', async () => {
     const { repository, saves } = setup();
-    const sent = doc('New').replace(
-      '<meta',
-      '<head><meta name="cv:template" content="modern@1"></head><meta',
-    );
-    expect(await saveCvDocument(services(repository), 'sample', sent)).toMatchObject({
+    expect(await saveCvDocument(services(repository), 'sample', doc('New', 'modern@1'))).toMatchObject({
       kind: 'invalid-document',
       problems: [expect.stringContaining('Unknown template "modern@1"')],
     });
@@ -157,8 +157,6 @@ describe('saveCvDocument', () => {
 });
 
 describe('createCvDocument', () => {
-  const doc = '<!doctype html><html><meta name="cv:title" content="New"></html>';
-
   function setup(existing: string[] = []) {
     const created: string[] = [];
     const repository: CvRepository = {
@@ -175,7 +173,7 @@ describe('createCvDocument', () => {
   it('creates a CV under a free id and announces it', async () => {
     const { repository, created } = setup();
     const { cvChanges, notified } = recordChanges();
-    expect(await createCvDocument(services(repository, cvChanges), 'fresh', doc)).toEqual({
+    expect(await createCvDocument(services(repository, cvChanges), 'fresh', doc('New'))).toEqual({
       kind: 'created',
     });
     expect(created).toEqual(['fresh']);
@@ -185,7 +183,7 @@ describe('createCvDocument', () => {
   it('reports an id that is already taken, announcing nothing', async () => {
     const { repository } = setup(['sample']);
     const { cvChanges, notified } = recordChanges();
-    expect(await createCvDocument(services(repository, cvChanges), 'sample', doc)).toEqual({
+    expect(await createCvDocument(services(repository, cvChanges), 'sample', doc('New'))).toEqual({
       kind: 'already-exists',
     });
     expect(notified).toEqual([]);
@@ -193,8 +191,12 @@ describe('createCvDocument', () => {
 
   it('checks the id and the document before touching the repository', async () => {
     const { repository, created } = setup();
-    expect(await createCvDocument(services(repository), '../secret', doc)).toEqual({ kind: 'invalid-id' });
-    expect(await createCvDocument(services(repository), 'fresh', doc.replace('</html>', ''))).toMatchObject({
+    expect(await createCvDocument(services(repository), '../secret', doc('New'))).toEqual({
+      kind: 'invalid-id',
+    });
+    expect(
+      await createCvDocument(services(repository), 'fresh', doc('New').replace('</html>', '')),
+    ).toMatchObject({
       kind: 'invalid-document',
     });
     expect(created).toEqual([]);

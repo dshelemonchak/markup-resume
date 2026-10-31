@@ -1,12 +1,11 @@
 import {
-  checkCvDocument,
-  checkTemplateMarkup,
   type CvRepository,
   type CvSummary,
+  type CvTemplateRef,
   isValidCvId,
   type ParseMarkup,
   type TemplateCatalog,
-  withTemplateStyles,
+  validateCvDocument,
 } from '../../domain/index.ts';
 import type { CvChanges } from '../cv-changes/cv-changes.ts';
 
@@ -87,21 +86,25 @@ type Rejection =
   | { readonly kind: 'invalid-document'; readonly problems: readonly string[] };
 
 /**
- * The checks of an incoming document that need no I/O, including its markup against the template's schema,
- * then the template styles put in (ADR-0006): the document as it will be stored, or why it may not be. The size
- * limit applies to what was sent.
+ * The checks of an incoming document that need no I/O: the id, the size of what was sent, then the validation
+ * boundary (ADR-0024). Gives the document as it will be stored, canonical and with the template styles in, and the
+ * template it names; or why it may not be stored.
  */
 function prepareIncoming(
   { templates, parseMarkup }: CvDocumentServices,
   id: string,
   html: string,
-): { readonly kind: 'ready'; readonly html: string } | Rejection {
-  if (!isValidCvId(id)) return { kind: 'invalid-id' };
+): { readonly kind: 'ready'; readonly html: string; readonly template: CvTemplateRef } | Rejection {
+  if (!isValidCvId(id)) {
+    return { kind: 'invalid-id' };
+  }
   const bytes = new TextEncoder().encode(html).byteLength;
-  if (bytes > MAX_CV_DOCUMENT_BYTES) return { kind: 'too-large', bytes, limitBytes: MAX_CV_DOCUMENT_BYTES };
-  const problems = [...checkCvDocument(html), ...checkTemplateMarkup(html, templates, parseMarkup)];
-  const styled = withTemplateStyles(html, templates);
-  if (styled.kind === 'problem') problems.push(styled.problem);
-  if (problems.length > 0 || styled.kind !== 'styled') return { kind: 'invalid-document', problems };
-  return { kind: 'ready', html: styled.html };
+  if (bytes > MAX_CV_DOCUMENT_BYTES) {
+    return { kind: 'too-large', bytes, limitBytes: MAX_CV_DOCUMENT_BYTES };
+  }
+  const document = validateCvDocument(html, templates, parseMarkup);
+  if (document.kind === 'invalid') {
+    return { kind: 'invalid-document', problems: document.problems };
+  }
+  return { kind: 'ready', html: document.html, template: document.template };
 }

@@ -4,7 +4,14 @@ import type { CvRepository, TemplateCatalog } from '../../domain/index.ts';
 import { createMcpServer } from './mcp-server.ts';
 import { CvChanges } from '../../app/index.ts';
 
-const doc = (title: string) => `<!doctype html><html><meta name="cv:title" content="${title}"></html>`;
+const doc = (title: string) =>
+  `<!doctype html><html><head><meta name="cv:title" content="${title}"><meta name="cv:template" content="classic@0.0.2"></head><body></body></html>`;
+/** The same document as stored, with the template styles put in. */
+const stored = (title: string) =>
+  doc(title).replace(
+    '</head>',
+    '  <style id="cv-lib" data-cv-lib="classic@0.0.2">\np {}\n  </style>\n</head>',
+  );
 
 const templates: TemplateCatalog = {
   refs: () => ['classic@0.0.2'],
@@ -99,7 +106,7 @@ describe('MCP server', () => {
   it('writes a CV, then reports the same document as unchanged', async () => {
     const saved = await client.callTool({ name: 'write_cv', arguments: { id: 'sample', html: doc('New') } });
     expect(saved.isError).toBeFalsy();
-    expect(documents['sample']).toBe(doc('New'));
+    expect(documents['sample']).toBe(stored('New'));
 
     const again = await client.callTool({ name: 'write_cv', arguments: { id: 'sample', html: doc('New') } });
     expect(textOf(again)).toContain('nothing was written');
@@ -118,7 +125,7 @@ describe('MCP server', () => {
       arguments: { id: 'fresh', html: doc('Fresh') },
     });
     expect(created.isError).toBeFalsy();
-    expect(documents['fresh']).toBe(doc('Fresh'));
+    expect(documents['fresh']).toBe(stored('Fresh'));
 
     const taken = await client.callTool({
       name: 'create_cv',
