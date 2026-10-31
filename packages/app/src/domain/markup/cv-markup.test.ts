@@ -27,7 +27,12 @@ const doc = (head: MarkupElement[], ...page: MarkupElement[]) =>
 describe('checkMarkup', () => {
   it('accepts a page built by the schema', () => {
     const page = doc(
-      [el('meta'), el('title'), withAttributes(el('style'), { id: 'cv-lib' })],
+      [
+        withAttributes(el('meta'), { charset: 'utf-8' }),
+        withAttributes(el('meta'), { name: 'cv:title', content: 'Senior engineer' }),
+        el('title'),
+        withAttributes(el('style'), { id: 'cv-lib' }),
+      ],
       el(
         'section',
         'cv-skills',
@@ -91,6 +96,34 @@ describe('checkMarkup', () => {
       'The onclick attribute on <p in .cv-skills> is not allowed.',
       'The link "javascript:alert(1)" in .cv-skills must start with https://, mailto: or tel:.',
     ]);
+  });
+
+  it('lets <meta> carry only charset, or name and content with a known name', () => {
+    const meta = (attributes: Record<string, string>) => withAttributes(el('meta'), attributes);
+    const problems = (...head: MarkupElement[]) =>
+      checkMarkup(doc(head, el('section', 'cv-skills', header())), schema);
+
+    expect(
+      problems(
+        meta({ charset: 'utf-8' }),
+        meta({ name: 'viewport', content: 'width=device-width' }),
+        meta({ name: 'author', content: 'Alex Morgan' }),
+        meta({ name: 'cv:template', content: 'classic@0.0.2' }),
+      ),
+    ).toEqual([]);
+
+    for (const attributes of [
+      { 'http-equiv': 'refresh', content: '0;url=https://evil.example' },
+      { name: 'referrer', content: 'no-referrer' },
+      { name: 'author', content: 'X', property: 'og:title' },
+      { charset: 'utf-8', name: 'author' },
+      { name: 'author' },
+      {},
+    ]) {
+      expect(problems(meta(attributes)), JSON.stringify(attributes)).toEqual([
+        '<meta> may only carry charset, or name and content with a name of cv:title, cv:template, viewport, author.',
+      ]);
+    }
   });
 
   it('wants the whole body inside one page element', () => {
