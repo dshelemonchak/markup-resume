@@ -8,17 +8,23 @@ import {
   MAX_CV_DOCUMENT_BYTES,
   saveCvDocument,
 } from '../../app/index.ts';
+import { formatCvAddress } from '../../domain/index.ts';
 
 const MIB = 1024 * 1024;
 
-const cvId = z
+const cvAddress = z
   .string()
-  .describe('CV id as returned by list_cvs. Format example only, not an existing CV: "frontend-engineer".');
+  .describe(
+    'CV id as returned by list_cvs, for its current revision ("frontend-engineer"), or an address with a revision ' +
+      'number for another one ("frontend-engineer@7"). Format examples only, not existing CVs.',
+  );
 
 const cvSummary = z.object({
   id: z.string(),
   title: z.string(),
   updatedAt: z.string().describe('ISO 8601'),
+  revision: z.number().describe('Number of the current revision'),
+  address: z.string().describe('Address of the current revision, e.g. "frontend-engineer@13"'),
 });
 
 export interface McpServerOptions {
@@ -37,6 +43,10 @@ const instructions = (refs: readonly string[]) =>
     'Before you create a CV with create_cv or change one with write_cv, call read_template for its template ' +
       'and follow those rules exactly: they list the only class names and structure the template accepts.',
     'Never write CSS: Markup Résumé puts the template styles into the document itself.',
+    'Every change is kept as a numbered revision. Address a CV by its id for the current revision ("my-cv"), or ' +
+      'by id@number for another one ("my-cv@7"). Write by id alone to build on the current revision. Write to ' +
+      'id@number only when the user asks to start again from that revision: the result leaves out every newer ' +
+      'revision, so tell the user so.',
   ].join('\n');
 
 /**
@@ -64,7 +74,7 @@ export function createMcpServer(services: CvDocumentServices, options: McpServer
     async () => {
       options.onToolCall?.();
       const cvs = await listCvs(store);
-      const output = { cvs: [...cvs] };
+      const output = { cvs: cvs.map((cv) => ({ ...cv, address: formatCvAddress(cv.id, cv.revision) })) };
       return { content: [text(JSON.stringify(output, null, 2))], structuredContent: output };
     },
   );
@@ -74,10 +84,11 @@ export function createMcpServer(services: CvDocumentServices, options: McpServer
     {
       title: 'Read CV',
       description:
-        'Returns the full HTML document of one CV. The document is the single source of truth: ' +
-        'content, structure and styles all live in this one file. Always read the CV right before ' +
-        'editing it, and base the edit on exactly this text.',
-      inputSchema: z.object({ id: cvId }),
+        'Returns the full HTML document of one revision of a CV, the current one unless the id names another. ' +
+        'The first part says which revision it is; the second part is the document, the single source of truth: ' +
+        'content, structure and styles all live in this one file. Always read the CV right before editing it, ' +
+        'and base the edit on exactly this document.',
+      inputSchema: z.object({ id: cvAddress }),
       annotations: { readOnlyHint: true, openWorldHint: false },
     },
     async ({ id }) => {
@@ -85,7 +96,7 @@ export function createMcpServer(services: CvDocumentServices, options: McpServer
       const result = await getCvDocument(store, id);
       switch (result.kind) {
         case 'found':
-          return { content: [text(result.html)] };
+          return { content: [text(revisionNote(result)), text(result.html)] };
         case 'invalid-id':
           return invalidId(id);
         case 'not-found':
@@ -104,27 +115,30 @@ export function createMcpServer(services: CvDocumentServices, options: McpServer
         'send the complete document, with every part you did not mean to change kept exactly as ' +
         'read_cv returned it. The document must start with <!doctype html>, end with </html> and keep ' +
         `<meta name="cv:title" content="…">; the size limit is ${MAX_CV_DOCUMENT_BYTES / MIB} MiB. ` +
-        "The previous version is kept in the CV's history, and the user sees the change live in the " +
-        'Markup Résumé viewer. Sending the same document again changes nothing. A rejected document is not ' +
-        'saved; the error lists what to fix.',
+        'Every write becomes a new numbered revision and the previous ones stay, so the user can go back; the user ' +
+        'sees the change live in the Markup Résumé viewer. Written by id alone, it builds on the current revision ' +
+        'and sending the same document again changes nothing. Written to id@number, it builds on that revision, ' +
+        'as when the user asks to start again from it. A rejected document is not saved; the error lists what to fix.',
       inputSchema: z.object({
-        id: cvId.describe(`${cvId.description} Only existing CVs can be written.`),
+        id: cvAddress.describe(`${cvAddress.description} Only existing CVs can be written.`),
         html: z.string().describe('The complete new HTML document.'),
       }),
-      annotations: { destructiveHint: true, idempotentHint: true, openWorldHint: false },
+      annotations: { destructiveHint: true, idempotentHint: false, openWorldHint: false },
     },
     async ({ id, html }) => {
       options.onToolCall?.();
       const result = await saveCvDocument(services, id, html, 'claude');
       switch (result.kind) {
         case 'saved':
-          return { content: [text(`Saved CV "${id}". The previous version is in its history.`)] };
+          return { content: [text(savedNote(result))] };
         case 'unchanged':
           return { content: [text(`CV "${id}" already has exactly this document; nothing was written.`)] };
         case 'invalid-id':
           return invalidId(id);
         case 'not-found':
           return notFound(id);
+        case 'unknown-revision':
+          return failure(`CV "${id}" has no such revision. Read it by its id to see the current revision.`);
         case 'too-large':
         case 'invalid-document':
           return rejected(result);
@@ -223,6 +237,34 @@ function rejected(
   }
   return failure(
     ['The document was not saved:', ...result.problems.map((problem) => `- ${problem}`)].join('\n'),
+  );
+}
+
+/** Which revision read_cv returned, kept apart from the document so it never ends up in a later write. */
+function revisionNote(result: { slug: string; number: number; current: number }): string {
+  const address = formatCvAddress(result.slug, result.number);
+  return result.number === result.current
+    ? `This is ${address}, the current revision.`
+    : `This is ${address}, an earlier revision; the current one is ${formatCvAddress(result.slug, result.current)}.`;
+}
+
+/** What write_cv tells Claude: the new address and, when an older base left revisions out, a warning to pass on. */
+function savedNote(result: {
+  slug: string;
+  number: number;
+  basedOn: number;
+  basedOnCurrent: boolean;
+}): string {
+  const saved = `Saved as ${formatCvAddress(result.slug, result.number)}; earlier revisions are kept.`;
+  if (result.basedOnCurrent) {
+    return saved;
+  }
+  const first = result.basedOn + 1;
+  const last = result.number - 1;
+  const leftOut = first === last ? `@${first} is` : `@${first} to @${last} are`;
+  return (
+    `${saved} Warning: it is based on ${formatCvAddress(result.slug, result.basedOn)}, so ${leftOut} not in it. ` +
+    'Tell the user, who decides what to do.'
   );
 }
 

@@ -66,6 +66,11 @@ function textOf(result: Awaited<ReturnType<Client['callTool']>>): string {
   return first?.text ?? '';
 }
 
+/** Every text part of a result, e.g. read_cv's revision note and its document. */
+function textsOf(result: Awaited<ReturnType<Client['callTool']>>): string[] {
+  return (result.content as { type: string; text?: string }[]).map((part) => part.text ?? '');
+}
+
 describe('MCP server', () => {
   it('advertises the five tools with input schemas and annotations', async () => {
     const { tools } = await client.listTools();
@@ -78,21 +83,30 @@ describe('MCP server', () => {
     ]);
     const writeCv = tools.find((tool) => tool.name === 'write_cv')!;
     expect(writeCv.inputSchema.required).toEqual(['id', 'html']);
-    expect(writeCv.annotations).toMatchObject({ destructiveHint: true, idempotentHint: true });
+    expect(writeCv.annotations).toMatchObject({ destructiveHint: true, idempotentHint: false });
   });
 
   it('lists CVs as text and structured content', async () => {
     const result = await client.callTool({ name: 'list_cvs', arguments: {} });
     expect(result.structuredContent).toEqual({
-      cvs: [{ id: 'sample', title: 'Sample', updatedAt: '2026-10-31T10:00:01.000Z' }],
+      cvs: [
+        {
+          id: 'sample',
+          title: 'Sample',
+          updatedAt: '2026-10-31T10:00:01.000Z',
+          revision: 1,
+          address: 'sample@1',
+        },
+      ],
     });
     expect(JSON.parse(textOf(result))).toEqual(result.structuredContent);
   });
 
   it('reads a CV, and reports a missing one as a tool error', async () => {
-    expect(textOf(await client.callTool({ name: 'read_cv', arguments: { id: 'sample' } }))).toBe(
+    expect(textsOf(await client.callTool({ name: 'read_cv', arguments: { id: 'sample' } }))).toEqual([
+      'This is sample@1, the current revision.',
       doc('Sample'),
-    );
+    ]);
 
     const missing = await client.callTool({ name: 'read_cv', arguments: { id: 'missing' } });
     expect(missing.isError).toBe(true);
@@ -106,6 +120,39 @@ describe('MCP server', () => {
 
     const again = await client.callTool({ name: 'write_cv', arguments: { id: 'sample', html: doc('New') } });
     expect(textOf(again)).toContain('nothing was written');
+  });
+
+  it('reads an earlier revision and says which one is current', async () => {
+    await client.callTool({ name: 'write_cv', arguments: { id: 'sample', html: doc('New') } });
+    expect(textsOf(await client.callTool({ name: 'read_cv', arguments: { id: 'sample@1' } }))).toEqual([
+      'This is sample@1, an earlier revision; the current one is sample@2.',
+      doc('Sample'),
+    ]);
+  });
+
+  it('says where a write went, and warns when an older base left revisions out', async () => {
+    const saved = await client.callTool({ name: 'write_cv', arguments: { id: 'sample', html: doc('Two') } });
+    expect(textOf(saved)).toBe('Saved as sample@2; earlier revisions are kept.');
+    await client.callTool({ name: 'write_cv', arguments: { id: 'sample', html: doc('Three') } });
+
+    const fromFirst = await client.callTool({
+      name: 'write_cv',
+      arguments: { id: 'sample@1', html: doc('Again') },
+    });
+    expect(textOf(fromFirst)).toBe(
+      'Saved as sample@4; earlier revisions are kept. Warning: it is based on sample@1, so @2 to @3 are not in it. ' +
+        'Tell the user, who decides what to do.',
+    );
+
+    const unknown = await client.callTool({
+      name: 'write_cv',
+      arguments: { id: 'sample@9', html: doc('X') },
+    });
+    expect(unknown.isError).toBe(true);
+  });
+
+  it('tells Claude in the handshake how revisions are addressed', () => {
+    expect(client.getInstructions()).toContain('id@number');
   });
 
   it('rejects a broken document with the list of problems', async () => {

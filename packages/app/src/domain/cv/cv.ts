@@ -8,6 +8,8 @@ export interface CvSummary {
   readonly title: string;
   /** Last modification of the document, ISO 8601. */
   readonly updatedAt: string;
+  /** Number of the current revision. */
+  readonly revision: number;
 }
 
 const CV_ID = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
