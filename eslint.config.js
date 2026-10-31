@@ -87,4 +87,17 @@ export default defineConfig(
       ],
     },
   },
+  // Outside the domain, its types come through domain/index.ts, never from a file inside it.
+  {
+    files: ['packages/app/src/**/*.ts'],
+    ignores: ['packages/app/src/domain/**'],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [{ group: ['**/domain/*/**'], message: 'Import from domain/index.ts instead.' }],
+        },
+      ],
+    },
+  },
 );
