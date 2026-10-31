@@ -44,7 +44,7 @@
     "loading": "Loading CVs…",
     "unreachable": "The local server is not reachable. Start it with <code>docker compose up -d app</code>; the list comes back by itself.",
     "failed": "The server could not load the CVs; see <code>docker compose logs app</code>. Trying again every few seconds.",
-    "empty": "No CVs yet. Add one to <code>data/cvs/&lt;id&gt;/document.html</code> or run <code>docker compose exec dev pnpm seed</code>."
+    "empty": "No CVs yet. Ask Claude to create one, add an example with <code>docker compose exec dev pnpm seed</code>, or bring CVs from an earlier version with <code>docker compose exec dev pnpm import:files</code>."
   },
   "header": {
     "noCv": "No CV selected",
