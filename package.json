@@ -19,7 +19,8 @@
     "test": "pnpm -r test",
     "check": "pnpm lint && pnpm format:check && pnpm typecheck && pnpm i18n && pnpm test",
     "seed": "pnpm --filter @markup-resume/app seed",
-    "i18n": "pnpm --filter @markup-resume/web i18n"
+    "i18n": "pnpm --filter @markup-resume/web i18n",
+    "test:db": "pnpm --filter @markup-resume/app test:db"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

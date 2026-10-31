@@ -24,3 +24,16 @@ jobs:
           push: 'false'
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+  # Tests against a real Postgres (pnpm test:db), in the same Compose stack as local development.
+  db:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Start Postgres
+        run: docker compose up --detach --wait db
+      # As root: the checkout belongs to the runner's user, not to the image's node user.
+      - name: Install dependencies
+        run: docker compose run --rm --user root dev pnpm install --frozen-lockfile
+      - name: Database tests
+        run: docker compose run --rm --user root dev pnpm test:db
