@@ -10,6 +10,7 @@ import {
   readResumeDocument,
   listResumes,
   type PdfExportDependencies,
+  toggleResumePin,
 } from '../../app/index.ts';
 import type { ResumeRepository } from '../../domain/index.ts';
 
@@ -90,6 +91,19 @@ export function createHttpApp(
           'Content-Disposition': attachment(result.fileName),
           'Cache-Control': 'no-store',
         });
+    }
+  });
+
+  app.post('/resumes/:slug/pin', async (c) => {
+    const result = await toggleResumePin({ repository, resumeChanges }, c.req.param('slug'));
+
+    switch (result.kind) {
+      case 'invalid-slug':
+        return c.json({ error: 'invalid-slug' }, 400);
+      case 'not-found':
+        return c.json({ error: 'not-found' }, 404);
+      case 'toggled':
+        return c.json({ pinned: result.pinned }, 200);
     }
   });
 

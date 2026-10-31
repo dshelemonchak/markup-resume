@@ -26,7 +26,7 @@ describe('HTTP API v1', () => {
     const response = await setup().app.request('/api/v1/resumes');
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual([
-      { slug: 'sample', title: 'Sample', updatedAt: '2026-10-31T10:00:01.000Z', revision: 1 },
+      { slug: 'sample', title: 'Sample', updatedAt: '2026-10-31T10:00:01.000Z', revision: 1, pinned: false },
     ]);
   });
 
@@ -43,6 +43,22 @@ describe('HTTP API v1', () => {
     const { app } = setup();
     expect((await app.request('/api/v1/resumes/Bad_Id/document')).status).toBe(400);
     expect((await app.request('/api/v1/resumes/missing/document')).status).toBe(404);
+  });
+
+  it('toggles the pin of a CV and answers with its new state', async () => {
+    const { app } = setup();
+    const pin = () => app.request('/api/v1/resumes/sample/pin', { method: 'POST' });
+
+    const pinned = await pin();
+    expect(pinned.status).toBe(200);
+    expect(await pinned.json()).toEqual({ pinned: true });
+    expect(await (await pin()).json()).toEqual({ pinned: false });
+  });
+
+  it('answers 400 for a malformed slug and 404 for a missing CV when pinning', async () => {
+    const { app } = setup();
+    expect((await app.request('/api/v1/resumes/Bad_Id/pin', { method: 'POST' })).status).toBe(400);
+    expect((await app.request('/api/v1/resumes/missing/pin', { method: 'POST' })).status).toBe(404);
   });
 
   it('streams a change event when a CV is written', async () => {

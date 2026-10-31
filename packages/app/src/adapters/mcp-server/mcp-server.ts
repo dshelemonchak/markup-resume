@@ -25,6 +25,7 @@ const resumeListItem = z.object({
   updatedAt: z.string().describe('ISO 8601'),
   revision: z.number().describe('Number of the current revision'),
   address: z.string().describe('Address of the current revision, e.g. "frontend-engineer@13"'),
+  pinned: z.boolean().describe('True when the user pinned this CV in the Markup Résumé viewer.'),
 });
 
 export interface McpServerOptions {

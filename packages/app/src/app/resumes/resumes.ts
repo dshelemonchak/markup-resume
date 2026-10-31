@@ -10,6 +10,7 @@ import {
   type RevisionAuthor,
   type TemplateCatalog,
   validateResumeDocument,
+  type TogglePinnedResult,
 } from '../../domain/index.ts';
 import type { ResumeChanges } from '../resume-changes/resume-changes.ts';
 
@@ -163,6 +164,30 @@ export async function createResumeDocument(
   }
   dependencies.resumeChanges.notify(slug);
   return { kind: 'created' };
+}
+
+export type ToggleResumePinResult = TogglePinnedResult | { readonly kind: 'invalid-slug' };
+
+/**
+ * Pins a CV, or unpins it when it is pinned, and announces the change so the UI reloads its list. Pinning only
+ * orders the user's list: it writes no revision and does not count as a change to the CV.
+ */
+export async function toggleResumePin(
+  dependencies: Pick<ResumeDocumentDependencies, 'repository' | 'resumeChanges'>,
+  slug: string,
+): Promise<ToggleResumePinResult> {
+  if (!isValidResumeSlug(slug)) {
+    return { kind: 'invalid-slug' };
+  }
+
+  const togglePinnedResult = await dependencies.repository.togglePinned(slug);
+
+  if (togglePinnedResult.kind === 'not-found') {
+    return { kind: 'not-found' };
+  }
+
+  dependencies.resumeChanges.notify(slug);
+  return { kind: 'toggled', pinned: togglePinnedResult.pinned };
 }
 
 type Rejection =
