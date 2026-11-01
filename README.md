@@ -1,144 +1,320 @@
 # Markup Résumé
 
-A free, open-source workspace for writing your CV together with your own Claude: Claude edits the CV in a chat,
-you see every change live, and the result exports to a PDF that reads correctly.
+A workspace for tailoring CVs to different roles with the AI assistant you already use. Switch between CVs
+from the sidebar, edit through chat, see changes live and export a PDF that is checked before download.
 
-## Why
+Content editing happens through MCP. The application keeps your CVs together and gives you a place to review
+the result, pin the versions you use most and export the finished document.
 
-- **Your own Claude, no extra service.** Markup Résumé serves an MCP endpoint, so Claude works on your CVs directly
-  through the Claude subscription you already have. There is no third-party plan or API key, and Markup Résumé adds
-  no limits of its own: ask Claude to tailor a CV to a vacancy, rewrite a section or start a new version as often as
-  your Claude plan allows. Markup Résumé runs on your machine and stores your CVs in a local database.
-- **A format Claude edits well.** Each CV is laid out in HTML and CSS: plain text that Claude reads and writes
-  directly. A template owns the design and gives Claude its rules, so changing the wording never breaks the
-  layout.
-- **A PDF that reads correctly.** The browser lays out real text, so the PDF keeps words, their order and their
-  links. PDFs exported from design tools often look right but extract badly: letters split apart (`C anvas`),
-  words merged, two-column layouts read across, or no text at all where a font is turned into outlines. Applicant
-  tracking systems read that text. Markup Résumé checks every export against the rendered page and holds back a PDF
-  that does not read like the page.
+**Status:** early development. The local MCP workflow works with both Claude Code and Codex, with one bundled
+template and a single local owner. Hosted accounts and integrations with Claude Desktop and ChatGPT Desktop are
+planned.
+
+[Stack](#tech-stack) · [Purpose](#why-this-project) · [Features](#features) · [Screenshots](#screenshots) ·
+[Setup](#getting-started) · [MCP](#mcp-integration) · [Architecture](#project-structure-and-architecture) ·
+[Development](#development) · [Roadmap](#roadmap)
+
+## Tech stack
+
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
+![Angular](https://img.shields.io/badge/Angular-22-DD0031?style=for-the-badge&logo=angular&logoColor=white)
+![RxJS](https://img.shields.io/badge/RxJS-B7178C?style=for-the-badge&logo=reactivex&logoColor=white)
+![Node.js](https://img.shields.io/badge/Node.js-24-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-18-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)
+![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
+![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-2088FF?style=for-the-badge&logo=githubactions&logoColor=white)
+![Vitest](https://img.shields.io/badge/Vitest-6E9F18?style=for-the-badge&logo=vitest&logoColor=white)
+
+- **Frontend:** Angular standalone components, signals, zoneless change detection, RxJS, SCSS, Bootstrap and
+  Transloco. Live document updates through Server-Sent Events and a sandboxed preview.
+- **Backend:** Node.js, TypeScript, Hono, Kysely and PostgreSQL. Ports and adapters, SQL migrations, transactional
+  revision storage, document validation and an MCP server with Zod tool schemas.
+- **Delivery and quality:** pnpm monorepo, Docker Compose and GitHub Actions; Vitest, Angular component tests,
+  real PostgreSQL and Chromium integration tests, ESLint-enforced architecture boundaries and Prettier.
+
+## Why this project
+
+A short CV leaves room for only part of your experience. An Angular vacancy, a Node.js role and a full-stack
+position may call for different projects, achievements and emphasis. The goal is to highlight the most relevant
+parts of the same experience while keeping the underlying facts consistent. Each CV variant develops its own
+history as you refine it.
+
+I built Markup Résumé for that everyday workflow. Working with separate Word files meant keeping track of copies
+and repairing formatting. Designing a CV in Figma gave me more visual control, but added AI usage limits and PDF
+exports whose text did not always copy back as intact words.
+
+I wanted to keep the conversation with my existing assistant, move quickly between CVs and review the result in
+a focused interface. That is the product's scope: content editing through MCP, a live viewer with a persistent
+CV sidebar, and automatic PDF checks. A manual content editor is outside the current plan.
+
+The project is also a way to deepen my backend and full-stack engineering skills by building and operating a
+tool I use myself, with the intention of making it useful to others with a similar workflow.
 
 ## Features
 
-- **One document per CV, with its full history.** Content and the template reference live in one standalone HTML
-  document with no separate content model. Every change is kept as a revision in Postgres, recording who made it
-  and which revision it was based on.
-- **Templates with a design system.** Each template defines its styles, a machine-readable schema of allowed
-  classes and nesting, rules for Claude, and an example document. The bundled `classic` template reproduces its
-  reference design to within 0.3 mm.
-- **MCP tools for Claude:** `list_resumes`, `read_resume`, `read_template`, `create_resume`, `write_resume`.
-- **Markup validation on every write.** Documents that break the template schema are rejected with a list of
-  problems for Claude to fix. Rejected content includes unknown classes, misplaced blocks, inline styles, scripts
-  and external resources. Markup Résumé inserts the template CSS itself.
-- **Live viewer.** The Angular UI renders each CV at its real size and updates as soon as Claude saves a change.
-  It also shows whether Claude is connected.
-- **Validated PDF export.** The CV is printed with headless Chromium and read back with poppler. The check covers:
-  - fonts: embedded, with a Unicode mapping, no Type 3;
-  - words: none split, merged, lost or added;
-  - blocks: each extracted in one piece and in reading order;
-  - links: clickable.
+- **Switch CVs without leaving the workspace.** The sidebar stays next to the preview. Select another CV in one
+  click and pin frequently used variants to keep them together.
+- **Edit with your own assistant.** Create a CV, rewrite a section or prepare a variant for a vacancy through
+  MCP, using the context available in your AI client. Markup Résumé does not call a model API or require a model
+  API key. Your assistant's own usage limits still apply.
+- **Review changes live.** The viewer refreshes after the assistant saves a document, so you can keep the chat
+  and preview open while refining the CV.
+- **Keep document history.** PostgreSQL stores numbered revisions and their authors. MCP can read the current
+  document or a specific revision; the revision browser and rollback controls in the UI are still planned.
+- **Validate every write.** The application checks the document against the template schema before saving it.
+  Unsupported markup, inline styles, scripts and external resources are rejected; template CSS is inserted by
+  the application.
+- **Check every PDF before download.** Each export compares the PDF with the rendered document to detect missing
+  or extra words, split or reordered text blocks, font problems and missing clickable links. If checks fail,
+  the regular download is stopped and the UI shows a report. Downloading despite the reported problems requires
+  a separate **Download anyway** action.
 
-## Status
+**PDF export happens in the application UI:** select a CV and click **Export PDF**. MCP tools edit HTML and do not
+return PDF files or download links. The checks verify specific properties of the exported file; they do not
+guarantee acceptance by every applicant tracking system (ATS).
 
-Early development. The core workflow works end to end on one template. Planned next:
+## Screenshots
 
-- ATS-oriented output;
-- page-count and overflow checks;
-- revision history and rollback in the UI;
-- additional templates.
+![Markup Résumé workspace with fictional CVs](.github/images/workspace-preview.webp)
 
-UI elements that are not implemented yet are marked with a red "dummy" overlay.
+_The workspace with one pinned CV and three alternative versions. Controls marked “dummy” are still under
+development._
 
 ## Getting started
 
-Requirements: Docker (Docker Desktop on macOS). All tooling runs in containers.
+### Requirements
+
+- Git.
+- Docker with Compose v2, such as Docker Desktop on macOS.
+- For AI editing, an MCP client that can reach the local Streamable HTTP endpoint. The repository includes a
+  Claude Code configuration.
+
+Node.js, pnpm, PostgreSQL, Chromium and Poppler run in containers; no host installation is needed. The development
+image supports both amd64 and arm64. No `.env` file is required for the default local setup.
+
+### Start the application
+
+Run these commands from a terminal:
 
 ```bash
-docker compose up -d dev
-docker compose exec dev pnpm install
-docker compose exec dev pnpm seed        # adds a fictional example CV to the database
-docker compose up -d app web              # also starts Postgres (db), which app waits for
+git clone https://github.com/dshelemonchak/markup-resume.git
+cd markup-resume
+
+# Build the toolbox and wait for PostgreSQL to be ready.
+docker compose up --build --wait dev db
+
+# Install the versions recorded in the lockfile.
+docker compose exec dev pnpm install --frozen-lockfile
+
+# Add a fictional example CV. Existing CVs are left untouched.
+docker compose exec dev pnpm seed
+
+# Start the API, MCP endpoint and Angular development server.
+docker compose up -d app web
 ```
 
-Open http://localhost:4200.
+Open [localhost:4200](http://localhost:4200) after the Angular server finishes starting. The sample CV is available
+without connecting an assistant. Select it and click **Export PDF** to try the export workflow.
 
-CVs and their revisions are stored in Postgres. The app connects to it at startup and applies its schema migrations.
-Until sign-in exists, every CV belongs to one local user, created on first start. The database lives in the Docker volume `markup-resume-db`, is reachable from
-this machine on `localhost:5433` (user, password and database: `markup`), and is reset with
-`docker compose down -v`.
+| Service    | Local address                  | Purpose                            |
+| ---------- | ------------------------------ | ---------------------------------- |
+| Web UI     | `http://localhost:4200`        | CV preview, pinning and PDF export |
+| HTTP API   | `http://localhost:3000/api/v1` | Data and events for the UI         |
+| MCP        | `http://localhost:3000/mcp`    | Tools for the assistant            |
+| PostgreSQL | `localhost:5433`               | Database access from host tools    |
 
-### Moving CVs from an earlier version
+The app and seed command apply pending database migrations automatically. Until sign-in is implemented, they
+use one local owner. CVs and revisions live in the named Docker volume `markup-resume-db` and survive container
+restarts. The development database name, username and password are all `markup`.
 
-Earlier versions kept CVs as files in `./data/cvs/<slug>/document.html`. To move them into the database, once:
+To stop the stack while keeping the database, run `docker compose down`. Adding `-v` deletes the database volume
+and all stored CVs and revisions.
+
+This Compose setup is for local development. Authentication is not implemented, and the API and web ports are
+published on all host interfaces by default. Do not expose this stack to the internet; hosted deployment is part
+of the roadmap.
+
+### Configuration
+
+The defaults are supplied by [compose.yaml](compose.yaml) and the [Dockerfile](Dockerfile).
+
+| Variable            | Purpose                                                                  | Container default                         |
+| ------------------- | ------------------------------------------------------------------------ | ----------------------------------------- |
+| `DATABASE_URL`      | PostgreSQL connection used by the app, seed, importer and database tests | `postgres://markup:markup@db:5432/markup` |
+| `PORT`              | HTTP API and MCP listening port                                          | `3000`                                    |
+| `CHROME_PATH`       | Browser executable for PDF export; export is unavailable when unset      | `/usr/bin/chromium`                       |
+| `LEGACY_RESUME_DIR` | Root directory for importing CVs from older file-based versions          | `/data` in the `dev` service              |
+
+### Import CVs from an earlier version
+
+If an older checkout stored documents at `data/cvs/<slug>/document.html`, run this after starting the database:
 
 ```bash
 docker compose exec dev pnpm import:files
 ```
 
-Each document is moved to the current template version (`classic@0.0.2` becomes `classic@0.0.3`), goes through the
-same checks as a write from Claude and becomes the CV's first revision; earlier versions in `history/` stay behind. A CV that is already in the database is skipped, and a document that fails the
-checks is listed with its problems, so it can be fixed and the import run again.
+The importer upgrades legacy document vocabulary, validates each document and stores it as the first revision.
+Existing slugs are skipped. Rejected documents are reported for correction; old `history/` files are not imported.
 
-### Running from a JetBrains IDE
+## MCP integration
 
-WebStorm and IntelliJ IDEA pick up the shared run configurations from `.run/`. **app + web** starts both services,
-and the database with them, with Docker Compose. **db** starts only the database. The Services tool window (⌘8)
-shows each container's log.
+MCP gives an assistant explicit tools to work with the application's documents. The server runs inside the same
+process as the HTTP API and is available at `http://localhost:3000/mcp` while the `app` service is running.
 
-If the IDE reports `Cannot connect to the Docker daemon at unix:///var/run/docker.sock`, Docker Desktop is using
-its per-user socket. Either point the IDE's Docker connection at it, under Settings → Build, Execution,
-Deployment → Docker, with the Engine API URL `unix://<your home>/.docker/run/docker.sock`. Or enable "Allow the
-default Docker socket to be used" in Docker Desktop's advanced settings.
+**Claude Code and Codex both work with the local MCP server.** Both can list CVs, read current and previous
+revisions, inspect template rules, create variants and save edits. Changes appear live in the application;
+PDF export remains in the application UI.
 
-### Connecting Claude
+The checked-in [.mcp.json](.mcp.json) points Claude Code at this endpoint. Open the repository in Claude Code and
+check the `markup-resume` connection with `/mcp`. Codex uses the same Streamable HTTP endpoint through its own
+MCP configuration. Other clients need support for Streamable HTTP; their compatibility should be verified
+separately.
 
-The MCP server is part of the app: a Streamable HTTP endpoint at `http://localhost:3000/mcp`, served while
-`app` is running. Accepted requests come from this machine only: the server checks the `Host` and `Origin` headers.
+The current MCP endpoint validates local `Host` and `Origin` headers, but does not implement OAuth. These checks
+do not replace authentication. The project does not yet provide a hosted connection flow for Claude Desktop or
+ChatGPT Desktop.
 
-- **Claude Code** — `.mcp.json` points to the endpoint, so Claude Code picks it up in this folder. Run `/mcp`
-  to check that `markup-resume` is connected.
-- **Claude Desktop** — not supported locally for now. Claude Desktop connects to remote servers through custom
-  connectors, which need a public HTTPS address with sign-in. That arrives with the hosted version.
+### Available tools
 
-Example prompt: _"Read the classic template and create a CV for this vacancy: …"_
+| Tool            | Purpose                                                                           |
+| --------------- | --------------------------------------------------------------------------------- |
+| `list_resumes`  | List CVs with their slugs, titles, revision addresses, update times and pin state |
+| `read_resume`   | Read the full HTML of the current CV or a numbered revision                       |
+| `read_template` | Read a template's structure, allowed classes, writing rules and example document  |
+| `create_resume` | Create a validated HTML CV under a new slug                                       |
+| `write_resume`  | Save a complete replacement HTML document as a new revision                       |
 
-## Architecture
+A slug such as `frontend-engineer` addresses the current document; `frontend-engineer@3` addresses revision 3.
+Writes replace the full document rather than patching individual fields. Writing from an older revision creates
+a new revision based on it and reports that newer changes were left out; the stored history remains intact.
 
-```
+### Typical workflow
+
+1. Ask the assistant to list your CVs and read the one you want to change.
+2. The assistant reads the template rules, edits the document and saves it through MCP.
+3. Review the updated CV in the web UI and ask for further edits if needed.
+4. Select the CV in the application and click **Export PDF**.
+
+Example prompt:
+
+> Read my existing CV and its template rules. Create a separate version tailored to the vacancy below, keeping
+> the original unchanged. Use only experience already present in the CV and ask me about missing details.
+
+The sample CV contains fictional data; replace it with your own information before using a CV for an application.
+
+## Project structure and architecture
+
+```text
 packages/
-  app/      Node.js: domain, use cases, adapters (HTTP API, MCP server, PDF export)
-  web/      Angular UI (standalone, zoneless, signals)
-  styles/   templates, fonts and icons
+  app/
+    src/
+      domain/       Pure rules, document types and ports
+      app/          Use cases: CV operations, notifications and PDF export
+      adapters/     PostgreSQL, HTTP, MCP, HTML parsing, Chromium and Poppler
+      main.ts       Composition root for HTTP and MCP
+      seed.ts       Fictional sample data
+      import-files.ts
+  web/              Angular viewer and application controls
+  styles/           Versioned templates, fonts and SVG icons
+.github/workflows/  CI checks and database tests
+.run/               Shared JetBrains run configurations
 ```
 
-The server follows a ports-and-adapters layout:
+The backend follows ports and adapters. Domain code has no I/O or third-party runtime imports; use cases depend
+on domain ports. Adapters provide storage, transport and document processing, and composition roots wire them
+together. ESLint enforces the import boundaries, including the rule that adapters do not import one another.
 
-- `domain` — types and pure rules, including the markup and PDF checks;
-- `app` — use cases;
-- adapters — Postgres storage (Kysely), HTTP, MCP, Chromium over the DevTools Protocol, poppler, parse5.
+An MCP write goes through the shared validation pipeline before PostgreSQL stores the document and advances its
+current revision in a transaction. A change notification reaches the Angular UI over SSE, and the viewer reloads
+the document in a sandboxed iframe. PDF export renders the stored document in Chromium and compares the result
+with facts extracted by Poppler.
 
-Import boundaries between the layers are enforced by ESLint. The HTTP API and the MCP server are two entry points
-to the same use cases.
+Each template includes `template.css`, `schema.json`, `rules.md` and `example.html`: visual styles, a validation
+schema, instructions for the assistant and a working example. The bundled template is `classic`; tests keep its
+schema, rules and example consistent.
 
 ## Development
 
+Run tooling in the existing `dev` container from the repository root:
+
 ```bash
-docker compose exec dev pnpm check       # lint, format check, typecheck, tests
+# Lint, formatting, TypeScript, translation keys and unit/integration tests.
+docker compose exec dev pnpm check
+
+# Repository tests against real PostgreSQL; requires the db service.
+docker compose exec dev pnpm test:db
+
+# Format the workspace.
+docker compose exec dev pnpm format
+
+# Regenerate database types after a schema change.
+docker compose exec dev pnpm --filter @markup-resume/app db:types
 ```
 
-The test suite includes an integration test that renders a page with the container's Chromium.
+The main test suite includes a real Chromium render. Database tests create and remove a separate test database.
+GitHub Actions runs both the main checks and PostgreSQL tests for pull requests and pushes to `main`.
 
-## Development approach
+Shared JetBrains configurations in `.run/` start **app + web** or just **db**. The app runs with Node's watch mode;
+Angular uses its development server. See [AGENTS.md](AGENTS.md) for repository conventions and layer rules.
 
-Markup Résumé is developed AI-first with Claude Code. Architecture, trade-offs and implementation decisions are made by
-the author. Every change is reviewed before it is committed, and Claude Code writes most of the code under that
-direction.
+### Troubleshooting
+
+| Symptom                                                | What to check                                                                                                                                      |
+| ------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Seed or app cannot connect to PostgreSQL               | Run `docker compose ps`; the `db` service must be healthy before seeding. Use `docker compose logs db app` for details.                            |
+| The UI is unavailable or reports an unreachable server | Inspect `docker compose logs app web`; the API and Angular server must both finish starting.                                                       |
+| The MCP client cannot connect                          | Check that `app` is running and the client uses `http://localhost:3000/mcp` with Streamable HTTP. This is a protocol endpoint, not a browser page. |
+| PDF export is unavailable                              | Use the supplied image, which installs Chromium and Poppler and sets `CHROME_PATH`.                                                                |
+| JetBrains cannot reach Docker Desktop on macOS         | Configure its Docker connection to use `unix://<your home>/.docker/run/docker.sock`, or enable Docker Desktop's default socket.                    |
+
+## Roadmap
+
+The local MCP editing, live preview, revision storage, pinning and checked PDF export workflow is implemented.
+The following work is planned; content editing remains through MCP.
+
+### CV workflow
+
+- [ ] **Colour-coded tags for each CV:** label variants with React, Angular, Node.js, Java or other tags to see
+      their technical focus at a glance in the CV list.
+- [ ] **Keep vacancy context with each CV:** store the company, role, job posting link, description and notes
+      alongside the variant prepared for that application.
+- [ ] **Manage CVs:** search, renaming, and a trash with restore.
+- [ ] **Browse and restore revisions:** inspect earlier versions and restore one as a new revision. Notify the
+      assistant about user-initiated rollbacks on its next interaction with that CV.
+
+### Layout and PDF quality
+
+- [ ] **Export visual and ATS versions:** keep a designed layout alongside a dedicated single-column A4 output.
+- [ ] **Configure each CV:** page width, base font size, font family, page limits and required contacts. Support
+      layouts that reflow with width and a continuous page sized to its content.
+- [ ] **Extend layout checks:** detect clipping, overlap, overflow, incorrect page dimensions, and blank trailing
+      pages. Show where a problem occurs and what to fix.
+- [ ] **Configure check severity:** choose error, warning or off for individual checks per CV, with defaults
+      appropriate to visual and ATS output.
+- [ ] **Expand the style library:** more templates and open-licence fonts, template discovery through MCP, and
+      versioned upgrades that preserve the previous styles when an update fails validation. Custom style
+      overrides are a later extension.
+
+### Accounts and desktop access
+
+- [ ] **Sign in with Google or GitHub:** individual accounts, browser sessions and access scoped to each user's
+      CVs; no application passwords.
+- [ ] **Connect desktop assistants:** OAuth for remote MCP, with Claude Desktop and ChatGPT Desktop as primary
+      clients, alongside Claude Code and Codex. Verify login and the complete editing workflow in each client.
+- [ ] **Deploy the hosted service:** HTTPS on an OCI ARM VM, automated image builds and deployment, backups and
+      monitoring. Serve CV documents from a separate origin from the signed-in application.
+
+Fact-change detection is still being explored: the definition of a new fact and the treatment of changes to
+dates, titles, companies or metrics have not been settled.
+
+Some unfinished UI controls carry a red **dummy** overlay. Their presence does not mean the corresponding feature
+is available. The roadmap describes intended work, without release-date commitments.
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+[MIT](LICENSE).
 
-Bundled assets:
+Bundled assets have their own license notices:
 
-- Inter font — SIL Open Font License 1.1 (`packages/styles/fonts/inter/`);
-- contact icons — based on Bootstrap Icons, MIT (`packages/styles/icons/BOOTSTRAP-ICONS-LICENSE.txt`).
+- [Inter](packages/styles/fonts/inter/OFL-LICENSE.txt) — SIL Open Font License 1.1.
+- [Contact icons based on Bootstrap Icons](packages/styles/icons/BOOTSTRAP-ICONS-LICENSE.txt) — MIT.
