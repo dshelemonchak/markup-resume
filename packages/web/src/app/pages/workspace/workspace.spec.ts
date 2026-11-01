@@ -1,6 +1,7 @@
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
+import type { ResumeListItemDto } from '../../api/resume-api';
 import { Workspace } from './workspace';
 
 class FakeEventSource {
@@ -22,9 +23,9 @@ class FakeEventSource {
   close(): void {}
 }
 
-const CVS = [
-  { slug: 'first', title: 'First', updatedAt: '2026-10-27T10:00:00.000Z' },
-  { slug: 'second', title: 'Second', updatedAt: '2026-10-26T10:00:00.000Z' },
+const CVS: readonly ResumeListItemDto[] = [
+  { slug: 'first', title: 'First', updatedAt: '2026-10-27T10:00:00.000Z', pinned: false },
+  { slug: 'second', title: 'Second', updatedAt: '2026-10-26T10:00:00.000Z', pinned: false },
 ];
 
 describe('Workspace', () => {
@@ -42,11 +43,11 @@ describe('Workspace', () => {
 
   afterEach(() => vi.unstubAllGlobals());
 
-  async function render() {
+  async function render(resumes = CVS) {
     const fixture = TestBed.createComponent(Workspace);
     const http = TestBed.inject(HttpTestingController);
     TestBed.tick(); // issue the list request (the app stays unstable until it is answered)
-    http.expectOne('/api/v1/resumes').flush(CVS);
+    http.expectOne('/api/v1/resumes').flush(resumes);
     http.expectOne('/api/v1/claude/sessions').flush([]);
     await fixture.whenStable();
     const root = fixture.nativeElement as HTMLElement;
@@ -74,6 +75,63 @@ describe('Workspace', () => {
     http.expectOne('/api/v1/resumes').flush(CVS);
     await fixture.whenStable();
     expect(frameSrc()).toBe('/api/v1/resumes/second/document?v=1');
+  });
+
+  it.each([false, true])(
+    'toggles an unselected CV with pinned=%s and regroups it after SSE',
+    async (pinned) => {
+      const resumes = CVS.map((resume) => (resume.slug === 'second' ? { ...resume, pinned } : resume));
+      const { fixture, http, root, frameSrc } = await render(resumes);
+      const row = [...root.querySelectorAll<HTMLElement>('mr-sidebar-item')].find(
+        (item) => item.querySelector('.title')?.textContent === 'Second',
+      )!;
+      row.querySelector<HTMLButtonElement>('.item-menu-btn')!.click();
+      await fixture.whenStable();
+      document.body.querySelector<HTMLButtonElement>('.dropdown-menu.show button')!.click();
+
+      const request = http.expectOne('/api/v1/resumes/second/pin');
+      expect(request.request.method).toBe('POST');
+      request.flush({ pinned: !pinned });
+      await fixture.whenStable();
+      expect(frameSrc()).toBe('/api/v1/resumes/first/document?v=0');
+
+      FakeEventSource.last!.emit('resume-changed');
+      TestBed.tick();
+      http
+        .expectOne('/api/v1/resumes')
+        .flush(resumes.map((resume) => (resume.slug === 'second' ? { ...resume, pinned: !pinned } : resume)));
+      await fixture.whenStable();
+
+      const group = pinned ? 'sidebar-all' : 'sidebar-pinned';
+      expect(root.querySelector(`[aria-labelledby="${group}"]`)!.textContent).toContain('Second');
+      expect(root.querySelector('[aria-current="true"] .title')?.textContent).toBe('First');
+      expect(frameSrc()).toBe('/api/v1/resumes/first/document?v=1');
+      http.verify();
+    },
+  );
+
+  it('logs a failed pin request without changing the selection', async () => {
+    const log = vi.spyOn(console, 'error').mockImplementation(() => {});
+    try {
+      const { fixture, http, root, frameSrc } = await render();
+      root.querySelectorAll<HTMLButtonElement>('.item-menu-btn')[1]!.click();
+      await fixture.whenStable();
+      document.body.querySelector<HTMLButtonElement>('.dropdown-menu.show button')!.click();
+      http.expectOne('/api/v1/resumes/second/pin').flush(
+        { error: 'failed' },
+        {
+          status: 500,
+          statusText: 'Internal Server Error',
+        },
+      );
+      await fixture.whenStable();
+
+      expect(log).toHaveBeenCalledExactlyOnceWith(expect.objectContaining({ status: 500 }));
+      expect(frameSrc()).toBe('/api/v1/resumes/first/document?v=0');
+      http.verify();
+    } finally {
+      log.mockRestore();
+    }
   });
 
   it('shows Claude as connected when the server reports a session', async () => {
