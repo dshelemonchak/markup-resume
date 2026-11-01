@@ -60,6 +60,25 @@ describe('Sidebar', () => {
     expect(emitted).toEqual(['c']);
   });
 
+  it.each([
+    ['sidebar-pinned', 'a'],
+    ['sidebar-all', 'b'],
+  ])('forwards a pin toggle from %s with the correct slug', async (group, slug) => {
+    const { fixture, root } = await render(ITEMS, 'c');
+    const emitted: string[] = [];
+    const selected = vi.fn();
+    fixture.componentInstance.togglePinResume.subscribe((value) => emitted.push(value));
+    fixture.componentInstance.selectResume.subscribe(selected);
+
+    root.querySelector<HTMLButtonElement>(`[aria-labelledby="${group}"] .item-menu-btn`)!.click();
+    await fixture.whenStable();
+    document.body.querySelector<HTMLButtonElement>('.dropdown-menu.show button')!.click();
+    await fixture.whenStable();
+
+    expect(emitted).toEqual([slug]);
+    expect(selected).not.toHaveBeenCalled();
+  });
+
   it('asks to show how to connect Claude', async () => {
     const { fixture, root } = await render(ITEMS);
     let asked = 0;

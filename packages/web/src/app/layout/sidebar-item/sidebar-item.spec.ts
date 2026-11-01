@@ -10,9 +10,9 @@ const ITEM: ResumeListItem = {
   pinned: true,
 };
 
-async function render(selected: boolean) {
+async function render(selected: boolean, pinned = ITEM.pinned) {
   const fixture = TestBed.createComponent(SidebarItem);
-  fixture.componentRef.setInput('item', ITEM);
+  fixture.componentRef.setInput('item', { ...ITEM, pinned });
   fixture.componentRef.setInput('selected', selected);
   await fixture.whenStable();
   const root = fixture.nativeElement as HTMLElement;
@@ -53,5 +53,23 @@ describe('SidebarItem', () => {
     fixture.componentInstance.selectResume.subscribe((id) => emitted.push(id));
     menu.click();
     expect(emitted).toEqual([]);
+  });
+
+  it.each([false, true])('requests a pin toggle without selecting the CV when pinned=%s', async (pinned) => {
+    const { fixture, menu } = await render(false, pinned);
+    const toggled = vi.fn();
+    const selected = vi.fn();
+    fixture.componentInstance.togglePinResume.subscribe(toggled);
+    fixture.componentInstance.selectResume.subscribe(selected);
+
+    menu.click();
+    await fixture.whenStable();
+    const action = document.body.querySelector<HTMLButtonElement>('.dropdown-menu.show button')!;
+    expect(action.textContent.trim()).toBe(pinned ? 'Unpin' : 'Pin');
+    action.click();
+    await fixture.whenStable();
+
+    expect(toggled).toHaveBeenCalledOnce();
+    expect(selected).not.toHaveBeenCalled();
   });
 });
