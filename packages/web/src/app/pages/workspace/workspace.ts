@@ -110,6 +110,22 @@ export class Workspace {
     read: ElementRef,
   });
 
+  constructor() {
+    const destroyRef = inject(DestroyRef);
+    const clock = setInterval(() => this.now.set(new Date()), 30_000);
+    destroyRef.onDestroy(() => clearInterval(clock));
+
+    afterNextRender(() => {
+      const observer = new ResizeObserver(() => {
+        this.headerHeight.set(this.header().nativeElement.getBoundingClientRect().height);
+        this.footerHeight.set(this.footer().nativeElement.getBoundingClientRect().height);
+      });
+      observer.observe(this.header().nativeElement);
+      observer.observe(this.footer().nativeElement);
+      destroyRef.onDestroy(() => observer.disconnect());
+    });
+  }
+
   /** Exports the selected CV; when the PDF check finds problems, shows them instead (unless forced). */
   protected async exportPdf(force = false): Promise<void> {
     const slug = this.selectedSlug();
@@ -126,20 +142,12 @@ export class Workspace {
     }
   }
 
-  constructor() {
-    const destroyRef = inject(DestroyRef);
-    const clock = setInterval(() => this.now.set(new Date()), 30_000);
-    destroyRef.onDestroy(() => clearInterval(clock));
-
-    afterNextRender(() => {
-      const observer = new ResizeObserver(() => {
-        this.headerHeight.set(this.header().nativeElement.getBoundingClientRect().height);
-        this.footerHeight.set(this.footer().nativeElement.getBoundingClientRect().height);
-      });
-      observer.observe(this.header().nativeElement);
-      observer.observe(this.footer().nativeElement);
-      destroyRef.onDestroy(() => observer.disconnect());
-    });
+  protected async togglePinResume(slug: string): Promise<void> {
+    try {
+      await this.api.togglePin(slug);
+    } catch (error) {
+      console.error(error);
+    }
   }
 }
 

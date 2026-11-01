@@ -19,8 +19,8 @@ function updatedAt(date: Date, locale: string): string {
 }
 
 /**
- * API summary → sidebar item. Status and pinning are not stored on the server yet,
- * so every CV is "not exported" and unpinned for now.
+ * API summary → sidebar item. Status is not stored on the server yet,
+ * so every CV is "not exported".
  */
 export function toResumeListItem(resume: ResumeListItemDto, locale: string): ResumeListItem {
   return {
@@ -28,6 +28,6 @@ export function toResumeListItem(resume: ResumeListItemDto, locale: string): Res
     title: resume.title,
     subtitle: `${resume.slug} · ${updatedAt(new Date(resume.updatedAt), locale)}`,
     status: 'not-exported',
-    pinned: false,
+    pinned: resume.pinned,
   };
 }

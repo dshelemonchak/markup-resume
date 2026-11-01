@@ -32,7 +32,12 @@ export class Sidebar {
   });
   readonly selectResume = output<string>();
   readonly connectClaude = output();
+  readonly togglePinResume = output<string>();
 
   protected readonly pinned = computed(() => this.items().filter((item) => item.pinned));
   protected readonly others = computed(() => this.items().filter((item) => !item.pinned));
+
+  onTogglePinResume(slug: string): void {
+    this.togglePinResume.emit(slug);
+  }
 }

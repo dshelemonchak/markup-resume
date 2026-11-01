@@ -34,7 +34,7 @@
       <i class="bi bi-three-dots-vertical" aria-hidden="true"></i>
     </button>
     <div ngbDropdownMenu mr-glass-panel variant="compact">
-      <button type="button" ngbDropdownItem>
+      <button type="button" (click)="onTogglePinResume()" ngbDropdownItem>
         {{ (item().pinned ? 'sidebarItem.unpin' : 'sidebarItem.pin') | transloco }}
       </button>
       <button type="button" ngbDropdownItem>{{ 'sidebarItem.rename' | transloco }}</button>

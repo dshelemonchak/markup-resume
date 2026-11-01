@@ -18,6 +18,7 @@ export interface ResumeListItemDto {
   readonly slug: string;
   readonly title: string;
   readonly updatedAt: string;
+  readonly pinned: boolean;
 }
 
 /** Shape of GET /api/v1/claude/sessions items. Mirrors ClaudeSession in packages/app/src/app. */
@@ -135,6 +136,12 @@ export class ResumeApi {
       }
       return { kind: 'failed', message: error instanceof HttpErrorResponse ? error.message : String(error) };
     }
+  }
+
+  togglePin(slug: string): Promise<{ pinned: boolean }> {
+    return firstValueFrom(
+      this.http.post<{ pinned: boolean }>(`${API}/resumes/${encodeURIComponent(slug)}/pin`, {}),
+    );
   }
 
   documentUrl(slug: string, revision: number): string {
