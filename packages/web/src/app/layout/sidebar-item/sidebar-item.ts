@@ -16,7 +16,12 @@ export class SidebarItem {
   readonly item = input.required<ResumeListItem>();
   readonly selected = input(false);
   readonly selectResume = output<string>();
+  readonly togglePinResume = output<void>();
 
   /** The actions menu is open: its button stays visible after the pointer leaves the row. */
   protected readonly menuOpen = signal(false);
+
+  onTogglePinResume(): void {
+    this.togglePinResume.emit();
+  }
 }

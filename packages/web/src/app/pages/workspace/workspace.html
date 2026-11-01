@@ -5,6 +5,7 @@
   [selectedSlug]="selectedSlug()"
   (selectResume)="selectedSlug.set($event)"
   [claude]="claudeStatus()"
+  (togglePinResume)="togglePinResume($event)"
   (connectClaude)="connectClaude.open()"
 />
 <mr-export-report
