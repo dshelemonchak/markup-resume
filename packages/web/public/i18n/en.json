@@ -120,6 +120,9 @@
     "moreWords": "{{ list }} and {{ count }} more",
     "moreProblems": "…and {{ count }} more problems."
   },
+  "screenshot": {
+    "exportUnavailable": "PDF export is disabled in the screenshot preview. Open the main workspace to export a CV."
+  },
   "connectClaude": {
     "title": "Connect Claude",
     "intro": "Markup Résumé gives Claude tools to list, read and write your CVs. The app serves them itself while it is running.",
