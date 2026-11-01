@@ -40,6 +40,11 @@ export interface McpServerOptions {
 const instructions = (refs: readonly string[]) =>
   [
     'Markup Résumé stores CVs as standalone HTML documents and shows them to the user in the Markup Résumé viewer.',
+    'PDF export is available ONLY in the Markup Résumé application UI: the user selects the CV and clicks ' +
+      '"Export PDF". This MCP server has no PDF export tool and returns no PDF files or PDF download links.',
+    'When asked for a PDF, finish any requested CV edits, then tell the user to open Markup Résumé, select the CV ' +
+      'and click "Export PDF". Do not generate, convert, print or attach a PDF yourself, call PDF export endpoints, ' +
+      'invent a download link, or claim that saving HTML exported a PDF.',
     `A CV is built on a template, named in <meta name="resume:template" content="…">; templates: ${refs.join(', ')}.`,
     'Before you create a CV with create_resume or change one with write_resume, call read_template for its template ' +
       'and follow those rules exactly: they list the only class names and structure the template accepts.',
@@ -96,7 +101,8 @@ export function createMcpServer(
         'Returns the full HTML document of one revision of a CV, the current one unless the address names another. ' +
         'The first part says which revision it is; the second part is the document, the single source of truth: ' +
         'content, structure and styles all live in this one file. Always read the CV right before editing it, ' +
-        'and base the edit on exactly this document.',
+        'and base the edit on exactly this document. This tool returns HTML only. To get a PDF, the user must ' +
+        'select the CV in the Markup Résumé application UI and click "Export PDF".',
       inputSchema: z.object({ resume: resumeAddress }),
       annotations: { readOnlyHint: true, openWorldHint: false },
     },
@@ -127,7 +133,9 @@ export function createMcpServer(
         'Every write becomes a new numbered revision and the previous ones stay, so the user can go back; the user ' +
         'sees the change live in the Markup Résumé viewer. Written by slug alone, it builds on the current revision ' +
         'and sending the same document again changes nothing. Written to slug@number, it builds on that revision, ' +
-        'as when the user asks to start again from it. A rejected document is not saved; the error lists what to fix.',
+        'as when the user asks to start again from it. A rejected document is not saved; the error lists what to fix. ' +
+        'This tool only saves HTML; it does not export PDF. After saving, direct the user to select the CV in ' +
+        'the Markup Résumé application UI and click "Export PDF" if they need a PDF.',
       inputSchema: z.object({
         resume: resumeAddress.describe(`${resumeAddress.description} Only existing CVs can be written.`),
         html: z.string().describe('The complete new HTML document.'),
@@ -168,7 +176,9 @@ export function createMcpServer(
         'a new CV, for example one tailored to a vacancy; to change an existing CV use write_resume instead. ' +
         'Never replaces an existing CV: if the slug is taken, nothing is written and you can pick another. ' +
         'Build the document by the rules from read_template; the same checks as in write_resume apply. ' +
-        'Give it its own resume:title so the user can tell it apart in the Markup Résumé viewer.',
+        'Give it its own resume:title so the user can tell it apart in the Markup Résumé viewer. ' +
+        'This tool only creates the HTML CV; it does not export PDF. To get a PDF, the user must select the CV ' +
+        'in the Markup Résumé application UI and click "Export PDF".',
       inputSchema: z.object({
         resume: z
           .string()
