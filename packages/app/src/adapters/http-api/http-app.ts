@@ -73,7 +73,7 @@ export interface HttpAppOptions {
  *   POST /auth/logout                             ends the session
  *
  * Versioned HTTP API (ADR-0011), v1. Every route but fonts and icons needs a session and answers 401 without one:
- *   GET  /api/v1/me                               the signed-in user
+ *   GET  /api/v1/user                             the signed-in user
  *   GET  /api/v1/resumes                          list of resumes
  *   GET  /api/v1/resumes/:slug/document           the resume's HTML, as stored
  *   GET  /api/v1/resumes/:slug/pdf[?force=1]      the resume printed to PDF and checked (ADR-0009); a PDF with
@@ -175,7 +175,7 @@ export function createHttpApp(
     return next();
   });
 
-  api.get('/me', (c) => c.json({ name: c.get('user').name }));
+  api.get('/user', (c) => c.json({ name: c.get('user').name }));
 
   api.get('/resumes', async (c) => c.json(await listResumes(c.get('repository'))));
 
