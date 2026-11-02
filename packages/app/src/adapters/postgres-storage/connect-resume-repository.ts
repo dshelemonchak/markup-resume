@@ -10,10 +10,10 @@ import { PostgresResumeRepository } from './postgres-resume-repository.ts';
  */
 export async function connectResumeRepository(
   databaseUrl: string,
-): Promise<{ db: Kysely<Database>; repository: PostgresResumeRepository }> {
+): Promise<{ db: Kysely<Database>; owner: string; repository: PostgresResumeRepository }> {
   const db = createDatabase(databaseUrl);
   await sql`select 1`.execute(db);
   await migrateToLatest(db);
   const owner = await ensureLocalOwner(db);
-  return { db, repository: new PostgresResumeRepository(db, owner) };
+  return { db, owner, repository: new PostgresResumeRepository(db, owner) };
 }

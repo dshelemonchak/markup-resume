@@ -20,7 +20,7 @@ export {
   type PdfExportDependencies,
   pdfFileName,
 } from './pdf-export/export-pdf.ts';
-export { ResumeChanges } from './resume-changes/resume-changes.ts';
+export { type ResumeChangeNotifier, ResumeChanges } from './resume-changes/resume-changes.ts';
 export {
   completeSignIn,
   type CompleteSignInResult,

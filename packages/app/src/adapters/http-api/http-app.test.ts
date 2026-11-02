@@ -4,8 +4,31 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
 import type { CanonicalResumeHtml } from '../../domain/index.ts';
 import { type HttpAppOptions, createHttpApp } from './http-app.ts';
-import { ResumeChanges } from '../../app/index.ts';
+import { ResumeChanges, type SignInDependencies } from '../../app/index.ts';
 import { InMemoryResumeRepository } from '../../app/testing/in-memory-resume-repository.ts';
+
+const APP_ORIGIN = 'http://localhost:4200';
+const USER = { id: 'user-1', name: 'Alex' };
+
+/** Every cookie resolves to USER: these tests are about the API, not about signing in. */
+const signIn: SignInDependencies = {
+  identityProvider: {
+    name: 'github',
+    authorizationUrl: () => 'https://github.test/authorize',
+    identify: () => Promise.resolve({ kind: 'rejected' }),
+  },
+  users: {
+    findByIdentity: () => Promise.resolve(null),
+    createWithIdentity: () => Promise.resolve({ kind: 'identity-taken' }),
+  },
+  sessions: {
+    create: () => Promise.resolve(),
+    findActive: () => Promise.resolve({ id: 'session-1', user: USER, lastSeenAt: new Date() }),
+    touch: () => Promise.resolve(),
+    delete: () => Promise.resolve(),
+  },
+  now: () => new Date(),
+};
 
 function setup(options?: HttpAppOptions) {
   const resumeChanges = new ResumeChanges();
@@ -17,8 +40,19 @@ function setup(options?: HttpAppOptions) {
     template: { name: 'classic', version: '0.0.3' },
     author: 'system',
   });
-  const { app, close } = createHttpApp(repository, resumeChanges, options);
-  return { app, close, notify: () => resumeChanges.notify('sample') };
+  const { app, close } = createHttpApp(
+    { repositoryFor: () => repository, resumeChanges, signIn, appOrigin: APP_ORIGIN },
+    options,
+  );
+  // Requests as the app's own page sends them: with a session cookie and the app's origin.
+  const signedIn = {
+    request: (path: string, init: RequestInit = {}) =>
+      app.request(path, {
+        ...init,
+        headers: { Cookie: `__Host-session=${'a'.repeat(43)}`, Origin: APP_ORIGIN },
+      }),
+  };
+  return { app: signedIn, close, notify: () => resumeChanges.notify(USER.id, 'sample') };
 }
 
 describe('HTTP API v1', () => {

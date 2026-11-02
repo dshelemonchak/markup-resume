@@ -12,14 +12,14 @@ import {
   validateResumeDocument,
   type TogglePinnedResult,
 } from '../../domain/index.ts';
-import type { ResumeChanges } from '../resume-changes/resume-changes.ts';
+import type { ResumeChangeNotifier } from '../resume-changes/resume-changes.ts';
 
 /** What storing a CV document needs: where it goes, the templates it may use, and an HTML parser. */
 export interface ResumeDocumentDependencies {
   readonly repository: ResumeRepository;
   readonly templates: TemplateCatalog;
   readonly parseHtml: HtmlParser;
-  readonly resumeChanges: ResumeChanges;
+  readonly resumeChanges: ResumeChangeNotifier;
 }
 
 /** All resumes, most recently changed first. */

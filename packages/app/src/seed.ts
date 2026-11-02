@@ -13,7 +13,7 @@ const databaseUrl = process.env['DATABASE_URL'];
 if (!databaseUrl) {
   throw new Error('DATABASE_URL is not set, e.g. postgres://user:password@host:5432/db');
 }
-const { db, repository } = await connectResumeRepository(databaseUrl);
+const { db, owner, repository } = await connectResumeRepository(databaseUrl);
 
 const [ref] = templateCatalog.refs();
 const example = ref ? templateCatalog.guide(ref)?.example : undefined;
@@ -23,7 +23,7 @@ if (!example) {
 
 try {
   const result = await createResumeDocument(
-    { repository, templates: templateCatalog, parseHtml, resumeChanges: new ResumeChanges() },
+    { repository, templates: templateCatalog, parseHtml, resumeChanges: new ResumeChanges().forOwner(owner) },
     SAMPLE_ID,
     example,
     'system',

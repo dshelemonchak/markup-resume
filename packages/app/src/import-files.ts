@@ -26,12 +26,12 @@ const ids = entries
   .map((entry) => entry.name)
   .sort();
 
-const { db, repository } = await connectResumeRepository(databaseUrl);
+const { db, owner, repository } = await connectResumeRepository(databaseUrl);
 const dependencies = {
   repository,
   templates: templateCatalog,
   parseHtml,
-  resumeChanges: new ResumeChanges(),
+  resumeChanges: new ResumeChanges().forOwner(owner),
 };
 const counts = { imported: 0, skipped: 0, rejected: 0 };
 

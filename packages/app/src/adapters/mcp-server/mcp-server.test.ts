@@ -47,7 +47,7 @@ beforeEach(async () => {
     createMcpServer(
       {
         repository,
-        resumeChanges,
+        resumeChanges: resumeChanges.forOwner('owner-1'),
         templates,
         parseHtml: (html) => ({ tree: { tag: 'html', attributes: new Map(), children: [] }, html }),
       },
