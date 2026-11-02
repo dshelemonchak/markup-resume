@@ -5,12 +5,15 @@
 // changes nothing. Prints what happened to each CV.
 //   LEGACY_RESUME_DIR  the v1 data directory (default ./data)
 //   DATABASE_URL  Postgres connection string (required)
+//   OWNER_GITHUB_ID  whose CVs these are: a GitHub user id that has signed in once (required)
 import { templateCatalog } from '@markup-resume/styles';
 import { readdir, readFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { parseHtml } from './adapters/parse5-html-parser/parse-html.ts';
-import { connectResumeRepository } from './adapters/postgres-storage/connect-resume-repository.ts';
+import { connectDatabase } from './adapters/postgres-storage/connect-database.ts';
+import { PostgresResumeRepository } from './adapters/postgres-storage/postgres-resume-repository.ts';
 import { createResumeDocument, ResumeChanges } from './app/index.ts';
+import { requireOwner } from './owner.ts';
 import { upgradeLegacyVocabulary } from './domain/index.ts';
 
 const dataDir = resolve(process.env['LEGACY_RESUME_DIR'] ?? 'data');
@@ -26,12 +29,14 @@ const ids = entries
   .map((entry) => entry.name)
   .sort();
 
-const { db, owner, repository } = await connectResumeRepository(databaseUrl);
+const db = await connectDatabase(databaseUrl);
+const owner = await requireOwner(db);
+const repository = new PostgresResumeRepository(db, owner.id);
 const dependencies = {
   repository,
   templates: templateCatalog,
   parseHtml,
-  resumeChanges: new ResumeChanges().forOwner(owner),
+  resumeChanges: new ResumeChanges().forOwner(owner.id),
 };
 const counts = { imported: 0, skipped: 0, rejected: 0 };
 

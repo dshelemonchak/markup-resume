@@ -24,6 +24,8 @@ x-workspace: &workspace
     LEGACY_RESUME_DIR: /data
     # The dev toolbox reaches the database too, e.g. to generate table types (pnpm db:types).
     DATABASE_URL: postgres://markup:markup@db:5432/markup
+    # Whose CVs pnpm seed, import:files and claim:local-resumes act for (ADR-0027), from .env.
+    OWNER_GITHUB_ID: ${OWNER_GITHUB_ID:-}
   # Chromium needs more shared memory than Docker's 64 MB default.
   shm_size: 1gb
 
@@ -58,6 +60,8 @@ services:
       GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET:-}
       # Where the user's browser opens the app: the GitHub callback and the Origin check use it.
       APP_ORIGIN: ${APP_ORIGIN:-http://localhost:4200}
+      # Whose CVs MCP serves until it has its own OAuth (ADR-0027, temporary).
+      OWNER_GITHUB_ID: ${OWNER_GITHUB_ID:-}
     ports:
       - '3000:3000'
     depends_on:

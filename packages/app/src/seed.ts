@@ -2,10 +2,13 @@
 // fresh checkout has something to show. It goes through the same use case as Claude's create_resume, so the
 // template's styles are inserted and its markup is checked. Never overwrites a CV.
 //   DATABASE_URL  Postgres connection string (required)
+//   OWNER_GITHUB_ID  whose CVs these are: a GitHub user id that has signed in once (required)
 import { templateCatalog } from '@markup-resume/styles';
 import { parseHtml } from './adapters/parse5-html-parser/parse-html.ts';
-import { connectResumeRepository } from './adapters/postgres-storage/connect-resume-repository.ts';
+import { connectDatabase } from './adapters/postgres-storage/connect-database.ts';
+import { PostgresResumeRepository } from './adapters/postgres-storage/postgres-resume-repository.ts';
 import { createResumeDocument, ResumeChanges } from './app/index.ts';
+import { requireOwner } from './owner.ts';
 
 const SAMPLE_ID = 'sample';
 
@@ -13,7 +16,9 @@ const databaseUrl = process.env['DATABASE_URL'];
 if (!databaseUrl) {
   throw new Error('DATABASE_URL is not set, e.g. postgres://user:password@host:5432/db');
 }
-const { db, owner, repository } = await connectResumeRepository(databaseUrl);
+const db = await connectDatabase(databaseUrl);
+const owner = await requireOwner(db);
+const repository = new PostgresResumeRepository(db, owner.id);
 
 const [ref] = templateCatalog.refs();
 const example = ref ? templateCatalog.guide(ref)?.example : undefined;
@@ -23,7 +28,12 @@ if (!example) {
 
 try {
   const result = await createResumeDocument(
-    { repository, templates: templateCatalog, parseHtml, resumeChanges: new ResumeChanges().forOwner(owner) },
+    {
+      repository,
+      templates: templateCatalog,
+      parseHtml,
+      resumeChanges: new ResumeChanges().forOwner(owner.id),
+    },
     SAMPLE_ID,
     example,
     'system',
