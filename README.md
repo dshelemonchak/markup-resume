@@ -7,8 +7,7 @@ Content editing happens through MCP. The application keeps your CVs together and
 the result, pin the versions you use most and export the finished document.
 
 **Status:** early development. The local MCP workflow works with both Claude Code and Codex, with one bundled
-template and a single local owner. Hosted accounts and integrations with Claude Desktop and ChatGPT Desktop are
-planned.
+template and sign-in with GitHub. Hosting and integrations with Claude Desktop and ChatGPT Desktop are planned.
 
 [Stack](#tech-stack) · [Purpose](#why-this-project) · [Features](#features) · [Screenshots](#screenshots) ·
 [Setup](#getting-started) · [MCP](#mcp-integration) · [Architecture](#project-structure-and-architecture) ·
@@ -90,7 +89,21 @@ development._
   Claude Code configuration.
 
 Node.js, pnpm, PostgreSQL, Chromium and Poppler run in containers; no host installation is needed. The development
-image supports both amd64 and arm64. No `.env` file is required for the default local setup.
+image supports both amd64 and arm64. A GitHub OAuth App is needed to sign in (see below).
+
+### Set up GitHub sign-in
+
+The UI signs you in with GitHub; the app only learns who you are (scope `read:user`) and keeps no GitHub token.
+
+1. Create an OAuth App at [github.com/settings/applications/new](https://github.com/settings/applications/new):
+   homepage `http://localhost:4200`, callback URL `http://localhost:4200/auth/github/callback`.
+2. Generate a client secret on the app's page.
+3. Copy [.env.example](.env.example) to `.env` and fill in `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` and
+   `OWNER_GITHUB_ID`, your GitHub user id (the `id` in `https://api.github.com/users/<your-login>`). Git ignores
+   `.env`; Compose reads it.
+
+Use a separate OAuth App for any other deployment: each app has one callback URL, and its secret belongs only to
+that environment.
 
 ### Start the application
 
@@ -106,15 +119,20 @@ docker compose up --build --wait dev db
 # Install the versions recorded in the lockfile.
 docker compose exec dev pnpm install --frozen-lockfile
 
-# Add a fictional example CV. Existing CVs are left untouched.
-docker compose exec dev pnpm seed
-
 # Start the API, MCP endpoint and Angular development server.
 docker compose up -d app web
 ```
 
-Open [localhost:4200](http://localhost:4200) after the Angular server finishes starting. The sample CV is available
-without connecting an assistant. Select it and click **Export PDF** to try the export workflow.
+Open [localhost:4200](http://localhost:4200) after the Angular server finishes starting and sign in with GitHub.
+Then add a fictional example CV for the account in `OWNER_GITHUB_ID`, and restart the app so MCP acts for it:
+
+```bash
+docker compose exec dev pnpm seed
+docker compose restart app
+```
+
+The sample CV is available without connecting an assistant. Select it and click **Export PDF** to try the export
+workflow.
 
 | Service    | Local address                  | Purpose                            |
 | ---------- | ------------------------------ | ---------------------------------- |
@@ -123,27 +141,30 @@ without connecting an assistant. Select it and click **Export PDF** to try the e
 | MCP        | `http://localhost:3000/mcp`    | Tools for the assistant            |
 | PostgreSQL | `localhost:5433`               | Database access from host tools    |
 
-The app and seed command apply pending database migrations automatically. Until sign-in is implemented, they
-use one local owner. CVs and revisions live in the named Docker volume `markup-resume-db` and survive container
+The app and seed command apply pending database migrations automatically. Every CV belongs to the user who signed
+in, and the UI shows only that user's CVs. CVs and revisions live in the named Docker volume `markup-resume-db` and survive container
 restarts. The development database name, username and password are all `markup`.
 
 To stop the stack while keeping the database, run `docker compose down`. Adding `-v` deletes the database volume
 and all stored CVs and revisions.
 
-This Compose setup is for local development. Authentication is not implemented, and the API and web ports are
-published on all host interfaces by default. Do not expose this stack to the internet; hosted deployment is part
+This Compose setup is for local development. The UI and API need a sign-in, but MCP does not have its own OAuth
+yet and acts for `OWNER_GITHUB_ID`; the API and web ports are published on all host interfaces by default. Do not expose this stack to the internet; hosted deployment is part
 of the roadmap.
 
 ### Configuration
 
 The defaults are supplied by [compose.yaml](compose.yaml) and the [Dockerfile](Dockerfile).
 
-| Variable            | Purpose                                                                  | Container default                         |
-| ------------------- | ------------------------------------------------------------------------ | ----------------------------------------- |
-| `DATABASE_URL`      | PostgreSQL connection used by the app, seed, importer and database tests | `postgres://markup:markup@db:5432/markup` |
-| `PORT`              | HTTP API and MCP listening port                                          | `3000`                                    |
-| `CHROME_PATH`       | Browser executable for PDF export; export is unavailable when unset      | `/usr/bin/chromium`                       |
-| `LEGACY_RESUME_DIR` | Root directory for importing CVs from older file-based versions          | `/data` in the `dev` service              |
+| Variable                                   | Purpose                                                                                                | Container default                         |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------ | ----------------------------------------- |
+| `DATABASE_URL`                             | PostgreSQL connection used by the app, seed, importer and database tests                               | `postgres://markup:markup@db:5432/markup` |
+| `PORT`                                     | HTTP API and MCP listening port                                                                        | `3000`                                    |
+| `CHROME_PATH`                              | Browser executable for PDF export; export is unavailable when unset                                    | `/usr/bin/chromium`                       |
+| `LEGACY_RESUME_DIR`                        | Root directory for importing CVs from older file-based versions                                        | `/data` in the `dev` service              |
+| `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` | The GitHub OAuth App for sign-in; the app does not start without them                                  | from `.env`                               |
+| `APP_ORIGIN`                               | Where the browser opens the app: the GitHub callback and the CSRF check use it                         | `http://localhost:4200`                   |
+| `OWNER_GITHUB_ID`                          | GitHub user id that MCP, seed and the importers act for; MCP answers 503 until that user has signed in | from `.env`                               |
 
 ### Import CVs from an earlier version
 
@@ -155,6 +176,17 @@ docker compose exec dev pnpm import:files
 
 The importer upgrades legacy document vocabulary, validates each document and stores it as the first revision.
 Existing slugs are skipped. Rejected documents are reported for correction; old `history/` files are not imported.
+
+### Move CVs from before sign-in
+
+A database from before sign-in keeps its CVs for a local owner. After signing in once, move them to the account in
+`OWNER_GITHUB_ID`:
+
+```bash
+docker compose exec dev pnpm claim:local-resumes
+```
+
+Nothing moves if that account already has a CV with one of the same slugs; the command lists them.
 
 ## MCP integration
 
@@ -170,8 +202,8 @@ check the `markup-resume` connection with `/mcp`. Codex uses the same Streamable
 MCP configuration. Other clients need support for Streamable HTTP; their compatibility should be verified
 separately.
 
-The current MCP endpoint validates local `Host` and `Origin` headers, but does not implement OAuth. These checks
-do not replace authentication. The project does not yet provide a hosted connection flow for Claude Desktop or
+The current MCP endpoint validates local `Host` and `Origin` headers, but does not implement OAuth yet: it works
+on the CVs of `OWNER_GITHUB_ID`, found when the app starts. These checks do not replace authentication. The project does not yet provide a hosted connection flow for Claude Desktop or
 ChatGPT Desktop.
 
 ### Available tools
@@ -259,13 +291,14 @@ Angular uses its development server. See [AGENTS.md](AGENTS.md) for repository c
 
 ### Troubleshooting
 
-| Symptom                                                | What to check                                                                                                                                      |
-| ------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Seed or app cannot connect to PostgreSQL               | Run `docker compose ps`; the `db` service must be healthy before seeding. Use `docker compose logs db app` for details.                            |
-| The UI is unavailable or reports an unreachable server | Inspect `docker compose logs app web`; the API and Angular server must both finish starting.                                                       |
-| The MCP client cannot connect                          | Check that `app` is running and the client uses `http://localhost:3000/mcp` with Streamable HTTP. This is a protocol endpoint, not a browser page. |
-| PDF export is unavailable                              | Use the supplied image, which installs Chromium and Poppler and sets `CHROME_PATH`.                                                                |
-| JetBrains cannot reach Docker Desktop on macOS         | Configure its Docker connection to use `unix://<your home>/.docker/run/docker.sock`, or enable Docker Desktop's default socket.                    |
+| Symptom                                                | What to check                                                                                                                                                       |
+| ------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Seed or app cannot connect to PostgreSQL               | Run `docker compose ps`; the `db` service must be healthy before seeding. Use `docker compose logs db app` for details.                                             |
+| MCP answers 503 "mcp-unavailable"                      | `OWNER_GITHUB_ID` is unset or that account has not signed in yet. Set it in `.env`, sign in once, then run `docker compose up -d app` so the container picks it up. |
+| The UI is unavailable or reports an unreachable server | Inspect `docker compose logs app web`; the API and Angular server must both finish starting.                                                                        |
+| The MCP client cannot connect                          | Check that `app` is running and the client uses `http://localhost:3000/mcp` with Streamable HTTP. This is a protocol endpoint, not a browser page.                  |
+| PDF export is unavailable                              | Use the supplied image, which installs Chromium and Poppler and sets `CHROME_PATH`.                                                                                 |
+| JetBrains cannot reach Docker Desktop on macOS         | Configure its Docker connection to use `unix://<your home>/.docker/run/docker.sock`, or enable Docker Desktop's default socket.                                     |
 
 ## Roadmap
 
@@ -297,8 +330,9 @@ The following work is planned; content editing remains through MCP.
 
 ### Accounts and desktop access
 
-- [ ] **Sign in with Google or GitHub:** individual accounts, browser sessions and access scoped to each user's
-      CVs; no application passwords.
+- [x] **Sign in with GitHub:** individual accounts, browser sessions and access scoped to each user's CVs; no
+      application passwords.
+- [ ] **Sign in with Google.**
 - [ ] **Connect desktop assistants:** OAuth for remote MCP, with Claude Desktop and ChatGPT Desktop as primary
       clients, alongside Claude Code and Codex. Verify login and the complete editing workflow in each client.
 - [ ] **Deploy the hosted service:** HTTPS on an OCI ARM VM, automated image builds and deployment, backups and
