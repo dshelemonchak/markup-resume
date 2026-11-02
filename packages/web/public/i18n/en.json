@@ -16,7 +16,8 @@
       "none": "No CVs yet",
       "signedOut": "Sign in to see your CVs"
     },
-    "signOut": "Sign out"
+    "signOut": "Sign out",
+    "signOutFailed": "Could not sign out: you are still signed in. Try again."
   },
   "sidebarItem": {
     "pinned": "Pinned",

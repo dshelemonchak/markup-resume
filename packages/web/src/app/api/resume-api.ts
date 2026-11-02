@@ -1,8 +1,10 @@
-import { HttpClient, HttpErrorResponse, httpResource } from '@angular/common/http';
-import { Injectable, computed, effect, inject, signal } from '@angular/core';
+import { HttpClient, HttpContext, HttpErrorResponse, httpResource } from '@angular/common/http';
+import { Injectable, computed, effect, inject, signal, untracked } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
+import { HANDLES_OWN_401, SessionExpiry } from './session-expiry';
 
 const API = '/api/v1';
+const CURRENT_USER_URL = `${API}/me`;
 /** A server that hangs counts as unreachable after this long, instead of loading forever. */
 const REQUEST_TIMEOUT_MS = 10_000;
 /** Pause before opening a new event stream after the server refused one. */
@@ -22,7 +24,7 @@ export interface ResumeListItemDto {
 }
 
 /** Shape of GET /api/v1/me: the signed-in user (ADR-0027). */
-export interface MeDto {
+export interface CurrentUserDto {
   readonly name: string | null;
 }
 
@@ -53,8 +55,9 @@ export type PdfExport =
   | { readonly kind: 'failed'; readonly message: string };
 
 /**
- * Client of the server's CV API. Everything but /me waits for a signed-in user: signed out, the API answers 401,
- * and the UI shows the way to sign in instead (ADR-0027). A 401 later on (the session ended) signs the UI out.
+ * Client of the server's CV API. Everything but the current user waits for a signed-in user: signed out, the API
+ * answers 401, and the UI shows the way to sign in instead (ADR-0027). A 401 later on, from any request or the
+ * event stream (the session ended), makes it ask for the current user again, and so signs the UI out.
  * Keeps the list fresh: the server's event stream
  * ("resume-changed") reloads the list and bumps `revision`, which the document URL carries
  * so the preview reloads too. "claude-changed" reloads the connected Claude sessions.
@@ -63,10 +66,15 @@ export type PdfExport =
  */
 @Injectable({ providedIn: 'root' })
 export class ResumeApi {
-  readonly me = httpResource<MeDto>(() => ({ url: `${API}/me`, timeout: REQUEST_TIMEOUT_MS }));
+  readonly currentUser = httpResource<CurrentUserDto>(() => ({
+    url: CURRENT_USER_URL,
+    timeout: REQUEST_TIMEOUT_MS,
+    // Its 401 is not a session that ended but the answer itself: nobody is signed in.
+    context: new HttpContext().set(HANDLES_OWN_401, true),
+  }));
   /** The server answered that nobody is signed in. */
-  readonly signedOut = computed(() => isSignedOut(this.me.error()));
-  private readonly signedIn = computed(() => this.me.hasValue());
+  readonly signedOut = computed(() => isSignedOut(this.currentUser.error()));
+  private readonly signedIn = computed(() => this.currentUser.hasValue());
 
   readonly resumes = httpResource<readonly ResumeListItemDto[]>(() =>
     this.signedIn() ? { url: `${API}/resumes`, timeout: REQUEST_TIMEOUT_MS } : undefined,
@@ -84,14 +92,17 @@ export class ResumeApi {
 
     const connect = () => {
       events = new EventSource(`${API}/events`);
-      connectedBefore = false;
       // "ready" after an earlier connection means the server is back: whatever it sent may be stale, and
       // whatever failed while it was down can load now. On the first connection only failures reload.
       events.addEventListener('ready', () => {
         for (const resource of [this.resumes, this.claudeSessions]) {
-          if (connectedBefore || resource.error() !== undefined) resource.reload();
+          if (connectedBefore || resource.error() !== undefined) {
+            resource.reload();
+          }
         }
-        if (connectedBefore) this.revision.update((revision) => revision + 1);
+        if (connectedBefore) {
+          this.revision.update((revision) => revision + 1);
+        }
         connectedBefore = true;
       });
       events.addEventListener('resume-changed', () => {
@@ -100,17 +111,23 @@ export class ResumeApi {
       });
       events.addEventListener('claude-changed', () => this.claudeSessions.reload());
       // EventSource retries a dropped connection itself, but gives up for good on an HTTP error, such as the
-      // dev proxy's 502 while the server is down. Then a new one is opened.
+      // dev proxy's 502 while the server is down, or a 401 once the session ended. EventSource does not say
+      // which, so a request finds out (a 401 signs the UI out), and a new stream is opened after a pause.
       events.addEventListener('error', () => {
-        if (events?.readyState !== EventSource.CLOSED) return;
+        if (events?.readyState !== EventSource.CLOSED) {
+          return;
+        }
+        this.http.get(CURRENT_USER_URL).subscribe({ error: () => undefined });
         retry = setTimeout(connect, EVENTS_RETRY_MS);
       });
     };
-    // The event stream is open while someone is signed in.
+    // The event stream is open while someone is signed in. A new sign-in starts afresh: its first "ready" is a
+    // first connection.
     effect((onCleanup) => {
       if (!this.signedIn()) {
         return;
       }
+      connectedBefore = false;
       connect();
       onCleanup(() => {
         clearTimeout(retry);
@@ -118,23 +135,28 @@ export class ResumeApi {
       });
     });
 
+    // A 401 anywhere may mean the session ended: asking for the current user again tells, and signs the UI out
+    // when nobody is signed in any more.
+    const expiry = inject(SessionExpiry);
+    effect(() => {
+      if (expiry.reported() > 0) {
+        untracked(() => this.currentUser.reload());
+      }
+    });
+
     // status() goes error → reloading → error on each failed try, so the effect schedules the next one. Signed out
     // is not a failure: nothing is retried until the user signs in, which reloads the page.
     effect((onCleanup) => {
-      if (this.me.status() !== 'error' || this.signedOut()) {
+      if (this.currentUser.status() !== 'error' || this.signedOut()) {
         return;
       }
-      const timer = setTimeout(() => this.me.reload(), RESOURCE_RETRY_MS);
+      const timer = setTimeout(() => this.currentUser.reload(), RESOURCE_RETRY_MS);
       onCleanup(() => clearTimeout(timer));
     });
+    // Signed out, these go idle, which ends their retries too.
     for (const resource of [this.resumes, this.claudeSessions]) {
       effect((onCleanup) => {
         if (resource.status() !== 'error') {
-          return;
-        }
-        // The session ended: asking /me again turns the UI to signed out.
-        if (isSignedOut(resource.error())) {
-          this.me.reload();
           return;
         }
         const timer = setTimeout(() => resource.reload(), RESOURCE_RETRY_MS);
@@ -146,7 +168,7 @@ export class ResumeApi {
   /** Ends the session on the server; the UI then shows the way to sign in. */
   async signOut(): Promise<void> {
     await firstValueFrom(this.http.post(`/auth/logout`, null));
-    this.me.reload();
+    this.currentUser.reload();
   }
 
   private readonly http = inject(HttpClient);
