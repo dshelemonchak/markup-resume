@@ -4,7 +4,7 @@ import { firstValueFrom } from 'rxjs';
 import { HANDLES_OWN_401, SessionExpiry } from './session-expiry';
 
 const API = '/api/v1';
-const CURRENT_USER_URL = `${API}/me`;
+const CURRENT_USER_URL = `${API}/user`;
 /** A server that hangs counts as unreachable after this long, instead of loading forever. */
 const REQUEST_TIMEOUT_MS = 10_000;
 /** Pause before opening a new event stream after the server refused one. */
@@ -23,7 +23,7 @@ export interface ResumeListItemDto {
   readonly pinned: boolean;
 }
 
-/** Shape of GET /api/v1/me: the signed-in user (ADR-0027). */
+/** Shape of GET /api/v1/user: the signed-in user (ADR-0027). */
 export interface CurrentUserDto {
   readonly name: string | null;
 }
