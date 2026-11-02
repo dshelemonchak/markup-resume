@@ -217,7 +217,7 @@ describe('sessions and the API', () => {
   it('answers 401 to every API route without a session', async () => {
     const { anonymous } = setup();
     for (const [method, path] of [
-      ['GET', '/api/v1/me'],
+      ['GET', '/api/v1/user'],
       ['GET', '/api/v1/resumes'],
       ['GET', '/api/v1/resumes/sample/document'],
       ['GET', '/api/v1/resumes/sample/pdf'],
@@ -242,7 +242,7 @@ describe('sessions and the API', () => {
   });
 
   it('names the signed-in user', async () => {
-    expect(await (await setup().app.request('/api/v1/me')).json()).toEqual({ name: 'Alex' });
+    expect(await (await setup().app.request('/api/v1/user')).json()).toEqual({ name: 'Alex' });
   });
 
   it('refuses a change from another origin, or with no origin, even with a session', async () => {
@@ -299,8 +299,8 @@ describe('signing in with GitHub', () => {
     );
     expect(setCookie(callback, '__Host-sign-in-state')).toContain('Max-Age=0');
 
-    const me = await anonymous.request('/api/v1/me', { headers: { Cookie: session.split(';')[0]! } });
-    expect(await me.json()).toEqual({ name: 'Alex' });
+    const user = await anonymous.request('/api/v1/user', { headers: { Cookie: session.split(';')[0]! } });
+    expect(await user.json()).toEqual({ name: 'Alex' });
   });
 
   it('starts no session on a callback with a state this browser did not start', async () => {
@@ -339,8 +339,8 @@ describe('signing in with GitHub', () => {
     const logout = await app.request('/auth/logout', { method: 'POST' });
     expect(logout.status).toBe(204);
     expect(setCookie(logout, '__Host-session')).toContain('Max-Age=0');
-    const me = await anonymous.request('/api/v1/me', { headers: { Cookie: (await session).cookie } });
-    expect(me.status).toBe(401);
+    const user = await anonymous.request('/api/v1/user', { headers: { Cookie: (await session).cookie } });
+    expect(user.status).toBe(401);
   });
 
   it('refuses a sign-out from another origin', async () => {
