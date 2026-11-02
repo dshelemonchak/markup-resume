@@ -97,5 +97,8 @@
         {{ 'sidebar.signOut' | transloco }}
       </button>
     </div>
+    @if (signOutFailed()) {
+      <p class="sign-out-failed" role="alert">{{ 'sidebar.signOutFailed' | transloco }}</p>
+    }
   }
 </aside>

@@ -32,6 +32,8 @@ export class Sidebar {
   });
   /** The signed-in user's name; null while nobody is signed in. */
   readonly userName = input<string | null>(null);
+  /** The last sign-out did not reach the server, so the user is still signed in. */
+  readonly signOutFailed = input(false);
   readonly selectResume = output<string>();
   readonly connectClaude = output();
   readonly signOut = output();
