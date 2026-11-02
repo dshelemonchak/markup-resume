@@ -81,18 +81,22 @@ async function render(chrome: ChromeDevToolsPipe, api: string, document: { url: 
       return;
     }
     const { requestId, request } = params as { requestId: string; request: { url: string } };
+    let answer: Promise<unknown>;
     if (request.url === url) {
-      void send('Fetch.fulfillRequest', {
+      answer = send('Fetch.fulfillRequest', {
         requestId,
         responseCode: 200,
         responseHeaders: [{ name: 'Content-Type', value: 'text/html; charset=utf-8' }],
         body: Buffer.from(document.html).toString('base64'),
       });
     } else if (request.url.startsWith(api)) {
-      void send('Fetch.continueRequest', { requestId });
+      answer = send('Fetch.continueRequest', { requestId });
     } else {
-      void send('Fetch.failRequest', { requestId, errorReason: 'BlockedByClient' });
+      answer = send('Fetch.failRequest', { requestId, errorReason: 'BlockedByClient' });
     }
+    // The request may be gone (cancelled by the page) or Chrome may have exited: the render fails or times out on
+    // its own, and an unhandled rejection here would end the whole server process.
+    answer.catch(() => undefined);
   });
   await send('Fetch.enable', { patterns: [{ urlPattern: '*' }] });
   await send('Emulation.setScriptExecutionDisabled', { value: true });
