@@ -1,7 +1,8 @@
-import { provideHttpClient } from '@angular/common/http';
+import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import type { ResumeListItemDto } from '../../api/resume-api';
+import { sessionExpiryInterceptor } from '../../api/session-expiry';
 import { Workspace } from './workspace';
 
 class FakeEventSource {
@@ -38,7 +39,12 @@ describe('Workspace', () => {
         disconnect(): void {}
       },
     );
-    TestBed.configureTestingModule({ providers: [provideHttpClient(), provideHttpClientTesting()] });
+    TestBed.configureTestingModule({
+      providers: [
+        provideHttpClient(withInterceptors([sessionExpiryInterceptor])),
+        provideHttpClientTesting(),
+      ],
+    });
   });
 
   afterEach(() => vi.unstubAllGlobals());
@@ -192,6 +198,74 @@ describe('Workspace', () => {
     await fixture.whenStable();
     expect(root.querySelector('.document-area a[href="/auth/github"]')).not.toBeNull();
     expect(root.querySelectorAll('mr-sidebar-item')).toHaveLength(0);
+  });
+
+  const UNAUTHORIZED = { status: 401, statusText: 'Unauthorized' };
+  const signInLink = (root: HTMLElement) => root.querySelector('.document-area a[href="/auth/github"]');
+
+  it('shows the way to sign in when the session ends, as soon as a request answers 401', async () => {
+    const { fixture, http, root } = await render();
+    FakeEventSource.last!.emit('resume-changed');
+    TestBed.tick();
+    http.expectOne('/api/v1/resumes').flush({ error: 'unauthenticated' }, UNAUTHORIZED);
+    await Promise.resolve();
+    TestBed.tick();
+    http.expectOne('/api/v1/me').flush({ error: 'unauthenticated' }, UNAUTHORIZED);
+    await fixture.whenStable();
+    expect(signInLink(root)).not.toBeNull();
+    expect(root.querySelectorAll('mr-sidebar-item')).toHaveLength(0);
+  });
+
+  it('finds out from a request why the event stream closed, and signs out on a 401', async () => {
+    const { fixture, http, root } = await render();
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+    try {
+      const streams = FakeEventSource.created;
+      FakeEventSource.last!.readyState = FakeEventSource.CLOSED;
+      FakeEventSource.last!.emit('error');
+      http.expectOne('/api/v1/me').flush({ error: 'unauthenticated' }, UNAUTHORIZED); // the probe
+      await vi.advanceTimersByTimeAsync(0);
+      TestBed.tick();
+      http.expectOne('/api/v1/me').flush({ error: 'unauthenticated' }, UNAUTHORIZED); // the current user again
+      await vi.advanceTimersByTimeAsync(10_000);
+      TestBed.tick();
+      expect(signInLink(root)).not.toBeNull();
+      expect(FakeEventSource.created).toBe(streams); // the pending reconnect was cancelled
+    } finally {
+      vi.useRealTimers();
+    }
+    await fixture.whenStable();
+  });
+
+  it('reloads the list and the preview when the stream comes back after the server restarted', async () => {
+    const { fixture, http, frameSrc } = await render();
+    FakeEventSource.last!.emit('ready'); // the first connection: nothing failed, nothing to reload
+    vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+    try {
+      FakeEventSource.last!.readyState = FakeEventSource.CLOSED;
+      FakeEventSource.last!.emit('error');
+      http.expectOne('/api/v1/me').flush({ name: 'Alex' }); // still signed in: the server was only away
+      await vi.advanceTimersByTimeAsync(2_000);
+    } finally {
+      vi.useRealTimers();
+    }
+    FakeEventSource.last!.emit('ready');
+    TestBed.tick();
+    http.expectOne('/api/v1/resumes').flush(CVS);
+    http.expectOne('/api/v1/claude/sessions').flush([]);
+    await fixture.whenStable();
+    expect(frameSrc()).toBe('/api/v1/resumes/first/document?v=1');
+  });
+
+  it('says so when signing out does not reach the server', async () => {
+    const { fixture, http, root } = await render();
+    root.querySelector<HTMLButtonElement>('mr-sidebar .sign-out')!.click();
+    http
+      .expectOne({ method: 'POST', url: '/auth/logout' })
+      .flush('', { status: 502, statusText: 'Bad Gateway' });
+    await fixture.whenStable();
+    expect(root.querySelector('mr-sidebar .sign-out-failed')!.textContent).toContain('still signed in');
+    expect(root.querySelector('mr-sidebar .account .name')!.textContent).toBe('Alex');
   });
 
   it('tells loading from an unreachable server, and recovers when the server is back', async () => {
