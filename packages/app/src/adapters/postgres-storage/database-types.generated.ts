@@ -52,6 +52,15 @@ export interface ResumeTags {
   tag: ResumeTag;
 }
 
+export interface Sessions {
+  created_at: Generated<Timestamp>;
+  expires_at: Timestamp;
+  id: Generated<string>;
+  last_seen_at: Generated<Timestamp>;
+  token_hash: Buffer;
+  user_id: string;
+}
+
 export interface UserIdentities {
   created_at: Generated<Timestamp>;
   email: string | null;
@@ -72,6 +81,7 @@ export interface DB {
   resume_revisions: ResumeRevisions;
   resume_tags: ResumeTags;
   resumes: Resumes;
+  sessions: Sessions;
   user_identities: UserIdentities;
   users: Users;
 }
