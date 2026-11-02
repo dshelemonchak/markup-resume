@@ -53,7 +53,7 @@ describe('Workspace', () => {
     const fixture = TestBed.createComponent(Workspace);
     const http = TestBed.inject(HttpTestingController);
     TestBed.tick(); // ask who is signed in (the app stays unstable until it is answered)
-    http.expectOne('/api/v1/me').flush({ name: 'Alex' });
+    http.expectOne('/api/v1/user').flush({ name: 'Alex' });
     await Promise.resolve(); // the resource takes the answer in a microtask
     TestBed.tick(); // then the list
     http.expectOne('/api/v1/resumes').flush(resumes);
@@ -169,7 +169,7 @@ describe('Workspace', () => {
     const root = fixture.nativeElement as HTMLElement;
     TestBed.tick();
     http
-      .expectOne('/api/v1/me')
+      .expectOne('/api/v1/user')
       .flush({ error: 'unauthenticated' }, { status: 401, statusText: 'Unauthorized' });
     await fixture.whenStable();
 
@@ -193,7 +193,7 @@ describe('Workspace', () => {
     await Promise.resolve();
     TestBed.tick();
     http
-      .expectOne('/api/v1/me')
+      .expectOne('/api/v1/user')
       .flush({ error: 'unauthenticated' }, { status: 401, statusText: 'Unauthorized' });
     await fixture.whenStable();
     expect(root.querySelector('.document-area a[href="/auth/github"]')).not.toBeNull();
@@ -210,7 +210,7 @@ describe('Workspace', () => {
     http.expectOne('/api/v1/resumes').flush({ error: 'unauthenticated' }, UNAUTHORIZED);
     await Promise.resolve();
     TestBed.tick();
-    http.expectOne('/api/v1/me').flush({ error: 'unauthenticated' }, UNAUTHORIZED);
+    http.expectOne('/api/v1/user').flush({ error: 'unauthenticated' }, UNAUTHORIZED);
     await fixture.whenStable();
     expect(signInLink(root)).not.toBeNull();
     expect(root.querySelectorAll('mr-sidebar-item')).toHaveLength(0);
@@ -223,10 +223,10 @@ describe('Workspace', () => {
       const streams = FakeEventSource.created;
       FakeEventSource.last!.readyState = FakeEventSource.CLOSED;
       FakeEventSource.last!.emit('error');
-      http.expectOne('/api/v1/me').flush({ error: 'unauthenticated' }, UNAUTHORIZED); // the probe
+      http.expectOne('/api/v1/user').flush({ error: 'unauthenticated' }, UNAUTHORIZED); // the probe
       await vi.advanceTimersByTimeAsync(0);
       TestBed.tick();
-      http.expectOne('/api/v1/me').flush({ error: 'unauthenticated' }, UNAUTHORIZED); // the current user again
+      http.expectOne('/api/v1/user').flush({ error: 'unauthenticated' }, UNAUTHORIZED); // the current user again
       await vi.advanceTimersByTimeAsync(10_000);
       TestBed.tick();
       expect(signInLink(root)).not.toBeNull();
@@ -244,7 +244,7 @@ describe('Workspace', () => {
     try {
       FakeEventSource.last!.readyState = FakeEventSource.CLOSED;
       FakeEventSource.last!.emit('error');
-      http.expectOne('/api/v1/me').flush({ name: 'Alex' }); // still signed in: the server was only away
+      http.expectOne('/api/v1/user').flush({ name: 'Alex' }); // still signed in: the server was only away
       await vi.advanceTimersByTimeAsync(2_000);
     } finally {
       vi.useRealTimers();
@@ -276,7 +276,7 @@ describe('Workspace', () => {
     TestBed.tick(); // the requests are pending, so the app is not stable yet
     expect(message()).toContain('Loading CVs');
 
-    http.expectOne('/api/v1/me').flush({ name: 'Alex' });
+    http.expectOne('/api/v1/user').flush({ name: 'Alex' });
     await Promise.resolve();
     TestBed.tick();
     http.expectOne('/api/v1/resumes').error(new ProgressEvent('error'));
@@ -313,7 +313,7 @@ describe('Workspace', () => {
         TestBed.tick();
       };
       TestBed.tick();
-      http.expectOne('/api/v1/me').flush({ name: 'Alex' });
+      http.expectOne('/api/v1/user').flush({ name: 'Alex' });
       await settle();
       http.expectOne('/api/v1/resumes').flush('boom', { status: 500, statusText: 'Server Error' });
       http.expectOne('/api/v1/claude/sessions').flush([]);
