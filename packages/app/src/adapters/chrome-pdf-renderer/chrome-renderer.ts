@@ -1,7 +1,7 @@
 import { mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import type { ResumeSlug, PageSnapshot, PdfRenderer } from '../../domain/index.ts';
+import type { PageSnapshot, PdfRenderer } from '../../domain/index.ts';
 import { ChromeDevToolsPipe } from './chrome-devtools-pipe.ts';
 
 const RENDER_TIMEOUT_MS = 30_000;
@@ -29,13 +29,16 @@ export interface ChromeRendererOptions {
 }
 
 /**
- * The domain's PdfRenderer port on headless Chromium, one browser per export (ADR-0008): opens the CV from this
- * app's API, so the template's fonts and icons load like in the viewer, lets no other request out, turns the
- * page's scripts off, snapshots the text and links, and prints with the page size the CSS declares.
+ * The domain's PdfRenderer port on headless Chromium, one browser per export (ADR-0008): opens the CV at an address
+ * on this app and answers that request itself with the document it was given (ADR-0027), so the template's fonts
+ * and icons load from the API like in the viewer. Lets no other request out, turns the page's scripts off,
+ * snapshots the text and links, and prints with the page size the CSS declares.
  */
 export function createChromeRenderer({ chromePath, appUrl }: ChromeRendererOptions): PdfRenderer {
   const api = `${appUrl}/api/v1/`;
-  return async (id: ResumeSlug) => {
+  // Never reaches the app: the renderer answers it. Being on the app's origin, the document's /api/v1 URLs resolve.
+  const documentUrl = `${appUrl}/render/document`;
+  return async (html: string) => {
     const profile = await mkdtemp(join(tmpdir(), 'markup-resume-chrome-'));
     const chrome = new ChromeDevToolsPipe(chromePath, [
       '--headless',
@@ -54,10 +57,7 @@ export function createChromeRenderer({ chromePath, appUrl }: ChromeRendererOptio
           RENDER_TIMEOUT_MS,
         );
       });
-      return await Promise.race([
-        render(chrome, api, `${api}resumes/${encodeURIComponent(id)}/document`),
-        timeout,
-      ]);
+      return await Promise.race([render(chrome, api, { url: documentUrl, html }), timeout]);
     } finally {
       clearTimeout(timer);
       await chrome.close();
@@ -66,20 +66,33 @@ export function createChromeRenderer({ chromePath, appUrl }: ChromeRendererOptio
   };
 }
 
-async function render(chrome: ChromeDevToolsPipe, api: string, url: string) {
+async function render(chrome: ChromeDevToolsPipe, api: string, document: { url: string; html: string }) {
+  const { url } = document;
   const { targetId } = await chrome.send('Target.createTarget', { url: 'about:blank' });
   const { sessionId } = (await chrome.send('Target.attachToTarget', { targetId, flatten: true })) as {
     sessionId: string;
   };
   const send = (method: string, params?: Record<string, unknown>) => chrome.send(method, params, sessionId);
 
-  // Every request pauses here: this app's API goes on, anything else is refused.
+  // Every request pauses here: the document is answered from memory, this app's API goes on (fonts and icons),
+  // anything else is refused.
   chrome.on('Fetch.requestPaused', (params, eventSession) => {
-    if (eventSession !== sessionId) return;
+    if (eventSession !== sessionId) {
+      return;
+    }
     const { requestId, request } = params as { requestId: string; request: { url: string } };
-    void (request.url.startsWith(api)
-      ? send('Fetch.continueRequest', { requestId })
-      : send('Fetch.failRequest', { requestId, errorReason: 'BlockedByClient' }));
+    if (request.url === url) {
+      void send('Fetch.fulfillRequest', {
+        requestId,
+        responseCode: 200,
+        responseHeaders: [{ name: 'Content-Type', value: 'text/html; charset=utf-8' }],
+        body: Buffer.from(document.html).toString('base64'),
+      });
+    } else if (request.url.startsWith(api)) {
+      void send('Fetch.continueRequest', { requestId });
+    } else {
+      void send('Fetch.failRequest', { requestId, errorReason: 'BlockedByClient' });
+    }
   });
   await send('Fetch.enable', { patterns: [{ urlPattern: '*' }] });
   await send('Emulation.setScriptExecutionDisabled', { value: true });

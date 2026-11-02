@@ -1,5 +1,3 @@
-import type { ResumeSlug } from '../resume/resume.ts';
-
 /** What the rendered page holds, to compare the PDF with. */
 export interface PageSnapshot {
   /** The document's <title>, which names the PDF file. */
@@ -19,8 +17,11 @@ export interface RenderedResume {
   readonly page: PageSnapshot;
 }
 
-/** Port: renders a stored CV in a browser, as the viewer shows it, into a PDF (ADR-0008). */
-export type PdfRenderer = (id: ResumeSlug) => Promise<RenderedResume>;
+/**
+ * Port: renders a CV's document in a browser, as the viewer shows it, into a PDF (ADR-0008). It gets the document
+ * itself, read for the signed-in user, so it needs no access to the API's documents (ADR-0027).
+ */
+export type PdfRenderer = (html: string) => Promise<RenderedResume>;
 
 export interface PdfFont {
   readonly name: string;
