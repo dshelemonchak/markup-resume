@@ -13,8 +13,10 @@
       "loading": "Loading…",
       "unreachable": "Server not reachable",
       "failed": "Could not load the CVs",
-      "none": "No CVs yet"
-    }
+      "none": "No CVs yet",
+      "signedOut": "Sign in to see your CVs"
+    },
+    "signOut": "Sign out"
   },
   "sidebarItem": {
     "pinned": "Pinned",
@@ -41,6 +43,11 @@
     "days": "{{ count }} d ago"
   },
   "workspace": {
+    "signIn": {
+      "prompt": "Sign in to see and edit your CVs.",
+      "button": "Sign in with GitHub",
+      "failed": "Signing in did not work. Try again."
+    },
     "loading": "Loading CVs…",
     "unreachable": "The local server is not reachable. Start it with <code>docker compose up -d app</code>; the list comes back by itself.",
     "failed": "The server could not load the CVs; see <code>docker compose logs app</code>. Trying again every few seconds.",
