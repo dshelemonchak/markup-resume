@@ -60,18 +60,19 @@ export class Workspace {
     if (this.api.signedOut()) {
       return 'signed-out';
     }
-    const me = this.api.me.error();
-    if (me !== undefined) {
-      return isUnreachable(me) ? 'unreachable' : 'failed';
+    const error = this.api.currentUser.error() ?? this.api.resumes.error();
+    if (error !== undefined) {
+      return isUnreachable(error) ? 'unreachable' : 'failed';
     }
-    const resumes = this.api.resumes;
-    const error = resumes.error();
-    if (error !== undefined) return isUnreachable(error) ? 'unreachable' : 'failed';
-    return resumes.hasValue() ? 'ready' : 'loading';
+    return this.api.resumes.hasValue() ? 'ready' : 'loading';
   });
 
   /** The signed-in user's name, for the sidebar. */
-  protected readonly userName = computed(() => (this.api.me.hasValue() ? this.api.me.value().name : null));
+  protected readonly userName = computed(() =>
+    this.api.currentUser.hasValue() ? this.api.currentUser.value().name : null,
+  );
+  /** The last sign-out did not reach the server: the session is still open. */
+  protected readonly signOutFailed = signal(false);
   /** GitHub's callback sent the browser back here after a sign-in that did not work (ADR-0027). */
   protected readonly signInFailed =
     new URLSearchParams(inject(DOCUMENT).location.search).get('signIn') === 'failed';
@@ -157,10 +158,12 @@ export class Workspace {
   }
 
   protected async signOut(): Promise<void> {
+    this.signOutFailed.set(false);
     try {
       await this.api.signOut();
     } catch (error) {
       console.error(error);
+      this.signOutFailed.set(true);
     }
   }
 
