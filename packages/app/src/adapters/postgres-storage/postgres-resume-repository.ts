@@ -10,9 +10,7 @@ import type {
   TogglePinnedResult,
 } from '../../domain/index.ts';
 import type { Database } from './database.ts';
-
-/** Postgres error code for a unique constraint violation. */
-const UNIQUE_VIOLATION = '23505';
+import { isUniqueViolation } from './unique-violation.ts';
 
 /**
  * CV storage in Postgres on the schema of ADR-0025, acting for one owner. Every write is one transaction, and the
@@ -229,15 +227,4 @@ export class PostgresResumeRepository implements ResumeRepository {
       };
     });
   }
-}
-
-/** A pg error for a unique violation of the named constraint. */
-function isUniqueViolation(error: unknown, constraint: string): boolean {
-  return (
-    error instanceof Error &&
-    'code' in error &&
-    error.code === UNIQUE_VIOLATION &&
-    'constraint' in error &&
-    error.constraint === constraint
-  );
 }

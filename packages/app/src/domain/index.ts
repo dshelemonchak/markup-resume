@@ -45,5 +45,18 @@ export {
   type TemplateStylesResult,
   withTemplateStyles,
 } from './template/template.ts';
+export type { ExternalIdentity, IdentityProviderName, User } from './user/user.ts';
+export type { CreateUserResult, UserRepository } from './user/user-repository.ts';
+export type { IdentifyResult, IdentityProvider } from './user/identity-provider.ts';
+export {
+  type Session,
+  SESSION_IDLE_TIMEOUT_MS,
+  SESSION_LIFETIME_MS,
+  SESSION_TOUCH_INTERVAL_MS,
+  sessionExpiresAt,
+  sessionIdleCutoff,
+  sessionNeedsTouch,
+} from './session/session.ts';
+export type { NewSession, SessionRepository } from './session/session-repository.ts';
 export { readResumeTitle } from './document/resume-title.ts';
 export { upgradeLegacyVocabulary } from './document/legacy-vocabulary.ts';
