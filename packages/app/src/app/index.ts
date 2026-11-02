@@ -21,3 +21,11 @@ export {
   pdfFileName,
 } from './pdf-export/export-pdf.ts';
 export { ResumeChanges } from './resume-changes/resume-changes.ts';
+export {
+  completeSignIn,
+  type CompleteSignInResult,
+  resolveSession,
+  type SignInDependencies,
+  signOut,
+  startSignIn,
+} from './sign-in/sign-in.ts';
