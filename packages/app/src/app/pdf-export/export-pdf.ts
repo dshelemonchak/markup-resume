@@ -37,10 +37,11 @@ export async function exportResumePdf(
   if (!isValidResumeSlug(slug)) {
     return { kind: 'invalid-slug' };
   }
-  if ((await dependencies.repository.read(slug)) === null) {
+  const revision = await dependencies.repository.read(slug);
+  if (revision === null) {
     return { kind: 'not-found' };
   }
-  const { pdf, page } = await dependencies.renderPdf(slug);
+  const { pdf, page } = await dependencies.renderPdf(revision.html);
   const problems = checkPdf(page, await dependencies.inspectPdf(pdf));
   return { kind: 'exported', pdf, fileName: pdfFileName(page.title, slug), problems };
 }

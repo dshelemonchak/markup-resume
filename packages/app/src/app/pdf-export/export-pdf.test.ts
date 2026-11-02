@@ -19,8 +19,8 @@ function dependencies(text: string) {
     rendered,
     dependencies: {
       repository,
-      renderPdf: (slug: string) => {
-        rendered.push(slug);
+      renderPdf: (html: string) => {
+        rendered.push(html);
         return Promise.resolve({
           pdf: new Uint8Array([1, 2, 3]),
           page: { title: 'Alex – CV', blocks: ['Hello world'], links: [] },
