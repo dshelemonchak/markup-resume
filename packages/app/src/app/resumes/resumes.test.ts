@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from 'vitest';
 import type { HtmlParser, TemplateCatalog } from '../../domain/index.ts';
-import { ResumeChanges } from '../resume-changes/resume-changes.ts';
+import { type ResumeChangeNotifier, ResumeChanges } from '../resume-changes/resume-changes.ts';
 import { InMemoryResumeRepository } from '../testing/in-memory-resume-repository.ts';
 import {
   createResumeDocument,
@@ -34,16 +34,17 @@ const stored = (title: string) =>
   );
 
 let repository: InMemoryResumeRepository;
-let resumeChanges: ResumeChanges;
+let resumeChanges: ResumeChangeNotifier;
 let notified: string[];
 
 const dependencies = () => ({ repository, templates, parseHtml, resumeChanges });
 
 beforeEach(() => {
   repository = new InMemoryResumeRepository();
-  resumeChanges = new ResumeChanges();
   notified = [];
-  resumeChanges.onChange((slug) => notified.push(slug));
+  const changes = new ResumeChanges();
+  changes.onChange((_ownerId, slug) => notified.push(slug));
+  resumeChanges = changes.forOwner('owner-1');
 });
 
 /** A CV "sample" at revision 1, created before the test starts listening. */
