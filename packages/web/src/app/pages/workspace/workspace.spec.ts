@@ -46,7 +46,10 @@ describe('Workspace', () => {
   async function render(resumes = CVS) {
     const fixture = TestBed.createComponent(Workspace);
     const http = TestBed.inject(HttpTestingController);
-    TestBed.tick(); // issue the list request (the app stays unstable until it is answered)
+    TestBed.tick(); // ask who is signed in (the app stays unstable until it is answered)
+    http.expectOne('/api/v1/me').flush({ name: 'Alex' });
+    await Promise.resolve(); // the resource takes the answer in a microtask
+    TestBed.tick(); // then the list
     http.expectOne('/api/v1/resumes').flush(resumes);
     http.expectOne('/api/v1/claude/sessions').flush([]);
     await fixture.whenStable();
@@ -153,6 +156,44 @@ describe('Workspace', () => {
     expect(root.querySelector('.connection')!.getAttribute('aria-label')).toBe('Claude Desktop connected');
   });
 
+  it('shows the way to sign in, and asks for nothing else, while nobody is signed in', async () => {
+    const streams = FakeEventSource.created;
+    const fixture = TestBed.createComponent(Workspace);
+    const http = TestBed.inject(HttpTestingController);
+    const root = fixture.nativeElement as HTMLElement;
+    TestBed.tick();
+    http
+      .expectOne('/api/v1/me')
+      .flush({ error: 'unauthenticated' }, { status: 401, statusText: 'Unauthorized' });
+    await fixture.whenStable();
+
+    expect(root.querySelector('.document-area a[href="/auth/github"]')!.textContent).toContain(
+      'Sign in with GitHub',
+    );
+    expect(root.querySelector('mr-sidebar .empty')!.textContent).toContain('Sign in to see your CVs');
+    expect(root.querySelector('mr-sidebar .account')).toBeNull();
+    http.verify(); // no list, no Claude sessions
+    expect(FakeEventSource.created).toBe(streams);
+  });
+
+  it('signs out on request and then shows the way to sign in', async () => {
+    const { fixture, http, root } = await render();
+    expect(root.querySelector('mr-sidebar .account .name')!.textContent).toBe('Alex');
+
+    root.querySelector<HTMLButtonElement>('mr-sidebar .sign-out')!.click();
+    http
+      .expectOne({ method: 'POST', url: '/auth/logout' })
+      .flush(null, { status: 204, statusText: 'No Content' });
+    await Promise.resolve();
+    TestBed.tick();
+    http
+      .expectOne('/api/v1/me')
+      .flush({ error: 'unauthenticated' }, { status: 401, statusText: 'Unauthorized' });
+    await fixture.whenStable();
+    expect(root.querySelector('.document-area a[href="/auth/github"]')).not.toBeNull();
+    expect(root.querySelectorAll('mr-sidebar-item')).toHaveLength(0);
+  });
+
   it('tells loading from an unreachable server, and recovers when the server is back', async () => {
     const fixture = TestBed.createComponent(Workspace);
     const http = TestBed.inject(HttpTestingController);
@@ -161,6 +202,9 @@ describe('Workspace', () => {
     TestBed.tick(); // the requests are pending, so the app is not stable yet
     expect(message()).toContain('Loading CVs');
 
+    http.expectOne('/api/v1/me').flush({ name: 'Alex' });
+    await Promise.resolve();
+    TestBed.tick();
     http.expectOne('/api/v1/resumes').error(new ProgressEvent('error'));
     http.expectOne('/api/v1/claude/sessions').error(new ProgressEvent('error'));
     await fixture.whenStable();
@@ -195,6 +239,8 @@ describe('Workspace', () => {
         TestBed.tick();
       };
       TestBed.tick();
+      http.expectOne('/api/v1/me').flush({ name: 'Alex' });
+      await settle();
       http.expectOne('/api/v1/resumes').flush('boom', { status: 500, statusText: 'Server Error' });
       http.expectOne('/api/v1/claude/sessions').flush([]);
       await settle();

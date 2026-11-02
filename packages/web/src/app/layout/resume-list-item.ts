@@ -17,7 +17,7 @@ export interface ResumeListItem {
 }
 
 /**
- * Where the list stands: still loading, the server cannot be reached, the server failed to answer, or loaded
- * (and maybe empty).
+ * Where the list stands: still loading, nobody signed in, the server cannot be reached, the server failed to
+ * answer, or loaded (and maybe empty).
  */
-export type ResumeListState = 'loading' | 'unreachable' | 'failed' | 'ready';
+export type ResumeListState = 'loading' | 'signed-out' | 'unreachable' | 'failed' | 'ready';
