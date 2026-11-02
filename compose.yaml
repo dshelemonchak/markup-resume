@@ -53,6 +53,11 @@ services:
     environment:
       PORT: '3000'
       DATABASE_URL: postgres://markup:markup@db:5432/markup
+      # GitHub sign-in (ADR-0027), from a dev OAuth App; the values come from .env, which git ignores.
+      GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID:-}
+      GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET:-}
+      # Where the user's browser opens the app: the GitHub callback and the Origin check use it.
+      APP_ORIGIN: ${APP_ORIGIN:-http://localhost:4200}
     ports:
       - '3000:3000'
     depends_on:

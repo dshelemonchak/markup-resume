@@ -13,6 +13,7 @@ coverage/
 *.log
 .env
 .env.*
+!.env.example
 .idea/
 .vscode/
 
