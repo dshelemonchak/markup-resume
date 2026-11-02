@@ -11,7 +11,9 @@ export class PostgresUserRepository implements UserRepository {
     this.db = db;
   }
 
-  async findByIdentity(identity: ExternalIdentity): Promise<User | null> {
+  async findByIdentity(
+    identity: Pick<ExternalIdentity, 'provider' | 'providerUserId'>,
+  ): Promise<User | null> {
     const user = await this.db
       .selectFrom('user_identities')
       .innerJoin('users', 'users.id', 'user_identities.user_id')

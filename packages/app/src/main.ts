@@ -4,6 +4,7 @@
 //   CHROME_PATH   Chrome or Chromium for PDF export (set in the image); unset: no PDF export
 //   GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET  the GitHub OAuth App for sign-in (required, ADR-0027)
 //   APP_ORIGIN    where the browser opens the app (default http://localhost:4200)
+//   OWNER_GITHUB_ID  whose CVs MCP serves until MCP has its own OAuth; unset or unknown: MCP answers 503
 import { serve } from '@hono/node-server';
 import { fontsDir, iconsDir, templateCatalog } from '@markup-resume/styles';
 import { Hono } from 'hono';
@@ -13,11 +14,12 @@ import { createGitHubIdentityProvider } from './adapters/github-identity-provide
 import { createHttpApp } from './adapters/http-api/http-app.ts';
 import { createMcpHttpApp } from './adapters/mcp-server/mcp-http.ts';
 import { inspectPdf } from './adapters/poppler-pdf-inspector/inspect-pdf.ts';
-import { connectResumeRepository } from './adapters/postgres-storage/connect-resume-repository.ts';
+import { connectDatabase } from './adapters/postgres-storage/connect-database.ts';
 import { PostgresResumeRepository } from './adapters/postgres-storage/postgres-resume-repository.ts';
 import { PostgresSessionRepository } from './adapters/postgres-storage/postgres-session-repository.ts';
 import { PostgresUserRepository } from './adapters/postgres-storage/postgres-user-repository.ts';
 import { ResumeChanges } from './app/index.ts';
+import { findOwner } from './owner.ts';
 
 // --- Configuration ---
 
@@ -40,8 +42,8 @@ const appOrigin = process.env['APP_ORIGIN'] ?? 'http://localhost:4200';
 
 // --- Storage ---
 
-// CVs and their revisions live in Postgres (ADR-0025). The local owner is only MCP's until MCP has its own OAuth.
-const { db, owner, repository } = await connectResumeRepository(databaseUrl);
+// CVs and their revisions live in Postgres (ADR-0025), each with its owner: the user who signed in (ADR-0027).
+const db = await connectDatabase(databaseUrl);
 
 // --- Shared by the adapters ---
 
@@ -80,16 +82,29 @@ const { app, close } = createHttpApp(
   },
 );
 
-const mcp = createMcpHttpApp({
-  repository,
-  templates: templateCatalog,
-  parseHtml,
-  resumeChanges: resumeChanges.forOwner(owner),
-});
+// Until MCP has its own OAuth, it acts for the one user named by OWNER_GITHUB_ID (ADR-0027, temporary).
+const mcpOwner = await findOwner(db);
+const mcp =
+  mcpOwner.kind === 'found'
+    ? createMcpHttpApp({
+        repository: new PostgresResumeRepository(db, mcpOwner.user.id),
+        templates: templateCatalog,
+        parseHtml,
+        resumeChanges: resumeChanges.forOwner(mcpOwner.user.id),
+      })
+    : null;
+if (mcpOwner.kind === 'missing') {
+  console.warn(`MCP is off: ${mcpOwner.reason} Then restart the app.`);
+}
 
 const root = new Hono();
 root.route('/', app);
-root.route('/mcp', mcp.app);
+if (mcp) {
+  root.route('/mcp', mcp.app);
+} else if (mcpOwner.kind === 'missing') {
+  const reason = mcpOwner.reason;
+  root.all('/mcp', (c) => c.json({ error: 'mcp-unavailable', reason }, 503));
+}
 
 // --- Server ---
 
@@ -99,7 +114,7 @@ const server = serve({ fetch: root.fetch, port, hostname: '0.0.0.0' }, (info) =>
 
 const shutdown = () => {
   close();
-  void mcp.close();
+  void mcp?.close();
   void db.destroy();
   server.close();
   // server.close() only stops new connections. Open keep-alive ones would still take requests, and the UI's
