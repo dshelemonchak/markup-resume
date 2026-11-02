@@ -2,33 +2,15 @@ import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, it } from 'vitest';
-import type { CanonicalResumeHtml } from '../../domain/index.ts';
+import type { CanonicalResumeHtml, IdentifyResult } from '../../domain/index.ts';
 import { type HttpAppOptions, createHttpApp } from './http-app.ts';
-import { ResumeChanges, type SignInDependencies } from '../../app/index.ts';
+import { completeSignIn, ResumeChanges, type SignInDependencies } from '../../app/index.ts';
 import { InMemoryResumeRepository } from '../../app/testing/in-memory-resume-repository.ts';
+import { InMemorySessionRepository } from '../../app/testing/in-memory-session-repository.ts';
+import { InMemoryUserRepository } from '../../app/testing/in-memory-user-repository.ts';
 
 const APP_ORIGIN = 'http://localhost:4200';
-const USER = { id: 'user-1', name: 'Alex' };
-
-/** Every cookie resolves to USER: these tests are about the API, not about signing in. */
-const signIn: SignInDependencies = {
-  identityProvider: {
-    name: 'github',
-    authorizationUrl: () => 'https://github.test/authorize',
-    identify: () => Promise.resolve({ kind: 'rejected' }),
-  },
-  users: {
-    findByIdentity: () => Promise.resolve(null),
-    createWithIdentity: () => Promise.resolve({ kind: 'identity-taken' }),
-  },
-  sessions: {
-    create: () => Promise.resolve(),
-    findActive: () => Promise.resolve({ id: 'session-1', user: USER, lastSeenAt: new Date() }),
-    touch: () => Promise.resolve(),
-    delete: () => Promise.resolve(),
-  },
-  now: () => new Date(),
-};
+const ALEX = { provider: 'github', providerUserId: '42', name: 'Alex', email: null } as const;
 
 function setup(options?: HttpAppOptions) {
   const resumeChanges = new ResumeChanges();
@@ -40,19 +22,65 @@ function setup(options?: HttpAppOptions) {
     template: { name: 'classic', version: '0.0.3' },
     author: 'system',
   });
+  const users = new InMemoryUserRepository();
+  const sessions = new InMemorySessionRepository(
+    (id) => users.byId(id),
+    () => new Date(),
+  );
+  // What GitHub answers to the code; a test can make it refuse or fail.
+  const github = {
+    identify: (): Promise<IdentifyResult> => Promise.resolve({ kind: 'identified', identity: ALEX }),
+  };
+  const signIn: SignInDependencies = {
+    identityProvider: {
+      name: 'github',
+      authorizationUrl: (state) => `https://github.test/authorize?state=${state}`,
+      identify: () => github.identify(),
+    },
+    users,
+    sessions,
+    now: () => new Date(),
+  };
   const { app, close } = createHttpApp(
     { repositoryFor: () => repository, resumeChanges, signIn, appOrigin: APP_ORIGIN },
     options,
   );
-  // Requests as the app's own page sends them: with a session cookie and the app's origin.
+  // Alex's session, as a finished sign-in leaves it.
+  const session = completeSignIn(signIn, { code: 'code', state: 'state', expectedState: 'state' }).then(
+    (result) => {
+      if (result.kind !== 'signed-in') {
+        throw new Error('not signed in');
+      }
+      return { user: result.user, cookie: `__Host-session=${result.sessionToken}` };
+    },
+  );
+  // Requests as the app's own page sends them: with Alex's session cookie and the app's origin.
   const signedIn = {
-    request: (path: string, init: RequestInit = {}) =>
+    request: async (path: string, init: RequestInit = {}) =>
       app.request(path, {
         ...init,
-        headers: { Cookie: `__Host-session=${'a'.repeat(43)}`, Origin: APP_ORIGIN },
+        headers: {
+          Cookie: (await session).cookie,
+          Origin: APP_ORIGIN,
+          ...(init.headers as Record<string, string> | undefined),
+        },
       }),
   };
-  return { app: signedIn, close, notify: () => resumeChanges.notify(USER.id, 'sample') };
+  return {
+    app: signedIn,
+    /** Requests with nothing added: no session, no origin. */
+    anonymous: app,
+    close,
+    github,
+    session,
+    sessions,
+    notify: async (ownerId?: string) => resumeChanges.notify(ownerId ?? (await session).user.id, 'sample'),
+  };
+}
+
+/** The Set-Cookie header for one cookie name. */
+function setCookie(response: Response, name: string): string | undefined {
+  return response.headers.getSetCookie().find((cookie) => cookie.startsWith(`${name}=`));
 }
 
 describe('HTTP API v1', () => {
@@ -104,7 +132,7 @@ describe('HTTP API v1', () => {
     const read = async () => decoder.decode((await reader.read()).value);
 
     expect(await read()).toContain('event: ready');
-    notify();
+    await notify();
     expect(await read()).toContain('event: resume-changed');
     controller.abort();
   });
@@ -124,7 +152,8 @@ describe('HTTP API v1', () => {
     try {
       await writeFile(join(dir, 'email.svg'), '<svg/>');
       await writeFile(join(dir, 'inter.woff2'), 'font');
-      const { app } = setup({ fontsDir: dir, iconsDir: dir });
+      // Without a session: documents load them, and the PDF renderer has none.
+      const { anonymous: app } = setup({ fontsDir: dir, iconsDir: dir });
 
       const icon = await app.request('/api/v1/icons/email.svg');
       expect(icon.status).toBe(200);
@@ -181,5 +210,145 @@ describe('HTTP API v1', () => {
       expect((await setup(pdfOptions('')).app.request('/api/v1/resumes/missing/pdf')).status).toBe(404);
       expect((await setup().app.request('/api/v1/resumes/sample/pdf')).status).toBe(501);
     });
+  });
+});
+
+describe('sessions and the API', () => {
+  it('answers 401 to every API route without a session', async () => {
+    const { anonymous } = setup();
+    for (const [method, path] of [
+      ['GET', '/api/v1/me'],
+      ['GET', '/api/v1/resumes'],
+      ['GET', '/api/v1/resumes/sample/document'],
+      ['GET', '/api/v1/resumes/sample/pdf'],
+      ['GET', '/api/v1/events'],
+      ['GET', '/api/v1/claude/sessions'],
+    ] as const) {
+      expect((await anonymous.request(path, { method })).status, path).toBe(401);
+    }
+    const pin = await anonymous.request('/api/v1/resumes/sample/pin', {
+      method: 'POST',
+      headers: { Origin: APP_ORIGIN },
+    });
+    expect(pin.status).toBe(401);
+  });
+
+  it('answers 401 to a cookie that is not a session', async () => {
+    const { app } = setup();
+    const response = await app.request('/api/v1/resumes', {
+      headers: { Cookie: `__Host-session=${'A'.repeat(43)}` },
+    });
+    expect(response.status).toBe(401);
+  });
+
+  it('names the signed-in user', async () => {
+    expect(await (await setup().app.request('/api/v1/me')).json()).toEqual({ name: 'Alex' });
+  });
+
+  it('refuses a change from another origin, or with no origin, even with a session', async () => {
+    const { app } = setup();
+    for (const origin of ['https://evil.test', '']) {
+      const response = await app.request('/api/v1/resumes/sample/pin', {
+        method: 'POST',
+        headers: { Origin: origin },
+      });
+      expect(response.status, origin).toBe(403);
+    }
+    expect(await (await app.request('/api/v1/resumes')).json()).toMatchObject([{ pinned: false }]);
+  });
+
+  it("does not send one user's changes to another user's event stream", async () => {
+    const { app, notify, close } = setup();
+    const response = await app.request('/api/v1/events');
+    const reader = (response.body as ReadableStream<Uint8Array>).getReader();
+    await reader.read(); // "ready"
+
+    await notify('someone-else');
+    close();
+    expect((await reader.read()).done).toBe(true);
+  });
+});
+
+describe('signing in with GitHub', () => {
+  /** Starts signing in: the redirect, and the state cookie to send back. */
+  async function start(anonymous: ReturnType<typeof setup>['anonymous']) {
+    const response = await anonymous.request('/auth/github');
+    const cookie = setCookie(response, '__Host-sign-in-state')!;
+    const state = new URL(response.headers.get('location')!).searchParams.get('state')!;
+    return { response, cookie, state, stateCookie: cookie.split(';')[0]! };
+  }
+
+  it('sends the browser to GitHub with a state it also keeps in a cookie', async () => {
+    const { response, cookie, state } = await start(setup().anonymous);
+    expect(response.status).toBe(302);
+    expect(response.headers.get('location')).toBe(`https://github.test/authorize?state=${state}`);
+    expect(cookie).toBe(`__Host-sign-in-state=${state}; Max-Age=600; Path=/; HttpOnly; Secure; SameSite=Lax`);
+  });
+
+  it('signs in on the callback: a session cookie that the API accepts, and back to the app', async () => {
+    const { anonymous } = setup();
+    const { state, stateCookie } = await start(anonymous);
+    const callback = await anonymous.request(`/auth/github/callback?code=code&state=${state}`, {
+      headers: { Cookie: stateCookie },
+    });
+    expect(callback.status).toBe(302);
+    expect(callback.headers.get('location')).toBe('/');
+    const session = setCookie(callback, '__Host-session')!;
+    expect(session).toMatch(
+      /^__Host-session=[A-Za-z0-9_-]{43}; Path=\/; Expires=.+; HttpOnly; Secure; SameSite=Lax$/,
+    );
+    expect(setCookie(callback, '__Host-sign-in-state')).toContain('Max-Age=0');
+
+    const me = await anonymous.request('/api/v1/me', { headers: { Cookie: session.split(';')[0]! } });
+    expect(await me.json()).toEqual({ name: 'Alex' });
+  });
+
+  it('starts no session on a callback with a state this browser did not start', async () => {
+    const { anonymous } = setup();
+    const { stateCookie } = await start(anonymous);
+    const forged = await anonymous.request('/auth/github/callback?code=code&state=forged', {
+      headers: { Cookie: stateCookie },
+    });
+    expect(forged.headers.get('location')).toBe('/?signIn=failed');
+    expect(setCookie(forged, '__Host-session')).toBeUndefined();
+  });
+
+  it('turns a cancelled, refused or failed sign-in into a failed one for the user, not an error', async () => {
+    const { anonymous, github } = setup();
+    const callback = async (query: string) => {
+      const { state, stateCookie } = await start(anonymous);
+      return anonymous.request(`/auth/github/callback?${query.replace('STATE', state)}`, {
+        headers: { Cookie: stateCookie },
+      });
+    };
+    expect((await callback('error=access_denied&state=STATE')).headers.get('location')).toBe(
+      '/?signIn=failed',
+    );
+
+    github.identify = () => Promise.resolve({ kind: 'rejected' });
+    expect((await callback('code=used&state=STATE')).headers.get('location')).toBe('/?signIn=failed');
+
+    github.identify = () => Promise.reject(new Error('GitHub answered 502'));
+    const failed = await callback('code=code&state=STATE');
+    expect(failed.status).toBe(302);
+    expect(failed.headers.get('location')).toBe('/?signIn=failed');
+  });
+
+  it('signs out on the server: the old cookie no longer works', async () => {
+    const { app, anonymous, session } = setup();
+    const logout = await app.request('/auth/logout', { method: 'POST' });
+    expect(logout.status).toBe(204);
+    expect(setCookie(logout, '__Host-session')).toContain('Max-Age=0');
+    const me = await anonymous.request('/api/v1/me', { headers: { Cookie: (await session).cookie } });
+    expect(me.status).toBe(401);
+  });
+
+  it('refuses a sign-out from another origin', async () => {
+    const { app } = setup();
+    const logout = await app.request('/auth/logout', {
+      method: 'POST',
+      headers: { Origin: 'https://evil.test' },
+    });
+    expect(logout.status).toBe(403);
   });
 });
