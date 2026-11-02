@@ -57,6 +57,9 @@
             @case ('loading') {
               <li class="empty">{{ 'sidebar.empty.loading' | transloco }}</li>
             }
+            @case ('signed-out') {
+              <li class="empty">{{ 'sidebar.empty.signedOut' | transloco }}</li>
+            }
             @case ('unreachable') {
               <li class="empty error">{{ 'sidebar.empty.unreachable' | transloco }}</li>
             }
@@ -85,4 +88,14 @@
       <span class="last-used">· {{ lastUsed }}</span>
     }
   </button>
+
+  @if (userName(); as name) {
+    <div class="account">
+      <i class="bi bi-person-circle" aria-hidden="true"></i>
+      <span class="name">{{ name }}</span>
+      <button type="button" class="btn btn-link btn-sm sign-out" (click)="signOut.emit()">
+        {{ 'sidebar.signOut' | transloco }}
+      </button>
+    </div>
+  }
 </aside>

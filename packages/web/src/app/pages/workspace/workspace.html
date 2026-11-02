@@ -5,6 +5,8 @@
   [selectedSlug]="selectedSlug()"
   (selectResume)="selectedSlug.set($event)"
   [claude]="claudeStatus()"
+  [userName]="userName()"
+  (signOut)="signOut()"
   (togglePinResume)="togglePinResume($event)"
   (connectClaude)="connectClaude.open()"
 />
@@ -37,6 +39,18 @@
         [(zoom)]="zoom"
         (documentInfo)="documentInfo.set($event)"
       />
+    } @else if (listState() === 'signed-out') {
+      <div class="empty sign-in">
+        @if (signInFailed) {
+          <p class="text-danger-emphasis">{{ 'workspace.signIn.failed' | transloco }}</p>
+        }
+        <p>{{ 'workspace.signIn.prompt' | transloco }}</p>
+        <!-- A full navigation, not a request: the server redirects the browser to GitHub. -->
+        <a class="btn btn-primary" href="/auth/github">
+          <i class="bi bi-github" aria-hidden="true"></i>
+          {{ 'workspace.signIn.button' | transloco }}
+        </a>
+      </div>
     } @else if (listState() === 'loading') {
       <p class="empty">{{ 'workspace.loading' | transloco }}</p>
     } @else if (listState() === 'unreachable') {
