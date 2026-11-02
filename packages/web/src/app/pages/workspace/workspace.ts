@@ -1,3 +1,4 @@
+import { DOCUMENT } from '@angular/common';
 import { HttpErrorResponse } from '@angular/common/http';
 import {
   ChangeDetectionStrategy,
@@ -56,11 +57,24 @@ export class Workspace {
     ),
   );
   protected readonly listState = computed<ResumeListState>(() => {
+    if (this.api.signedOut()) {
+      return 'signed-out';
+    }
+    const me = this.api.me.error();
+    if (me !== undefined) {
+      return isUnreachable(me) ? 'unreachable' : 'failed';
+    }
     const resumes = this.api.resumes;
     const error = resumes.error();
     if (error !== undefined) return isUnreachable(error) ? 'unreachable' : 'failed';
     return resumes.hasValue() ? 'ready' : 'loading';
   });
+
+  /** The signed-in user's name, for the sidebar. */
+  protected readonly userName = computed(() => (this.api.me.hasValue() ? this.api.me.value().name : null));
+  /** GitHub's callback sent the browser back here after a sign-in that did not work (ADR-0027). */
+  protected readonly signInFailed =
+    new URLSearchParams(inject(DOCUMENT).location.search).get('signIn') === 'failed';
 
   /** Ticks so that "2 min ago" stays current. */
   private readonly now = signal(new Date());
@@ -139,6 +153,14 @@ export class Workspace {
       this.exportReport().open();
     } finally {
       this.exporting.set(false);
+    }
+  }
+
+  protected async signOut(): Promise<void> {
+    try {
+      await this.api.signOut();
+    } catch (error) {
+      console.error(error);
     }
   }
 
