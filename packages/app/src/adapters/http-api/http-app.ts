@@ -7,6 +7,7 @@ import { type SSEStreamingApi, streamSSE } from 'hono/streaming';
 import {
   ClaudeSessions,
   completeSignIn,
+  type CompleteSignInResult,
   exportResumePdf,
   readResumeDocument,
   listResumes,
@@ -135,7 +136,14 @@ export function createHttpApp(
     if (!code || !state) {
       return c.redirect(SIGN_IN_FAILED);
     }
-    const result = await completeSignIn(dependencies.signIn, { code, state, expectedState });
+    let result: CompleteSignInResult;
+    try {
+      result = await completeSignIn(dependencies.signIn, { code, state, expectedState });
+    } catch (error) {
+      // GitHub down, slow or answering something unexpected: a failed sign-in for the user, not a 500.
+      console.error('Signing in with GitHub failed:', error);
+      return c.redirect(SIGN_IN_FAILED);
+    }
     if (result.kind !== 'signed-in') {
       return c.redirect(SIGN_IN_FAILED);
     }
