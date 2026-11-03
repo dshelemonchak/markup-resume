@@ -15,7 +15,10 @@ export const iconsDir = fileURLToPath(new URL('icons/', PACKAGE_DIR));
  * The templates by reference: what a document names in <meta name="resume:template">, "<name>@<semver>",
  * mapped to its folder under templates/.
  */
-const TEMPLATES: ReadonlyMap<string, string> = new Map([['classic@0.0.3', 'classic']]);
+const TEMPLATES: ReadonlyMap<string, string> = new Map([
+  ['classic@0.0.3', 'classic'],
+  ['dev-classic@0.0.1', 'dev-classic'],
+]);
 
 /**
  * The versions of a template's look: the designed one, and one column for applicant tracking systems
