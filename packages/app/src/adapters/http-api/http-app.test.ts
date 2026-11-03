@@ -10,6 +10,14 @@ import { InMemorySessionRepository } from '../../app/testing/in-memory-session-r
 import { InMemoryUserRepository } from '../../app/testing/in-memory-user-repository.ts';
 
 const APP_ORIGIN = 'http://localhost:4200';
+/** The document's template has a visual and an ATS version. */
+const templates = {
+  refs: () => ['classic@0.0.3'],
+  styles: (ref: string, variant = 'visual') =>
+    ref === 'classic@0.0.3' ? (variant === 'ats' ? '.visual {} .ats {}' : '.visual {}') : null,
+  guide: () => null,
+  schema: () => null,
+};
 const ALEX = { provider: 'github', providerUserId: '42', name: 'Alex', email: null } as const;
 
 function setup(options?: HttpAppOptions) {
@@ -18,7 +26,7 @@ function setup(options?: HttpAppOptions) {
   void repository.create({
     slug: 'sample',
     title: 'Sample',
-    html: '<html><body>CV</body></html>' as CanonicalResumeHtml,
+    html: '<html><head><meta name="resume:template" content="classic@0.0.3"></head><body>CV</body></html>' as CanonicalResumeHtml,
     template: { name: 'classic', version: '0.0.3' },
     author: 'system',
   });
@@ -42,7 +50,7 @@ function setup(options?: HttpAppOptions) {
     now: () => new Date(),
   };
   const { app, close } = createHttpApp(
-    { repositoryFor: () => repository, resumeChanges, signIn, appOrigin: APP_ORIGIN },
+    { repositoryFor: () => repository, resumeChanges, signIn, templates, appOrigin: APP_ORIGIN },
     options,
   );
   // Alex's session, as a finished sign-in leaves it.
@@ -98,7 +106,18 @@ describe('HTTP API v1', () => {
     expect(response.headers.get('content-type')).toContain('text/html');
     expect(response.headers.get('content-security-policy')).toBe('sandbox allow-same-origin');
     expect(response.headers.get('cache-control')).toBe('no-store');
-    expect(await response.text()).toBe('<html><body>CV</body></html>');
+    expect(await response.text()).toBe(
+      '<html><head><meta name="resume:template" content="classic@0.0.3"></head><body>CV</body></html>',
+    );
+  });
+
+  it('serves the same document restyled as ATS, without changing what is stored', async () => {
+    const { app } = setup();
+    const ats = await (await app.request('/api/v1/resumes/sample/document?mode=ats')).text();
+    expect(ats).toContain('<style id="resume-lib" data-resume-lib="classic@0.0.3">');
+    expect(ats).toContain('.ats {}');
+    expect(ats).toContain('<body>CV</body>');
+    expect(await (await app.request('/api/v1/resumes/sample/document')).text()).not.toContain('.ats {}');
   });
 
   it('answers 400 for a malformed slug and 404 for a missing CV', async () => {

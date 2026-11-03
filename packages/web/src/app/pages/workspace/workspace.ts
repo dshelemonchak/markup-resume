@@ -103,7 +103,7 @@ export class Workspace {
   );
   protected readonly documentSrc = computed(() => {
     const slug = this.selectedSlug();
-    return slug ? this.api.documentUrl(slug, this.api.revision()) : null;
+    return slug ? this.api.documentUrl(slug, this.api.revision(), this.mode()) : null;
   });
 
   protected readonly exporting = signal(false);
@@ -141,13 +141,16 @@ export class Workspace {
     });
   }
 
-  /** Exports the selected CV; when the PDF check finds problems, shows them instead (unless forced). */
+  /**
+   * Exports the selected CV in the version on screen (Visual or ATS); when the PDF check finds problems, shows them
+   * instead (unless forced).
+   */
   protected async exportPdf(force = false): Promise<void> {
     const slug = this.selectedSlug();
     if (!slug || this.exporting()) return;
     this.exporting.set(true);
     try {
-      const result = await this.api.exportPdf(slug, force);
+      const result = await this.api.exportPdf(slug, force, this.mode());
       if (result.kind === 'downloaded') return;
       this.exportProblems.set(result.kind === 'problems' ? result.problems : []);
       this.exportFailure.set(result.kind === 'failed' ? result.message : null);
