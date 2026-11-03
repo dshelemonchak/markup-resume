@@ -20,7 +20,13 @@ import {
   startSignIn,
   toggleResumePin,
 } from '../../app/index.ts';
-import type { ResumeRepository, User } from '../../domain/index.ts';
+import {
+  type ResumeRepository,
+  type TemplateCatalog,
+  type TemplateVariant,
+  type User,
+  withTemplateStyles,
+} from '../../domain/index.ts';
 
 const HEARTBEAT_MS = 25_000;
 /** Asset names: a flat file name, so a request can never leave the asset folder. */
@@ -54,6 +60,8 @@ export interface HttpAppDependencies {
   readonly repositoryFor: (ownerId: string) => ResumeRepository;
   readonly resumeChanges: ResumeChanges;
   readonly signIn: SignInDependencies;
+  /** The templates, for showing and exporting the ATS version of a document. */
+  readonly templates: TemplateCatalog;
   /** The origin the browser opens the app at, e.g. http://localhost:4200; requests that change state come from it. */
   readonly appOrigin: string;
 }
@@ -63,7 +71,7 @@ export interface HttpAppOptions {
   readonly fontsDir?: string;
   readonly iconsDir?: string;
   /** Printing to PDF and checking it; without it, PDF export answers 501. */
-  readonly pdf?: Omit<PdfExportDependencies, 'repository'>;
+  readonly pdf?: Omit<PdfExportDependencies, 'repository' | 'templates'>;
 }
 
 /**
@@ -75,9 +83,9 @@ export interface HttpAppOptions {
  * Versioned HTTP API (ADR-0011), v1. Every route but fonts and icons needs a session and answers 401 without one:
  *   GET  /api/v1/user                             the signed-in user
  *   GET  /api/v1/resumes                          list of resumes
- *   GET  /api/v1/resumes/:slug/document           the resume's HTML, as stored
- *   GET  /api/v1/resumes/:slug/pdf[?force=1]      the resume printed to PDF and checked (ADR-0009); a PDF with
- *                                                 problems comes back as 422 with the list, unless forced
+ *   GET  /api/v1/resumes/:slug/document[?mode=ats]  the resume's HTML, as stored, or restyled as ATS (ADR-0005)
+ *   GET  /api/v1/resumes/:slug/pdf[?force=1][&mode=ats]  the resume printed to PDF and checked (ADR-0009); a PDF
+ *                                                 with problems comes back as 422 with the list, unless forced
  *   POST /api/v1/resumes/:slug/pin                pins or unpins the resume
  *   GET  /api/v1/events                           server-sent events: "resume-changed" when one of the user's resumes changes,
  *                                                 "claude-changed" when a Claude session comes, goes or acts
@@ -186,12 +194,21 @@ export function createHttpApp(
         return c.json({ error: 'invalid-slug' }, 400);
       case 'not-found':
         return c.json({ error: 'not-found' }, 404);
-      case 'found':
-        return c.html(result.html, 200, {
+      case 'found': {
+        let html = result.html;
+        if (variantOf(c.req.query('mode')) === 'ats') {
+          const restyled = withTemplateStyles(result.html, dependencies.templates, 'ats');
+          if (restyled.kind === 'problem') {
+            return c.json({ error: 'no-variant', problem: restyled.problem }, 422);
+          }
+          html = restyled.html;
+        }
+        return c.html(html, 200, {
           // Even when the URL is opened directly, scripts in a CV never run (ADR-0002).
           'Content-Security-Policy': 'sandbox allow-same-origin',
           'Cache-Control': 'no-store',
         });
+      }
     }
   });
 
@@ -200,14 +217,17 @@ export function createHttpApp(
       return c.json({ error: 'pdf-unavailable' }, 501);
     }
     const result = await exportResumePdf(
-      { repository: c.get('repository'), ...options.pdf },
+      { repository: c.get('repository'), templates: dependencies.templates, ...options.pdf },
       c.req.param('slug'),
+      variantOf(c.req.query('mode')),
     );
     switch (result.kind) {
       case 'invalid-slug':
         return c.json({ error: 'invalid-slug' }, 400);
       case 'not-found':
         return c.json({ error: 'not-found' }, 404);
+      case 'no-variant':
+        return c.json({ error: 'no-variant', problem: result.problem }, 422);
       case 'exported':
         if (result.problems.length > 0 && c.req.query('force') !== '1') {
           return c.json({ error: 'pdf-check-failed', problems: result.problems }, 422);
@@ -267,6 +287,11 @@ export function createHttpApp(
   };
 
   return { app, close };
+}
+
+/** The version a request asks for with ?mode=: ats, or the visual one by default. */
+function variantOf(mode: string | undefined): TemplateVariant {
+  return mode === 'ats' ? 'ats' : 'visual';
 }
 
 /** Content-Disposition for a download: an ASCII fallback name, and the real one for browsers that read it. */

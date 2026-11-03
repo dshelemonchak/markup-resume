@@ -13,6 +13,15 @@ describe('templateCatalog', () => {
     }
   });
 
+  it('gives every template an ATS version: its own CSS with the one-column styles after it', () => {
+    for (const ref of templateCatalog.refs()) {
+      const ats = templateCatalog.styles(ref, 'ats');
+      expect(ats?.startsWith(templateCatalog.styles(ref)!)).toBe(true);
+      expect(ats).toContain('.resume-columns');
+    }
+    expect(templateCatalog.styles('classic@9.9.9', 'ats')).toBeNull();
+  });
+
   it('knows nothing about other references', () => {
     expect(templateCatalog.styles('classic@9.9.9')).toBeNull();
     expect(templateCatalog.guide('modern@0.0.1')).toBeNull();

@@ -1,0 +1,117 @@
+/*
+ * The ATS version of "classic" (ADR-0005): the same document in one column, for the parsers of applicant tracking
+ * systems. Appended after the template's CSS when the document is shown or exported as ATS; documents never contain
+ * it. Kept apart from the template's versioned files for now, so it changes without a new template version.
+ *
+ * The order on the page stays the document's order (contacts, skills, education, languages, then experience): the
+ * PDF check compares the extracted text with that order, and parsers read it top to bottom.
+ */
+
+/* Denser text than the designed version: a parser reads it the same, and the CV keeps to fewer pages. */
+:root {
+  --resume-fs-body: 13px;
+  --resume-lh-body: 17px;
+}
+
+.resume-name {
+  margin-top: 0;
+}
+.resume-columns {
+  display: block;
+  margin-top: 14px;
+}
+.resume-summary {
+  margin-top: 12px;
+}
+:is(.resume-sidebar, .resume-main) > section + section,
+.resume-main {
+  margin-top: 14px;
+}
+:is(
+  .resume-summary-header,
+  .resume-contacts-header,
+  .resume-skills-header,
+  .resume-education-header,
+  .resume-experience-header,
+  .resume-projects-header,
+  .resume-languages-header
+) {
+  margin-bottom: 6px;
+}
+
+/* Contacts on one wrapping line, as plain text: no icons, no underlines. */
+.resume-contact-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px 20px;
+}
+.resume-contact::before {
+  content: none;
+}
+.resume-contact + .resume-contact {
+  margin-top: 0;
+}
+.resume-contact a[href^='http'] {
+  text-decoration: none;
+}
+
+/* Skills: a title, then the group's skills on the same line. */
+.resume-skill-group {
+  display: flex;
+  gap: 8px;
+}
+.resume-skill-group h3 {
+  flex: none;
+  min-width: 110px;
+  font-weight: 700;
+}
+.resume-skill-list {
+  padding-left: 0;
+  list-style: none;
+}
+/* One comma-separated line per group, read as text rather than a table: the ATS copy of the document carries
+   the commas (see withTemplateStyles), so the page and its text say the same. */
+.resume-skill-list li {
+  display: inline;
+}
+.resume-skill-group + .resume-skill-group {
+  margin-top: 4px;
+}
+
+/* Education: each degree on one line, dates first. */
+.resume-degree {
+  display: flex;
+  gap: 16px;
+}
+.resume-degree .resume-dates {
+  flex: none;
+  min-width: 110px;
+  margin-top: 4px;
+}
+.resume-degree-name {
+  margin-top: 4px;
+}
+
+/* Languages on one line. */
+.resume-language-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0 24px;
+}
+.resume-language-list li + li {
+  margin-top: 0;
+}
+
+/* Experience and projects: the visual spacing, tightened. */
+.resume-employer + .resume-employer {
+  margin-top: 12px;
+}
+.resume-employer-header + .resume-project {
+  margin-top: 6px;
+}
+.resume-project + .resume-project {
+  margin-top: 10px;
+}
+.resume-achievements {
+  margin-top: 4px;
+}

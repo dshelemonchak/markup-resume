@@ -13,6 +13,59 @@ const doc = (head: string) =>
 const template = '    <meta name="resume:template" content="classic@0.0.3" />\n';
 
 describe('withTemplateStyles', () => {
+  it('moves education and languages after the experience in the ATS version only', () => {
+    const page = (sidebar: string, main: string) =>
+      doc(template).replace(
+        '<body></body>',
+        `<body><main class="resume-page"><div class="resume-columns"><aside class="resume-sidebar">${sidebar}</aside><div class="resume-main">${main}</div></div></main></body>`,
+      );
+    const html = page(
+      '<section class="resume-contacts">C</section><section class="resume-education">E</section><section class="resume-skills">S</section><section class="resume-languages">L</section>',
+      '<section class="resume-experience">X</section><section class="resume-projects">P</section>',
+    );
+    const order = (result: ReturnType<typeof withTemplateStyles>) =>
+      result.kind === 'styled'
+        ? [...result.html.matchAll(/class="resume-(\w+)">/g)].map((m) => m[1]).join(',')
+        : '';
+    expect(order(withTemplateStyles(html, catalog))).toBe(
+      'page,columns,sidebar,contacts,education,skills,languages,main,experience,projects',
+    );
+    expect(order(withTemplateStyles(html, catalog, 'ats'))).toBe(
+      'page,columns,sidebar,contacts,skills,main,experience,projects,education,languages',
+    );
+  });
+
+  it('writes the skills as comma-separated lines in the ATS version only', () => {
+    const html = doc(template).replace(
+      '<body></body>',
+      '<body><ul class="resume-skill-list"><li><strong>Angular</strong></li> <li>RxJS</li></ul></body>',
+    );
+    const ats = withTemplateStyles(html, catalog, 'ats');
+    expect(ats.kind === 'styled' && ats.html).toContain(
+      '<li><strong>Angular</strong>,</li> <li>RxJS</li></ul>',
+    );
+    const visual = withTemplateStyles(html, catalog);
+    expect(visual.kind === 'styled' && visual.html).not.toContain(',</li>');
+  });
+
+  it('inserts the ATS styles for the ATS version, and refuses a template without one', () => {
+    const withAts: TemplateCatalog = {
+      ...catalog,
+      styles: (ref, variant = 'visual') =>
+        ref === 'classic@0.0.3' ? (variant === 'ats' ? 'body {} .ats {}' : 'body {}') : null,
+    };
+    const ats = withTemplateStyles(doc(template), withAts, 'ats');
+    expect(ats.kind === 'styled' && ats.html).toContain('body {} .ats {}');
+    const noAts: TemplateCatalog = {
+      ...catalog,
+      styles: (ref, variant = 'visual') => (variant === 'ats' ? null : catalog.styles(ref)),
+    };
+    expect(withTemplateStyles(doc(template), noAts, 'ats')).toEqual({
+      kind: 'problem',
+      problem: 'The template "classic@0.0.3" has no ATS version.',
+    });
+  });
+
   it('inserts the template CSS at the end of the head', () => {
     expect(withTemplateStyles(doc(template), catalog)).toEqual({
       kind: 'styled',

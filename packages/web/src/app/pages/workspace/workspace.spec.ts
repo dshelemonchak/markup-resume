@@ -341,6 +341,21 @@ describe('Workspace', () => {
     expect(FakeEventSource.created).toBe(before);
   });
 
+  it('previews and exports the ATS version of the same CV when ATS is chosen', async () => {
+    const { fixture, http, root, frameSrc } = await render();
+    root.querySelector<HTMLInputElement>('#preview-mode-ats')!.click();
+    await fixture.whenStable();
+    expect(frameSrc()).toBe('/api/v1/resumes/first/document?v=0&mode=ats');
+
+    vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
+    Object.assign(URL, { createObjectURL: () => 'blob:pdf', revokeObjectURL: () => {} });
+    root.querySelector<HTMLButtonElement>('mr-document-header .export')!.click();
+    http.expectOne('/api/v1/resumes/first/pdf?mode=ats').flush(new Blob(['%PDF-']), {
+      headers: { 'Content-Disposition': 'attachment; filename="First.pdf"' },
+    });
+    await fixture.whenStable();
+  });
+
   it('shows what the PDF check found, and downloads the PDF anyway on request', async () => {
     Object.assign(HTMLDialogElement.prototype, {
       showModal(this: HTMLDialogElement) {
