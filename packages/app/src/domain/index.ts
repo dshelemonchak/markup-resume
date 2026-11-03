@@ -43,6 +43,7 @@ export {
   type TemplateCatalog,
   type TemplateGuide,
   type TemplateStylesResult,
+  type TemplateVariant,
   withTemplateStyles,
 } from './template/template.ts';
 export type { ExternalIdentity, IdentityProviderName, User } from './user/user.ts';

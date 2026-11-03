@@ -2,7 +2,7 @@
 // Template files are read on every call, not cached: the MCP server runs for as long as Claude is open, and
 // an edit to a template's files must reach Claude without restarting it. A new template (a new entry in
 // TEMPLATES) still needs a restart, as does the template list in the MCP handshake.
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 const PACKAGE_DIR = new URL('../', import.meta.url);
@@ -17,6 +17,12 @@ export const iconsDir = fileURLToPath(new URL('icons/', PACKAGE_DIR));
  */
 const TEMPLATES: ReadonlyMap<string, string> = new Map([['classic@0.0.3', 'classic']]);
 
+/**
+ * The versions of a template's look: the designed one, and one column for applicant tracking systems
+ * (ADR-0005). Both style the same document.
+ */
+export type TemplateVariant = 'visual' | 'ats';
+
 /** One file of a template, or null when there is no template with this reference. */
 function read(
   ref: string,
@@ -29,8 +35,18 @@ function read(
 /** The templates as Markup Résumé's TemplateCatalog port expects them. */
 export const templateCatalog = {
   refs: (): readonly string[] => [...TEMPLATES.keys()],
-  /** The CSS Markup Résumé inserts into the document. */
-  styles: (ref: string): string | null => read(ref, 'template.css'),
+  /**
+   * The CSS Markup Résumé inserts into the document. The ATS variant is the template's CSS with ats/<name>.css
+   * after it; null when the template has no ATS version.
+   */
+  styles: (ref: string, variant: TemplateVariant = 'visual'): string | null => {
+    const css = read(ref, 'template.css');
+    if (css === null || variant === 'visual') {
+      return css;
+    }
+    const ats = new URL(`ats/${TEMPLATES.get(ref)!}.css`, PACKAGE_DIR);
+    return existsSync(ats) ? `${css}\n${readFileSync(ats, 'utf8')}` : null;
+  },
   /** The design system for whoever writes the document (Claude), and a complete example built by it. */
   guide: (ref: string): { rules: string; example: string } | null => {
     const rules = read(ref, 'rules.md');
