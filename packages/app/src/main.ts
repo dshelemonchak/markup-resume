@@ -67,6 +67,7 @@ const { app, close } = createHttpApp(
     repositoryFor: (ownerId) => new PostgresResumeRepository(db, ownerId),
     resumeChanges,
     signIn,
+    templates: templateCatalog,
     appOrigin,
   },
   {

@@ -1,6 +1,7 @@
 import { HttpClient, HttpContext, HttpErrorResponse, httpResource } from '@angular/common/http';
 import { Injectable, computed, effect, inject, signal, untracked } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
+import type { PreviewMode } from '../layout/preview-mode';
 import { HANDLES_OWN_401, SessionExpiry } from './session-expiry';
 
 const API = '/api/v1';
@@ -174,11 +175,15 @@ export class ResumeApi {
   private readonly http = inject(HttpClient);
 
   /**
-   * Prints the CV to PDF on the server and saves the file to the user's downloads. A PDF that fails the
-   * server's check is only handed out when forced.
+   * Prints the CV to PDF on the server, in the visual or the ATS version (ADR-0005), and saves the file to the
+   * user's downloads. A PDF that fails the server's check is only handed out when forced.
    */
-  async exportPdf(slug: string, force = false): Promise<PdfExport> {
-    const url = `${API}/resumes/${encodeURIComponent(slug)}/pdf${force ? '?force=1' : ''}`;
+  async exportPdf(slug: string, force = false, mode: PreviewMode = 'visual'): Promise<PdfExport> {
+    const query = new URLSearchParams({
+      ...(force && { force: '1' }),
+      ...(mode === 'ats' && { mode }),
+    }).toString();
+    const url = `${API}/resumes/${encodeURIComponent(slug)}/pdf${query ? `?${query}` : ''}`;
     try {
       const response = await firstValueFrom(
         this.http.get(url, { responseType: 'blob', observe: 'response' }),
@@ -190,8 +195,11 @@ export class ResumeApi {
       return { kind: 'downloaded' };
     } catch (error) {
       if (error instanceof HttpErrorResponse && error.status === 422 && error.error instanceof Blob) {
-        const body = JSON.parse(await error.error.text()) as { problems: PdfProblemDto[] };
-        return { kind: 'problems', problems: body.problems };
+        const body = JSON.parse(await error.error.text()) as { problems?: PdfProblemDto[]; problem?: string };
+        // A 422 without problems: the template has no version for this mode.
+        return body.problems
+          ? { kind: 'problems', problems: body.problems }
+          : { kind: 'failed', message: body.problem ?? 'This version cannot be exported.' };
       }
       return { kind: 'failed', message: error instanceof HttpErrorResponse ? error.message : String(error) };
     }
@@ -203,8 +211,10 @@ export class ResumeApi {
     );
   }
 
-  documentUrl(slug: string, revision: number): string {
-    return `${API}/resumes/${encodeURIComponent(slug)}/document?v=${revision}`;
+  /** The document for the preview: the visual version, or the same document restyled as ATS. */
+  documentUrl(slug: string, revision: number, mode: PreviewMode = 'visual'): string {
+    const ats = mode === 'ats' ? '&mode=ats' : '';
+    return `${API}/resumes/${encodeURIComponent(slug)}/document?v=${revision}${ats}`;
   }
 }
 

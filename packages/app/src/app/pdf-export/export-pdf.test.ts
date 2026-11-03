@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import type { CanonicalResumeHtml, PdfFacts } from '../../domain/index.ts';
+import type { CanonicalResumeHtml, PdfFacts, TemplateCatalog } from '../../domain/index.ts';
 import { InMemoryResumeRepository } from '../testing/in-memory-resume-repository.ts';
 import { exportResumePdf, pdfFileName } from './export-pdf.ts';
 
@@ -11,6 +11,26 @@ await repository.create({
   template: { name: 'classic', version: '0.0.3' },
   author: 'system',
 });
+await repository.create({
+  slug: 'on-template',
+  title: 'On a template',
+  html: '<html><head><meta name="resume:template" content="classic@0.0.3"></head><body></body></html>' as CanonicalResumeHtml,
+  template: { name: 'classic', version: '0.0.3' },
+  author: 'system',
+});
+
+/** "classic@0.0.3" has both versions; "plain@0.0.1" has no ATS version. */
+const templates: TemplateCatalog = {
+  refs: () => ['classic@0.0.3', 'plain@0.0.1'],
+  styles: (ref, variant = 'visual') => {
+    if (ref === 'classic@0.0.3') {
+      return variant === 'ats' ? '.visual {} .ats {}' : '.visual {}';
+    }
+    return ref === 'plain@0.0.1' && variant === 'visual' ? '.plain {}' : null;
+  },
+  guide: () => null,
+  schema: () => null,
+};
 
 function dependencies(text: string) {
   const rendered: string[] = [];
@@ -27,11 +47,34 @@ function dependencies(text: string) {
         });
       },
       inspectPdf: () => Promise.resolve(facts),
+      templates,
     },
   };
 }
 
 describe('exportResumePdf', () => {
+  it('prints the document as stored by default, and with the ATS styles for the ATS version', async () => {
+    const { dependencies: deps, rendered } = dependencies('Hello world');
+    await exportResumePdf(deps, 'on-template');
+    await exportResumePdf(deps, 'on-template', 'ats');
+    // The visual version is the document as stored, styled when it was saved.
+    expect(rendered[0]).not.toContain('.ats {}');
+    expect(rendered[1]).toContain('.ats {}');
+  });
+
+  it('says so when the template has no ATS version', async () => {
+    await repository.create({
+      slug: 'plain',
+      title: 'Plain',
+      html: '<html><head><meta name="resume:template" content="plain@0.0.1"></head><body></body></html>' as CanonicalResumeHtml,
+      template: { name: 'plain', version: '0.0.1' },
+      author: 'system',
+    });
+    const { dependencies: deps, rendered } = dependencies('');
+    expect(await exportResumePdf(deps, 'plain', 'ats')).toMatchObject({ kind: 'no-variant' });
+    expect(rendered).toEqual([]);
+  });
+
   it('returns the PDF, named after the title, with what the check found', async () => {
     expect(await exportResumePdf(dependencies('Hello world').dependencies, 'sample')).toEqual({
       kind: 'exported',
