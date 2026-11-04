@@ -292,7 +292,7 @@ docker compose exec dev pnpm --filter @markup-resume/app db:types
 The main test suite includes a real Chromium render. Database tests create and remove a separate test database.
 GitHub Actions runs both the main checks and PostgreSQL tests for pull requests and pushes to `main`.
 
-Shared JetBrains configurations in `.run/` start **app + web** or just **db**. The app runs with Node's watch mode;
+Shared JetBrains configurations in `.run/` start **app + web + dev** or just **db**. The app runs with Node's watch mode;
 Angular uses its development server. See [AGENTS.md](AGENTS.md) for repository conventions and layer rules.
 
 ### Troubleshooting
