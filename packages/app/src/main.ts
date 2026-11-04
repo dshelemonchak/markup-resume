@@ -4,7 +4,8 @@
 //   CHROME_PATH   Chrome or Chromium for PDF export (set in the image); unset: no PDF export
 //   GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET  the GitHub OAuth App for sign-in (required, ADR-0027)
 //   APP_ORIGIN    where the browser opens the app (default http://localhost:4200)
-//   OWNER_GITHUB_ID  whose CVs MCP serves until MCP has its own OAuth; unset or unknown: MCP answers 503
+//   MCP_URL       the public URL of the MCP endpoint, the resource its OAuth tokens are for
+//                 (default http://localhost:<PORT>/mcp, ADR-0028)
 import { serve } from '@hono/node-server';
 import { fontsDir, iconsDir, templateCatalog } from '@markup-resume/styles';
 import { Hono } from 'hono';
@@ -12,14 +13,16 @@ import { createChromeRenderer } from './adapters/chrome-pdf-renderer/chrome-rend
 import { parseHtml } from './adapters/parse5-html-parser/parse-html.ts';
 import { createGitHubIdentityProvider } from './adapters/github-identity-provider/github-identity-provider.ts';
 import { createHttpApp } from './adapters/http-api/http-app.ts';
+import { createOAuthApp } from './adapters/http-api/oauth-app.ts';
 import { createMcpHttpApp } from './adapters/mcp-server/mcp-http.ts';
 import { inspectPdf } from './adapters/poppler-pdf-inspector/inspect-pdf.ts';
 import { connectDatabase } from './adapters/postgres-storage/connect-database.ts';
+import { PostgresOAuthClientRepository } from './adapters/postgres-storage/postgres-oauth-client-repository.ts';
+import { PostgresOAuthGrantRepository } from './adapters/postgres-storage/postgres-oauth-grant-repository.ts';
 import { PostgresResumeRepository } from './adapters/postgres-storage/postgres-resume-repository.ts';
 import { PostgresSessionRepository } from './adapters/postgres-storage/postgres-session-repository.ts';
 import { PostgresUserRepository } from './adapters/postgres-storage/postgres-user-repository.ts';
-import { ResumeChanges } from './app/index.ts';
-import { findOwner } from './owner.ts';
+import { ResumeChanges, verifyAccessToken } from './app/index.ts';
 
 // --- Configuration ---
 
@@ -39,6 +42,7 @@ if (!githubClientId || !githubClientSecret) {
   );
 }
 const appOrigin = process.env['APP_ORIGIN'] ?? 'http://localhost:4200';
+const mcpUrl = process.env['MCP_URL'] ?? `http://localhost:${port}/mcp`;
 
 // --- Storage ---
 
@@ -83,29 +87,31 @@ const { app, close } = createHttpApp(
   },
 );
 
-// Until MCP has its own OAuth, it acts for the one user named by OWNER_GITHUB_ID (ADR-0027, temporary).
-const mcpOwner = await findOwner(db);
-const mcp =
-  mcpOwner.kind === 'found'
-    ? createMcpHttpApp({
-        repository: new PostgresResumeRepository(db, mcpOwner.user.id),
-        templates: templateCatalog,
-        parseHtml,
-        resumeChanges: resumeChanges.forOwner(mcpOwner.user.id),
-      })
-    : null;
-if (mcpOwner.kind === 'missing') {
-  console.warn(`MCP is off: ${mcpOwner.reason} Then restart the app.`);
-}
+// MCP is authorised by this app's own OAuth server (ADR-0028); the browser signs in through the app's origin.
+const oauth = {
+  clients: new PostgresOAuthClientRepository(db),
+  grants: new PostgresOAuthGrantRepository(db),
+  resource: mcpUrl,
+  issuer: appOrigin,
+  now: () => new Date(),
+};
+const oauthApp = createOAuthApp({ oauth, signIn, appOrigin });
+
+const mcp = createMcpHttpApp({
+  dependenciesFor: (userId) => ({
+    repository: new PostgresResumeRepository(db, userId),
+    templates: templateCatalog,
+    parseHtml,
+    resumeChanges: resumeChanges.forOwner(userId),
+  }),
+  verifyAccessToken: (token) => verifyAccessToken(oauth, token),
+  resource: mcpUrl,
+});
 
 const root = new Hono();
+root.route('/', oauthApp);
 root.route('/', app);
-if (mcp) {
-  root.route('/mcp', mcp.app);
-} else if (mcpOwner.kind === 'missing') {
-  const reason = mcpOwner.reason;
-  root.all('/mcp', (c) => c.json({ error: 'mcp-unavailable', reason }, 503));
-}
+root.route('/mcp', mcp.app);
 
 // --- Server ---
 
@@ -115,7 +121,7 @@ const server = serve({ fetch: root.fetch, port, hostname: '0.0.0.0' }, (info) =>
 
 const shutdown = () => {
   close();
-  void mcp?.close();
+  void mcp.close();
   void db.destroy();
   server.close();
   // server.close() only stops new connections. Open keep-alive ones would still take requests, and the UI's

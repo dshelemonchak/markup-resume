@@ -124,11 +124,10 @@ docker compose up -d app web
 ```
 
 Open [localhost:4200](http://localhost:4200) after the Angular server finishes starting and sign in with GitHub.
-Then add a fictional example CV for the account in `OWNER_GITHUB_ID`, and restart the app so MCP acts for it:
+Then add a fictional example CV for the account in `OWNER_GITHUB_ID`:
 
 ```bash
 docker compose exec dev pnpm seed
-docker compose restart app
 ```
 
 The sample CV is available without connecting an assistant. Select it and click **Export PDF** to try the export
@@ -148,23 +147,24 @@ restarts. The development database name, username and password are all `markup`.
 To stop the stack while keeping the database, run `docker compose down`. Adding `-v` deletes the database volume
 and all stored CVs and revisions.
 
-This Compose setup is for local development. The UI and API need a sign-in, but MCP does not have its own OAuth
-yet and acts for `OWNER_GITHUB_ID`; the API and web ports are published on all host interfaces by default. Do not expose this stack to the internet; hosted deployment is part
+This Compose setup is for local development. The UI and API need a sign-in and MCP needs an OAuth token; the API
+and web ports are published on all host interfaces by default. Do not expose this stack to the internet; hosted deployment is part
 of the roadmap.
 
 ### Configuration
 
 The defaults are supplied by [compose.yaml](compose.yaml) and the [Dockerfile](Dockerfile).
 
-| Variable                                   | Purpose                                                                                                | Container default                         |
-| ------------------------------------------ | ------------------------------------------------------------------------------------------------------ | ----------------------------------------- |
-| `DATABASE_URL`                             | PostgreSQL connection used by the app, seed, importer and database tests                               | `postgres://markup:markup@db:5432/markup` |
-| `PORT`                                     | HTTP API and MCP listening port                                                                        | `3000`                                    |
-| `CHROME_PATH`                              | Browser executable for PDF export; export is unavailable when unset                                    | `/usr/bin/chromium`                       |
-| `LEGACY_RESUME_DIR`                        | Root directory for importing CVs from older file-based versions                                        | `/data` in the `dev` service              |
-| `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` | The GitHub OAuth App for sign-in; the app does not start without them                                  | from `.env`                               |
-| `APP_ORIGIN`                               | Where the browser opens the app: the GitHub callback and the CSRF check use it                         | `http://localhost:4200`                   |
-| `OWNER_GITHUB_ID`                          | GitHub user id that MCP, seed and the importers act for; MCP answers 503 until that user has signed in | from `.env`                               |
+| Variable                                   | Purpose                                                                                | Container default                         |
+| ------------------------------------------ | -------------------------------------------------------------------------------------- | ----------------------------------------- |
+| `DATABASE_URL`                             | PostgreSQL connection used by the app, seed, importer and database tests               | `postgres://markup:markup@db:5432/markup` |
+| `PORT`                                     | HTTP API and MCP listening port                                                        | `3000`                                    |
+| `CHROME_PATH`                              | Browser executable for PDF export; export is unavailable when unset                    | `/usr/bin/chromium`                       |
+| `LEGACY_RESUME_DIR`                        | Root directory for importing CVs from older file-based versions                        | `/data` in the `dev` service              |
+| `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` | The GitHub OAuth App for sign-in; the app does not start without them                  | from `.env`                               |
+| `APP_ORIGIN`                               | Where the browser opens the app: the GitHub callback and the CSRF check use it         | `http://localhost:4200`                   |
+| `OWNER_GITHUB_ID`                          | GitHub user id that seed and the importers act for; that user must have signed in once | from `.env`                               |
+| `MCP_URL`                                  | Public URL of the MCP endpoint: the resource its OAuth tokens are issued for           | `http://localhost:3000/mcp`               |
 
 ### Import CVs from an earlier version
 
@@ -202,9 +202,10 @@ check the `markup-resume` connection with `/mcp`. Codex uses the same Streamable
 MCP configuration. Other clients need support for Streamable HTTP; their compatibility should be verified
 separately.
 
-The current MCP endpoint validates local `Host` and `Origin` headers, but does not implement OAuth yet: it works
-on the CVs of `OWNER_GITHUB_ID`, found when the app starts. These checks do not replace authentication. The project does not yet provide a hosted connection flow for Claude Desktop or
-ChatGPT Desktop.
+MCP is authorised with OAuth 2.1, served by the app itself. On the first connection the client registers, opens
+the browser at Markup Résumé, where you sign in with GitHub and allow it; it then works on your CVs with a short-lived
+access token that it refreshes. Claude Code does this from `/mcp`. Claude Desktop and claude.ai need a public HTTPS
+URL, so they connect once the service is hosted.
 
 ### Available tools
 
@@ -291,14 +292,14 @@ Angular uses its development server. See [AGENTS.md](AGENTS.md) for repository c
 
 ### Troubleshooting
 
-| Symptom                                                | What to check                                                                                                                                                       |
-| ------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Seed or app cannot connect to PostgreSQL               | Run `docker compose ps`; the `db` service must be healthy before seeding. Use `docker compose logs db app` for details.                                             |
-| MCP answers 503 "mcp-unavailable"                      | `OWNER_GITHUB_ID` is unset or that account has not signed in yet. Set it in `.env`, sign in once, then run `docker compose up -d app` so the container picks it up. |
-| The UI is unavailable or reports an unreachable server | Inspect `docker compose logs app web`; the API and Angular server must both finish starting.                                                                        |
-| The MCP client cannot connect                          | Check that `app` is running and the client uses `http://localhost:3000/mcp` with Streamable HTTP. This is a protocol endpoint, not a browser page.                  |
-| PDF export is unavailable                              | Use the supplied image, which installs Chromium and Poppler and sets `CHROME_PATH`.                                                                                 |
-| JetBrains cannot reach Docker Desktop on macOS         | Configure its Docker connection to use `unix://<your home>/.docker/run/docker.sock`, or enable Docker Desktop's default socket.                                     |
+| Symptom                                                | What to check                                                                                                                                      |
+| ------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Seed or app cannot connect to PostgreSQL               | Run `docker compose ps`; the `db` service must be healthy before seeding. Use `docker compose logs db app` for details.                            |
+| The MCP client's sign-in page does not load            | The Angular dev server forwards `/oauth` and `/.well-known` to the app only after a restart: `docker compose restart web`.                         |
+| The UI is unavailable or reports an unreachable server | Inspect `docker compose logs app web`; the API and Angular server must both finish starting.                                                       |
+| The MCP client cannot connect                          | Check that `app` is running and the client uses `http://localhost:3000/mcp` with Streamable HTTP. This is a protocol endpoint, not a browser page. |
+| PDF export is unavailable                              | Use the supplied image, which installs Chromium and Poppler and sets `CHROME_PATH`.                                                                |
+| JetBrains cannot reach Docker Desktop on macOS         | Configure its Docker connection to use `unix://<your home>/.docker/run/docker.sock`, or enable Docker Desktop's default socket.                    |
 
 ## Roadmap
 
