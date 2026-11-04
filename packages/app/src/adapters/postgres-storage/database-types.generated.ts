@@ -20,6 +20,54 @@ export type RevisionKind = 'restore' | 'write';
 
 export type Timestamp = ColumnType<Date, Date | string, Date | string>;
 
+export interface OauthAccessTokens {
+  created_at: Generated<Timestamp>;
+  expires_at: Timestamp;
+  family_id: string;
+  id: Generated<string>;
+  token_hash: Buffer;
+}
+
+export interface OauthAuthorizationCodes {
+  client_id: string;
+  code_challenge: string;
+  code_hash: Buffer;
+  created_at: Generated<Timestamp>;
+  expires_at: Timestamp;
+  id: Generated<string>;
+  redirect_uri: string;
+  resource: string;
+  used_at: Timestamp | null;
+  user_id: string;
+}
+
+export interface OauthClients {
+  client_id: string;
+  client_name: string | null;
+  created_at: Generated<Timestamp>;
+  id: Generated<string>;
+  redirect_uris: string[];
+}
+
+export interface OauthRefreshTokens {
+  created_at: Generated<Timestamp>;
+  expires_at: Timestamp;
+  family_id: string;
+  id: Generated<string>;
+  token_hash: Buffer;
+  used_at: Timestamp | null;
+}
+
+export interface OauthTokenFamilies {
+  authorization_code_id: string;
+  client_id: string;
+  created_at: Generated<Timestamp>;
+  id: Generated<string>;
+  resource: string;
+  revoked_at: Timestamp | null;
+  user_id: string;
+}
+
 export interface ResumeRevisions {
   author: RevisionAuthor;
   based_on_id: string | null;
@@ -78,6 +126,11 @@ export interface Users {
 }
 
 export interface DB {
+  oauth_access_tokens: OauthAccessTokens;
+  oauth_authorization_codes: OauthAuthorizationCodes;
+  oauth_clients: OauthClients;
+  oauth_refresh_tokens: OauthRefreshTokens;
+  oauth_token_families: OauthTokenFamilies;
   resume_revisions: ResumeRevisions;
   resume_tags: ResumeTags;
   resumes: Resumes;
