@@ -29,3 +29,18 @@ export {
   signOut,
   startSignIn,
 } from './sign-in/sign-in.ts';
+export {
+  approveAuthorization,
+  type AuthorizationRequest,
+  checkAuthorizationRequest,
+  type CheckAuthorizationResult,
+  denyAuthorization,
+  exchangeToken,
+  type ExchangeTokenResult,
+  type IssuedTokens,
+  type OAuthDependencies,
+  type OAuthFailure,
+  registerClient,
+  type RegisterClientResult,
+  verifyAccessToken,
+} from './oauth/oauth.ts';
