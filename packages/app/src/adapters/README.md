@@ -2,10 +2,11 @@
 
 Implementations of domain ports and entry points, one sub-folder per adapter:
 
-- `postgres-storage/` — resumes and their revisions, users and sign-in sessions in Postgres, and migrations;
+- `postgres-storage/` — resumes and their revisions, users, sign-in sessions and OAuth grants in Postgres, and
+  migrations;
 - `github-identity-provider/` — signing in with a GitHub OAuth App;
-- `http-api/` — the HTTP API and event stream for the UI;
-- `mcp-server/` — the MCP server for Claude, served over HTTP at `/mcp`;
+- `http-api/` — the HTTP API and event stream for the UI, GitHub sign-in, and the OAuth server for MCP;
+- `mcp-server/` — the MCP server for Claude, served over HTTP at `/mcp` with OAuth bearer tokens;
 - `parse5-html-parser/` — parses a resume the way a browser does, for the markup check;
 - `chrome-pdf-renderer/` — prints a resume to PDF with Chromium;
 - `poppler-pdf-inspector/` — reads fonts, text and links back out of a PDF.

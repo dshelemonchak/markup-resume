@@ -1,5 +1,5 @@
-// For the composition roots: the user that tools without a sign-in of their own act for (MCP until it has OAuth,
-// pnpm seed, pnpm import:files, pnpm claim:local-resumes), named by OWNER_GITHUB_ID (ADR-0027).
+// For the composition roots: the user that tools without a sign-in of their own act for (pnpm seed,
+// pnpm import:files, pnpm claim:local-resumes), named by OWNER_GITHUB_ID (ADR-0027).
 import type { Kysely } from 'kysely';
 import type { Database } from './adapters/postgres-storage/database.ts';
 import { PostgresUserRepository } from './adapters/postgres-storage/postgres-user-repository.ts';
@@ -10,7 +10,7 @@ const HOW_TO_SET =
   'in the UI with that account.';
 
 /** The owner, or why there is none. */
-export async function findOwner(
+async function findOwner(
   db: Kysely<Database>,
 ): Promise<
   { readonly kind: 'found'; readonly user: User } | { readonly kind: 'missing'; readonly reason: string }

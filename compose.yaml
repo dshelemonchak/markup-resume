@@ -60,8 +60,8 @@ services:
       GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET:-}
       # Where the user's browser opens the app: the GitHub callback and the Origin check use it.
       APP_ORIGIN: ${APP_ORIGIN:-http://localhost:4200}
-      # Whose CVs MCP serves until it has its own OAuth (ADR-0027, temporary).
-      OWNER_GITHUB_ID: ${OWNER_GITHUB_ID:-}
+      # The public URL of the MCP endpoint, the resource its OAuth tokens are issued for (ADR-0028).
+      MCP_URL: ${MCP_URL:-http://localhost:3000/mcp}
     ports:
       - '3000:3000'
     depends_on:
