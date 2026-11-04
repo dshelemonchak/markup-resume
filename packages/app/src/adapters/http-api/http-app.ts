@@ -1,7 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { setTimeout as sleep } from 'node:timers/promises';
-import { type Context, Hono, type MiddlewareHandler } from 'hono';
+import { type Context, Hono } from 'hono';
 import { deleteCookie, getCookie, setCookie } from 'hono/cookie';
 import { type SSEStreamingApi, streamSSE } from 'hono/streaming';
 import {
@@ -27,22 +27,18 @@ import {
   type User,
   withTemplateStyles,
 } from '../../domain/index.ts';
+import { COOKIE_OPTIONS, SESSION_COOKIE, sameOrigin as sameOriginCheck } from './cookies.ts';
 
 const HEARTBEAT_MS = 25_000;
 /** Asset names: a flat file name, so a request can never leave the asset folder. */
 const ASSET_NAME = /^[\w-]+\.(woff2|svg)$/;
 const ASSET_TYPES = { woff2: 'font/woff2', svg: 'image/svg+xml' } as const;
 
-/**
- * The session cookie (ADR-0027). __Host-: only this host, only over HTTPS (browsers treat http://localhost as
- * secure), path /. HttpOnly keeps it from scripts; SameSite=Lax keeps it off requests that other sites start,
- * except a top-level navigation such as GitHub's redirect back.
- */
-const SESSION_COOKIE = '__Host-session';
 /** The sign-in state, kept between the redirect to GitHub and the callback. */
 const STATE_COOKIE = '__Host-sign-in-state';
+/** Where to go after signing in, when it is not the app itself: an OAuth authorisation waiting for it (ADR-0028). */
+const RETURN_COOKIE = '__Host-sign-in-return';
 const STATE_MAX_AGE_S = 10 * 60;
-const COOKIE_OPTIONS = { httpOnly: true, secure: true, sameSite: 'Lax', path: '/' } as const;
 /** Where the browser lands after a sign-in that did not work; the UI tells the user. */
 const SIGN_IN_FAILED = '/?signIn=failed';
 
@@ -76,7 +72,7 @@ export interface HttpAppOptions {
 
 /**
  * Sign-in with GitHub (ADR-0027):
- *   GET  /auth/github                             starts signing in: redirects to GitHub
+ *   GET  /auth/github[?returnTo=/oauth/authorize…]  starts signing in: redirects to GitHub
  *   GET  /auth/github/callback                    GitHub's redirect back: starts a session, sets its cookie
  *   POST /auth/logout                             ends the session
  *
@@ -115,29 +111,27 @@ export function createHttpApp(
   sessions.onChange(() => broadcast('claude-changed'));
   const shutdown = new AbortController();
 
-  /** A request that changes state must come from the app's own pages: the CSRF check on top of SameSite. */
-  const sameOrigin: MiddlewareHandler = async (c, next) => {
-    if (
-      c.req.method !== 'GET' &&
-      c.req.method !== 'HEAD' &&
-      c.req.header('Origin') !== dependencies.appOrigin
-    ) {
-      return c.json({ error: 'forbidden-origin' }, 403);
-    }
-    return next();
-  };
+  const sameOrigin = sameOriginCheck(dependencies.appOrigin);
 
   const auth = new Hono().basePath('/auth');
 
   auth.get('/github', (c) => {
     const { state, url } = startSignIn(dependencies.signIn);
     setCookie(c, STATE_COOKIE, state, { ...COOKIE_OPTIONS, maxAge: STATE_MAX_AGE_S });
+    const returnTo = c.req.query('returnTo');
+    if (returnTo !== undefined && isSafeReturnTo(returnTo)) {
+      setCookie(c, RETURN_COOKIE, returnTo, { ...COOKIE_OPTIONS, maxAge: STATE_MAX_AGE_S });
+    } else {
+      deleteCookie(c, RETURN_COOKIE, COOKIE_OPTIONS);
+    }
     return c.redirect(url);
   });
 
   auth.get('/github/callback', async (c) => {
     const expectedState = getCookie(c, STATE_COOKIE);
     deleteCookie(c, STATE_COOKIE, COOKIE_OPTIONS);
+    const returnTo = getCookie(c, RETURN_COOKIE);
+    deleteCookie(c, RETURN_COOKIE, COOKIE_OPTIONS);
     const code = c.req.query('code');
     const state = c.req.query('state');
     // Without a code, the user cancelled on GitHub (error=access_denied) or the request is not GitHub's.
@@ -156,7 +150,7 @@ export function createHttpApp(
       return c.redirect(SIGN_IN_FAILED);
     }
     setCookie(c, SESSION_COOKIE, result.sessionToken, { ...COOKIE_OPTIONS, expires: result.expiresAt });
-    return c.redirect('/');
+    return c.redirect(returnTo !== undefined && isSafeReturnTo(returnTo) ? returnTo : '/');
   });
 
   auth.post('/logout', sameOrigin, async (c) => {
@@ -292,6 +286,14 @@ export function createHttpApp(
 /** The version a request asks for with ?mode=: ats, or the visual one by default. */
 function variantOf(mode: string | undefined): TemplateVariant {
   return mode === 'ats' ? 'ats' : 'visual';
+}
+
+/**
+ * Whether signing in may end at this address: only the OAuth authorisation page of this app, so the parameter
+ * cannot send the browser anywhere else (an open redirect).
+ */
+function isSafeReturnTo(value: string): boolean {
+  return value.startsWith('/oauth/authorize?') && !value.includes('\\');
 }
 
 /** Content-Disposition for a download: an ASCII fallback name, and the real one for browsers that read it. */

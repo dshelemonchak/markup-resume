@@ -371,3 +371,35 @@ describe('signing in with GitHub', () => {
     expect(logout.status).toBe(403);
   });
 });
+
+describe('signing in on the way to an OAuth authorisation', () => {
+  it('returns to the authorisation request after the callback', async () => {
+    const { anonymous } = setup();
+    const returnTo = '/oauth/authorize?client_id=c&state=s';
+    const started = await anonymous.request(`/auth/github?returnTo=${encodeURIComponent(returnTo)}`);
+    expect(setCookie(started, '__Host-sign-in-return')).toContain(encodeURIComponent(returnTo));
+    const state = new URL(started.headers.get('location')!).searchParams.get('state')!;
+    const cookies = started.headers
+      .getSetCookie()
+      .map((cookie) => cookie.split(';')[0])
+      .join('; ');
+
+    const callback = await anonymous.request(`/auth/github/callback?code=code&state=${state}`, {
+      headers: { Cookie: cookies },
+    });
+    expect(callback.headers.get('location')).toBe(returnTo);
+  });
+
+  it('never returns anywhere but the authorisation page (no open redirect)', async () => {
+    const { anonymous } = setup();
+    for (const returnTo of [
+      'https://evil.test/',
+      '//evil.test/oauth/authorize?',
+      '/api/v1/resumes',
+      '/oauth/authorize',
+    ]) {
+      const started = await anonymous.request(`/auth/github?returnTo=${encodeURIComponent(returnTo)}`);
+      expect(setCookie(started, '__Host-sign-in-return'), returnTo).toContain('Max-Age=0');
+    }
+  });
+});
