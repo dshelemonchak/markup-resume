@@ -4,8 +4,9 @@
 //   CHROME_PATH   Chrome or Chromium for PDF export (set in the image); unset: no PDF export
 //   GITHUB_CLIENT_ID, GITHUB_CLIENT_SECRET  the GitHub OAuth App for sign-in (required, ADR-0027)
 //   APP_ORIGIN    where the browser opens the app (default http://localhost:4200)
-//   MCP_URL       the public URL of the MCP endpoint, the resource its OAuth tokens are for
-//                 (default http://localhost:<PORT>/mcp, ADR-0028)
+//   MCP_URL       the public URL of the MCP endpoint (default http://localhost:<PORT>/mcp, ADR-0028).
+//                 https: MCP needs OAuth tokens from this app. http on localhost: a local run, where MCP
+//                 serves only this machine and acts for OWNER_GITHUB_ID.
 import { serve } from '@hono/node-server';
 import { fontsDir, iconsDir, templateCatalog } from '@markup-resume/styles';
 import { Hono } from 'hono';
@@ -14,7 +15,7 @@ import { parseHtml } from './adapters/parse5-html-parser/parse-html.ts';
 import { createGitHubIdentityProvider } from './adapters/github-identity-provider/github-identity-provider.ts';
 import { createHttpApp } from './adapters/http-api/http-app.ts';
 import { createOAuthApp } from './adapters/http-api/oauth-app.ts';
-import { createMcpHttpApp } from './adapters/mcp-server/mcp-http.ts';
+import { createMcpHttpApp, type McpAuth, mcpAuthKind } from './adapters/mcp-server/mcp-http.ts';
 import { inspectPdf } from './adapters/poppler-pdf-inspector/inspect-pdf.ts';
 import { connectDatabase } from './adapters/postgres-storage/connect-database.ts';
 import { PostgresOAuthClientRepository } from './adapters/postgres-storage/postgres-oauth-client-repository.ts';
@@ -23,6 +24,7 @@ import { PostgresResumeRepository } from './adapters/postgres-storage/postgres-r
 import { PostgresSessionRepository } from './adapters/postgres-storage/postgres-session-repository.ts';
 import { PostgresUserRepository } from './adapters/postgres-storage/postgres-user-repository.ts';
 import { ResumeChanges, verifyAccessToken } from './app/index.ts';
+import { findOwner } from './owner.ts';
 
 // --- Configuration ---
 
@@ -87,7 +89,9 @@ const { app, close } = createHttpApp(
   },
 );
 
-// MCP is authorised by this app's own OAuth server (ADR-0028); the browser signs in through the app's origin.
+// Hosted (https), MCP is authorised by this app's own OAuth server and the browser signs in through the app's
+// origin. Run locally (http on localhost), the Claude apps would refuse the http sign-in page, so MCP serves only
+// this machine and acts for OWNER_GITHUB_ID (ADR-0028).
 const oauth = {
   clients: new PostgresOAuthClientRepository(db),
   grants: new PostgresOAuthGrantRepository(db),
@@ -95,7 +99,23 @@ const oauth = {
   issuer: appOrigin,
   now: () => new Date(),
 };
-const oauthApp = createOAuthApp({ oauth, signIn, appOrigin });
+let mcpAuth: McpAuth;
+if (mcpAuthKind(mcpUrl) === 'oauth') {
+  mcpAuth = {
+    kind: 'oauth',
+    verifyAccessToken: (token) => verifyAccessToken(oauth, token),
+    resource: mcpUrl,
+  };
+} else {
+  mcpAuth = {
+    kind: 'local',
+    owner: async () => {
+      const owner = await findOwner(db);
+      return owner.kind === 'found' ? { kind: 'found', userId: owner.user.id } : owner;
+    },
+  };
+}
+console.log(`MCP on ${mcpUrl}: ${mcpAuth.kind === 'oauth' ? 'OAuth' : 'local, for OWNER_GITHUB_ID'}`);
 
 const mcp = createMcpHttpApp({
   dependenciesFor: (userId) => ({
@@ -104,12 +124,13 @@ const mcp = createMcpHttpApp({
     parseHtml,
     resumeChanges: resumeChanges.forOwner(userId),
   }),
-  verifyAccessToken: (token) => verifyAccessToken(oauth, token),
-  resource: mcpUrl,
+  auth: mcpAuth,
 });
 
 const root = new Hono();
-root.route('/', oauthApp);
+if (mcpAuth.kind === 'oauth') {
+  root.route('/', createOAuthApp({ oauth, signIn, appOrigin }));
+}
 root.route('/', app);
 root.route('/mcp', mcp.app);
 

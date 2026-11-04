@@ -10,8 +10,9 @@ shows them live, and PDF export is checked against the rendered page. See `READM
   - `src/app` — use cases; imports `domain` only.
   - `src/adapters/<technology>-<role>` (e.g. `chrome-pdf-renderer`) — import `domain` and `app`, never each other.
   - Composition roots: `src/main.ts` (HTTP API and MCP at `/mcp`), `src/seed.ts`, `src/import-files.ts`,
-    `src/claim-local-resumes.ts`. Seed and the importers act for the user in `OWNER_GITHUB_ID` (`src/owner.ts`);
-    MCP acts for the user of its OAuth token (`/oauth/*`, ADR-0028).
+    `src/claim-local-resumes.ts`. Seed and the importers act for the user in `OWNER_GITHUB_ID` (`src/owner.ts`).
+    MCP (ADR-0028): hosted on https, for the user of its OAuth token (`/oauth/*`); in a local run (http on
+    localhost), only for this machine and for `OWNER_GITHUB_ID`.
   - Layer boundaries are enforced by ESLint (`eslint-plugin-boundaries`).
 - `packages/web` — Angular 22: standalone, zoneless, signals; Transloco i18n.
 - `packages/styles` — templates (`templates/<name>/`), Inter fonts, contact icons.
