@@ -60,10 +60,13 @@ services:
       GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET:-}
       # Where the user's browser opens the app: the GitHub callback and the Origin check use it.
       APP_ORIGIN: ${APP_ORIGIN:-http://localhost:4200}
-      # The public URL of the MCP endpoint, the resource its OAuth tokens are issued for (ADR-0028).
+      # The public URL of the MCP endpoint (ADR-0028): https needs OAuth; http on localhost is a local run, where
+      # MCP acts for OWNER_GITHUB_ID.
       MCP_URL: ${MCP_URL:-http://localhost:3000/mcp}
+      OWNER_GITHUB_ID: ${OWNER_GITHUB_ID:-}
     ports:
-      - '3000:3000'
+      # This machine only: in a local run, MCP trusts whoever reaches it (ADR-0028).
+      - '127.0.0.1:3000:3000'
     depends_on:
       db:
         condition: service_healthy
