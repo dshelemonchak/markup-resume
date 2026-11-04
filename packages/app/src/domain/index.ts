@@ -61,3 +61,23 @@ export {
 export type { NewSession, SessionRepository } from './session/session-repository.ts';
 export { readResumeTitle } from './document/resume-title.ts';
 export { upgradeLegacyVocabulary } from './document/legacy-vocabulary.ts';
+export {
+  ACCESS_TOKEN_LIFETIME_MS,
+  AUTHORIZATION_CODE_LIFETIME_MS,
+  isAllowedRedirectUri,
+  isValidCodeChallenge,
+  isValidCodeVerifier,
+  type OAuthClient,
+  REFRESH_TOKEN_LIFETIME_MS,
+} from './oauth/oauth.ts';
+export type {
+  AccessGrant,
+  AuthorizationCode,
+  ConsumeCodeResult,
+  NewAuthorizationCode,
+  NewTokenFamily,
+  NewTokens,
+  OAuthClientRepository,
+  OAuthGrantRepository,
+  RotateRefreshTokenResult,
+} from './oauth/oauth-repository.ts';
