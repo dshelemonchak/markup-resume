@@ -87,10 +87,11 @@ function asAtsCopy(html: string): string {
 
 /**
  * Each skill list as one comma-separated line, which parsers read as text rather than a table. The commas go into
- * the markup, not into CSS, so the PDF check finds in the page's text exactly what the PDF holds.
+ * the markup, not into CSS, so the PDF check finds in the page's text exactly what the PDF holds. A space follows
+ * each comma even when the items were written without whitespace between them, or the PDF joins the words.
  */
 function withSkillCommas(html: string): string {
-  return html.replace(SKILL_LIST, (list) => list.replace(/<\/li>(?=\s*<li>)/g, ',</li>'));
+  return html.replace(SKILL_LIST, (list) => list.replace(/<\/li>\s*(?=<li>)/g, ',</li> '));
 }
 
 /**
