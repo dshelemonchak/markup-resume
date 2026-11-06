@@ -55,14 +55,22 @@
   text-decoration: none;
 }
 
-/* Skills: a title, then the group's skills on the same line. */
+/* Skills: a title, then the group's skills on the same line. The groups share one grid through subgrid, so every
+   group's skills start where the longest title ends. */
+.resume-skills {
+  display: grid;
+  grid-template-columns: max-content 1fr;
+  column-gap: 8px;
+}
+.resume-skills-header {
+  grid-column: 1 / -1;
+}
 .resume-skill-group {
-  display: flex;
-  gap: 8px;
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
 }
 .resume-skill-group h3 {
-  flex: none;
-  min-width: 110px;
   font-weight: 700;
 }
 .resume-skill-list {
