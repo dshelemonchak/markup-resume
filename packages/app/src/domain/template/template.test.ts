@@ -48,6 +48,17 @@ describe('withTemplateStyles', () => {
     expect(visual.kind === 'styled' && visual.html).not.toContain(',</li>');
   });
 
+  it('keeps a space after each ATS skill comma when the items are written without one', () => {
+    const html = doc(template).replace(
+      '<body></body>',
+      '<body><ul class="resume-skill-list"><li>React, TypeScript</li><li>Angular</li><li>RxJS</li></ul></body>',
+    );
+    const ats = withTemplateStyles(html, catalog, 'ats');
+    expect(ats.kind === 'styled' && ats.html).toContain(
+      '<li>React, TypeScript,</li> <li>Angular,</li> <li>RxJS</li></ul>',
+    );
+  });
+
   it('inserts the ATS styles for the ATS version, and refuses a template without one', () => {
     const withAts: TemplateCatalog = {
       ...catalog,
