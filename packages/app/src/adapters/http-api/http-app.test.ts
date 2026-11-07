@@ -234,6 +234,19 @@ describe('HTTP API v1', () => {
   });
 });
 
+describe('health', () => {
+  it('answers without a session: 200 while healthy, 503 when not, never cached', async () => {
+    let healthy = true;
+    const { anonymous } = setup({ isHealthy: () => Promise.resolve(healthy) });
+    const ok = await anonymous.request('/api/health');
+    expect(ok.status).toBe(200);
+    expect(await ok.json()).toEqual({ status: 'ok' });
+    expect(ok.headers.get('cache-control')).toBe('no-store');
+    healthy = false;
+    expect((await anonymous.request('/api/health')).status).toBe(503);
+  });
+});
+
 describe('sessions and the API', () => {
   it('answers 401 to every API route without a session', async () => {
     const { anonymous } = setup();

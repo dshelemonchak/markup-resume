@@ -1,0 +1,29 @@
+# The public entry of the production server (ADR-0029). SITE_ADDRESS is the domain; on localhost Caddy uses its own
+# local certificate authority, anywhere else it gets and renews a Let's Encrypt certificate by itself.
+{$SITE_ADDRESS} {
+	encode zstd gzip
+
+	# The app: the API, sign-in, the OAuth server, its discovery documents and MCP.
+	@app path /api/* /auth/* /oauth/* /.well-known/* /mcp /mcp/*
+	handle @app {
+		reverse_proxy app:3000
+	}
+
+	# Everything else is the Angular app: a file of the build, or index.html for its routes.
+	handle {
+		root * /srv
+		try_files {path} /index.html
+		file_server
+		# The UI is never framed. CV documents are framed by the UI and come from the app, so this is set here only.
+		header X-Frame-Options DENY
+	}
+
+	header {
+		# No includeSubDomains: the domain may be a shared one such as sslip.io.
+		Strict-Transport-Security "max-age=31536000"
+		X-Content-Type-Options nosniff
+		# A default only: the app's own pages set theirs (the consent page needs same-origin).
+		?Referrer-Policy strict-origin-when-cross-origin
+		-Server
+	}
+}

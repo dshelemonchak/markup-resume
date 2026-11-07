@@ -1,0 +1,81 @@
+# Production: the app, Postgres and Caddy on one server (ADR-0029). On the server, with the settings in an env file
+# (deploy/app.env.example lists them; the real one is assembled from SSM Parameter Store):
+#   docker compose -f compose.prod.yaml --env-file /etc/markup-resume/app.env pull
+#   docker compose -f compose.prod.yaml --env-file /etc/markup-resume/app.env up -d
+# The database volume is created once (docker volume create markup-resume-db-prod) and is external, so no Compose
+# command, not even down -v, can delete it.
+# To try the production images on this machine first, see compose.prod.local.yaml.
+
+name: markup-resume-prod
+
+services:
+  db:
+    image: postgres:18-alpine
+    environment:
+      POSTGRES_USER: markup
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-}
+      POSTGRES_DB: markup
+    volumes:
+      - db-data:/var/lib/postgresql
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U markup -d markup']
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+
+  app:
+    image: ${APP_IMAGE:-}
+    environment:
+      PORT: '3000'
+      # The password goes into a URL: generate it URL-safe (e.g. openssl rand -hex 32).
+      DATABASE_URL: postgres://markup:${POSTGRES_PASSWORD:-}@db:5432/markup
+      GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID:-}
+      GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET:-}
+      APP_ORIGIN: https://${SITE_ADDRESS:-}
+      # https: MCP is authorised with OAuth (ADR-0028), and the app refuses to start without ALLOWED_GITHUB_IDS.
+      MCP_URL: https://${SITE_ADDRESS:-}/mcp
+      ALLOWED_GITHUB_IDS: ${ALLOWED_GITHUB_IDS:-}
+      OWNER_GITHUB_ID: ${OWNER_GITHUB_ID:-}
+    # Chromium needs more shared memory than Docker's 64 MB default.
+    shm_size: 1gb
+    depends_on:
+      db:
+        condition: service_healthy
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - "fetch('http://localhost:3000/api/health').then((r) => process.exit(r.ok ? 0 : 1), () => process.exit(1))"
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 20s
+    restart: unless-stopped
+
+  web:
+    image: ${WEB_IMAGE:-}
+    environment:
+      SITE_ADDRESS: ${SITE_ADDRESS:-}
+    ports:
+      - '80:80'
+      - '443:443'
+      - '443:443/udp'
+    volumes:
+      # Certificates and Caddy's state: kept across restarts so Let's Encrypt is not asked again each time.
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on:
+      app:
+        condition: service_healthy
+    restart: unless-stopped
+
+volumes:
+  db-data:
+    external: true
+    name: markup-resume-db-prod
+  caddy-data:
+    name: markup-resume-caddy-data
+  caddy-config:
+    name: markup-resume-caddy-config

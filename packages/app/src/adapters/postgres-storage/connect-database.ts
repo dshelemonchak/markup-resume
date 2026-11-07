@@ -12,3 +12,13 @@ export async function connectDatabase(databaseUrl: string): Promise<Kysely<Datab
   await migrateToLatest(db);
   return db;
 }
+
+/** Whether the database answers now: for the health endpoint. */
+export async function isDatabaseReachable(db: Kysely<Database>): Promise<boolean> {
+  try {
+    await sql`select 1`.execute(db);
+    return true;
+  } catch {
+    return false;
+  }
+}

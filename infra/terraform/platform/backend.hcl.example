@@ -1,0 +1,3 @@
+# Copy to backend.hcl (git ignores it) and fill in from the outputs of ../bootstrap.
+bucket = "markup-resume-tfstate-123456789012"
+region = "eu-north-1"

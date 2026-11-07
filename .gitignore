@@ -24,3 +24,10 @@ coverage/
 .angular/
 out-tsc/
 __screenshots__/
+
+# Terraform: providers, local state and the per-account backend settings stay out of git; .terraform.lock.hcl is
+# committed so every run uses the same provider versions.
+infra/terraform/**/.terraform/
+infra/terraform/**/*.tfstate
+infra/terraform/**/*.tfstate.*
+infra/terraform/**/backend.hcl
