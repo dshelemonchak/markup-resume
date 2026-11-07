@@ -47,6 +47,8 @@ function setup(options?: HttpAppOptions) {
     },
     users,
     sessions,
+    // Alex only: a test that has GitHub answer someone else sees them turned away.
+    allowlist: new Set([ALEX.providerUserId]),
     now: () => new Date(),
   };
   const { app, close } = createHttpApp(
@@ -351,6 +353,18 @@ describe('signing in with GitHub', () => {
     const failed = await callback('code=code&state=STATE');
     expect(failed.status).toBe(302);
     expect(failed.headers.get('location')).toBe('/?signIn=failed');
+  });
+
+  it('sends someone not on the allowlist back with no session, and says why', async () => {
+    const { anonymous, github } = setup();
+    github.identify = () =>
+      Promise.resolve({ kind: 'identified', identity: { ...ALEX, providerUserId: '99' } });
+    const { state, stateCookie } = await start(anonymous);
+    const callback = await anonymous.request(`/auth/github/callback?code=code&state=${state}`, {
+      headers: { Cookie: stateCookie },
+    });
+    expect(callback.headers.get('location')).toBe('/?signIn=not-allowed');
+    expect(setCookie(callback, '__Host-session')).toBeUndefined();
   });
 
   it('signs out on the server: the old cookie no longer works', async () => {

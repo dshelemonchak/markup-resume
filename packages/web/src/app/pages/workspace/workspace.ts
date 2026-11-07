@@ -73,9 +73,12 @@ export class Workspace {
   );
   /** The last sign-out did not reach the server: the session is still open. */
   protected readonly signOutFailed = signal(false);
-  /** GitHub's callback sent the browser back here after a sign-in that did not work (ADR-0027). */
-  protected readonly signInFailed =
-    new URLSearchParams(inject(DOCUMENT).location.search).get('signIn') === 'failed';
+  /** How the last sign-in ended, when GitHub's callback sent the browser back here without a session (ADR-0027). */
+  private readonly signInOutcome = new URLSearchParams(inject(DOCUMENT).location.search).get('signIn');
+  /** The sign-in did not work. */
+  protected readonly signInFailed = this.signInOutcome === 'failed';
+  /** The GitHub account is not on this server's allowlist. */
+  protected readonly signInNotAllowed = this.signInOutcome === 'not-allowed';
 
   /** Ticks so that "2 min ago" stays current. */
   private readonly now = signal(new Date());

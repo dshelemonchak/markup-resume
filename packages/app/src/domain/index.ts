@@ -59,6 +59,7 @@ export {
   sessionNeedsTouch,
 } from './session/session.ts';
 export type { NewSession, SessionRepository } from './session/session-repository.ts';
+export { ENDED_RECORD_RETENTION_MS } from './retention.ts';
 export { readResumeTitle } from './document/resume-title.ts';
 export { upgradeLegacyVocabulary } from './document/legacy-vocabulary.ts';
 export {

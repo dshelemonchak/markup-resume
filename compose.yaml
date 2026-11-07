@@ -64,6 +64,8 @@ services:
       # MCP acts for OWNER_GITHUB_ID.
       MCP_URL: ${MCP_URL:-http://localhost:3000/mcp}
       OWNER_GITHUB_ID: ${OWNER_GITHUB_ID:-}
+      # Comma-separated GitHub user ids that may sign in; empty lets anyone in, which an https MCP_URL refuses.
+      ALLOWED_GITHUB_IDS: ${ALLOWED_GITHUB_IDS:-}
     ports:
       # This machine only: in a local run, MCP trusts whoever reaches it (ADR-0028).
       - '127.0.0.1:3000:3000'

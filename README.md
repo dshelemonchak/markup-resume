@@ -156,16 +156,17 @@ of the roadmap.
 
 The defaults are supplied by [compose.yaml](compose.yaml) and the [Dockerfile](Dockerfile).
 
-| Variable                                   | Purpose                                                                                                  | Container default                         |
-| ------------------------------------------ | -------------------------------------------------------------------------------------------------------- | ----------------------------------------- |
-| `DATABASE_URL`                             | PostgreSQL connection used by the app, seed, importer and database tests                                 | `postgres://markup:markup@db:5432/markup` |
-| `PORT`                                     | HTTP API and MCP listening port                                                                          | `3000`                                    |
-| `CHROME_PATH`                              | Browser executable for PDF export; export is unavailable when unset                                      | `/usr/bin/chromium`                       |
-| `LEGACY_RESUME_DIR`                        | Root directory for importing CVs from older file-based versions                                          | `/data` in the `dev` service              |
-| `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` | The GitHub OAuth App for sign-in; the app does not start without them                                    | from `.env`                               |
-| `APP_ORIGIN`                               | Where the browser opens the app: the GitHub callback and the CSRF check use it                           | `http://localhost:4200`                   |
-| `OWNER_GITHUB_ID`                          | GitHub user id that seed, the importers and local MCP act for; that user must have signed in once        | from `.env`                               |
-| `MCP_URL`                                  | Public URL of the MCP endpoint. `https`: MCP needs OAuth. `http` on localhost: a local run without OAuth | `http://localhost:3000/mcp`               |
+| Variable                                   | Purpose                                                                                                    | Container default                         |
+| ------------------------------------------ | ---------------------------------------------------------------------------------------------------------- | ----------------------------------------- |
+| `DATABASE_URL`                             | PostgreSQL connection used by the app, seed, importer and database tests                                   | `postgres://markup:markup@db:5432/markup` |
+| `PORT`                                     | HTTP API and MCP listening port                                                                            | `3000`                                    |
+| `CHROME_PATH`                              | Browser executable for PDF export; export is unavailable when unset                                        | `/usr/bin/chromium`                       |
+| `LEGACY_RESUME_DIR`                        | Root directory for importing CVs from older file-based versions                                            | `/data` in the `dev` service              |
+| `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` | The GitHub OAuth App for sign-in; the app does not start without them                                      | from `.env`                               |
+| `APP_ORIGIN`                               | Where the browser opens the app: the GitHub callback and the CSRF check use it                             | `http://localhost:4200`                   |
+| `OWNER_GITHUB_ID`                          | GitHub user id that seed, the importers and local MCP act for; that user must have signed in once          | from `.env`                               |
+| `MCP_URL`                                  | Public URL of the MCP endpoint. `https`: MCP needs OAuth. `http` on localhost: a local run without OAuth   | `http://localhost:3000/mcp`               |
+| `ALLOWED_GITHUB_IDS`                       | Comma-separated GitHub user ids that may sign in; unset lets anyone in, which an `https` `MCP_URL` refuses | unset                                     |
 
 ### Import CVs from an earlier version
 

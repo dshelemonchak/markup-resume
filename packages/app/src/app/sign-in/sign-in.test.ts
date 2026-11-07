@@ -33,7 +33,7 @@ beforeEach(() => {
     () => now,
   );
   identified = { kind: 'identified', identity: ALEX };
-  dependencies = { identityProvider: provider, users, sessions, now: () => now };
+  dependencies = { identityProvider: provider, users, sessions, allowlist: null, now: () => now };
 });
 
 /** A whole sign-in: start, then GitHub's callback with the state from the start. */
@@ -73,6 +73,16 @@ describe('completeSignIn', () => {
     identified = { kind: 'rejected' };
     expect(await signIn()).toEqual({ kind: 'rejected' });
     expect(sessions.size).toBe(0);
+  });
+
+  it('turns away someone not on the allowlist, without creating a user or a session', async () => {
+    const deps = { ...dependencies, allowlist: new Set(['someone-else']) };
+    expect(await signIn(deps)).toEqual({ kind: 'not-allowed' });
+    expect(await users.findByIdentity(ALEX)).toBeNull();
+    expect(sessions.size).toBe(0);
+    expect((await signIn({ ...dependencies, allowlist: new Set([ALEX.providerUserId]) })).kind).toBe(
+      'signed-in',
+    );
   });
 
   it('creates the user on the first sign-in, finds them later, and starts a new session each time', async () => {

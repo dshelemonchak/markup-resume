@@ -152,6 +152,44 @@ export class InMemoryOAuthGrantRepository implements OAuthGrantRepository {
     return Promise.resolve({ kind: 'rotated' });
   }
 
+  deleteExpired(before: Date): Promise<number> {
+    let deleted = 0;
+    for (const tokens of [this.accessTokens, this.refreshTokens]) {
+      for (const [key, token] of tokens) {
+        if (token.expiresAt < before) {
+          tokens.delete(key);
+          deleted += 1;
+        }
+      }
+    }
+    const liveFamilies = new Set(
+      [...this.accessTokens.values(), ...this.refreshTokens.values()].map((t) => t.familyId),
+    );
+    for (const id of this.families.keys()) {
+      if (!liveFamilies.has(id)) {
+        this.families.delete(id);
+        deleted += 1;
+      }
+    }
+    const usedCodes = new Set([...this.families.values()].map((family) => family.authorizationCodeId));
+    for (const [key, code] of this.codes) {
+      if (code.expiresAt < before && !usedCodes.has(code.id)) {
+        this.codes.delete(key);
+        deleted += 1;
+      }
+    }
+    return Promise.resolve(deleted);
+  }
+
+  /** How many codes, families and tokens are stored, for tests of cleanup. */
+  get size(): { readonly codes: number; readonly families: number; readonly tokens: number } {
+    return {
+      codes: this.codes.size,
+      families: this.families.size,
+      tokens: this.accessTokens.size + this.refreshTokens.size,
+    };
+  }
+
   private addTokens(familyId: string, tokens: NewTokens): void {
     this.accessTokens.set(hex(tokens.accessTokenHash), {
       familyId,

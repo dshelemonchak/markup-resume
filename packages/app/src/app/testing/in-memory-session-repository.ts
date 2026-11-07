@@ -61,6 +61,17 @@ export class InMemorySessionRepository implements SessionRepository {
     return Promise.resolve();
   }
 
+  deleteEnded(at: { readonly expiredBefore: Date; readonly idleBefore: Date }): Promise<number> {
+    let deleted = 0;
+    for (const [key, session] of this.sessions) {
+      if (session.expiresAt < at.expiredBefore || session.lastSeenAt < at.idleBefore) {
+        this.sessions.delete(key);
+        deleted += 1;
+      }
+    }
+    return Promise.resolve(deleted);
+  }
+
   get size(): number {
     return this.sessions.size;
   }

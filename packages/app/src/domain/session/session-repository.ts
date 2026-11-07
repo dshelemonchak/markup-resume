@@ -15,6 +15,8 @@ export interface SessionRepository {
   touch(id: string, at: Date): Promise<void>;
   /** Ends the session with this token hash; nothing happens when there is none. */
   delete(tokenHash: Uint8Array): Promise<void>;
+  /** Deletes the sessions that expired before expiredBefore or were last seen before idleBefore; returns how many. */
+  deleteEnded(at: { readonly expiredBefore: Date; readonly idleBefore: Date }): Promise<number>;
 }
 
 export interface NewSession {

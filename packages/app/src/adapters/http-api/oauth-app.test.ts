@@ -31,7 +31,12 @@ async function setup() {
   );
   const { token, hash } = newSessionToken();
   await sessions.create({ userId: ALEX.id, tokenHash: hash, expiresAt: new Date(Date.now() + 60_000) });
-  const app = createOAuthApp({ oauth, signIn: { sessions, now: () => new Date() }, appOrigin: APP_ORIGIN });
+  const app = createOAuthApp({
+    oauth,
+    signIn: { sessions, now: () => new Date() },
+    appOrigin: APP_ORIGIN,
+    clientAddress: (c) => c.req.header('X-Test-Address') ?? '192.0.2.1',
+  });
 
   const register = (body: unknown) =>
     app.request('/oauth/register', {
@@ -230,5 +235,36 @@ describe('the token endpoint', () => {
     });
     expect(badCode.status).toBe(400);
     expect(await badCode.json()).toMatchObject({ error: 'invalid_grant' });
+  });
+});
+
+describe('rate limits', () => {
+  it('limits registrations and token requests per address', async () => {
+    const { app } = await setup();
+    const from = (address: string, path: string, body: string, type: string) =>
+      app.request(path, {
+        method: 'POST',
+        headers: { 'Content-Type': type, 'X-Test-Address': address },
+        body,
+      });
+    const registration = JSON.stringify({ redirect_uris: [REDIRECT] });
+    for (let i = 0; i < 10; i++) {
+      expect((await from('198.51.100.7', '/oauth/register', registration, 'application/json')).status).toBe(
+        201,
+      );
+    }
+    const refused = await from('198.51.100.7', '/oauth/register', registration, 'application/json');
+    expect(refused.status).toBe(429);
+    expect(refused.headers.get('Retry-After')).not.toBeNull();
+    expect((await from('198.51.100.8', '/oauth/register', registration, 'application/json')).status).toBe(
+      201,
+    );
+
+    const form = 'grant_type=refresh_token&client_id=unknown&refresh_token=x';
+    const type = 'application/x-www-form-urlencoded';
+    for (let i = 0; i < 60; i++) {
+      expect((await from('198.51.100.9', '/oauth/token', form, type)).status).toBe(401);
+    }
+    expect((await from('198.51.100.9', '/oauth/token', form, type)).status).toBe(429);
   });
 });

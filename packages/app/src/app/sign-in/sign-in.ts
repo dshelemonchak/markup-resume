@@ -16,6 +16,11 @@ export interface SignInDependencies {
   readonly identityProvider: IdentityProvider;
   readonly users: UserRepository;
   readonly sessions: SessionRepository;
+  /**
+   * The provider's user ids that may sign in (ALLOWED_GITHUB_IDS), or null to let anyone in. Others are turned away
+   * before a user is created for them.
+   */
+  readonly allowlist: ReadonlySet<string> | null;
   /** The current time; tests pass a fixed clock. */
   readonly now: () => Date;
 }
@@ -43,7 +48,9 @@ export type CompleteSignInResult =
   /** The state is missing or is not the one this browser started with: possibly a forged callback. */
   | { readonly kind: 'invalid-state' }
   /** The provider refused the code. */
-  | { readonly kind: 'rejected' };
+  | { readonly kind: 'rejected' }
+  /** The provider knows this person, but they are not on the allowlist. */
+  | { readonly kind: 'not-allowed' };
 
 /**
  * The callback of signing in: checks that this browser started it, learns from the provider who signed in, finds
@@ -60,6 +67,9 @@ export async function completeSignIn(
   const identified = await dependencies.identityProvider.identify(callback.code);
   if (identified.kind === 'rejected') {
     return { kind: 'rejected' };
+  }
+  if (dependencies.allowlist && !dependencies.allowlist.has(identified.identity.providerUserId)) {
+    return { kind: 'not-allowed' };
   }
   const user = await findOrCreateUser(dependencies.users, identified.identity);
 
