@@ -44,3 +44,4 @@ export {
   type RegisterClientResult,
   verifyAccessToken,
 } from './oauth/oauth.ts';
+export { purgeEndedRecords, type PurgeEndedRecordsDependencies } from './maintenance/purge-ended-records.ts';

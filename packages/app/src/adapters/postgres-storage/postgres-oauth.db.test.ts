@@ -168,6 +168,37 @@ describe('PostgresOAuthGrantRepository', () => {
     ).toBe('rotated');
   });
 
+  it('deletes expired codes and tokens, then families with no tokens and codes no family needs', async () => {
+    const past = new Date(Date.now() - 30 * 24 * HOUR);
+    const code = await familyFromCode(past);
+    await grants.createCode({
+      codeHash: hash('unused'),
+      clientId: client.id,
+      userId,
+      redirectUri: 'http://localhost:33418/callback',
+      codeChallenge: 'c'.repeat(43),
+      resource: RESOURCE,
+      expiresAt: past,
+    });
+    const before = new Date(past.getTime() + 2 * HOUR);
+
+    // The access token expired; the refresh token (24 h) has not: only the access token and the unused code go.
+    expect(await grants.deleteExpired(before)).toBe(2);
+    expect(await db.selectFrom('oauth_authorization_codes').select('id').execute()).toEqual([
+      { id: code.id },
+    ]);
+
+    // Once the refresh token has expired too, the family and its code go with it.
+    expect(await grants.deleteExpired(new Date())).toBe(3);
+    for (const table of [
+      'oauth_token_families',
+      'oauth_authorization_codes',
+      'oauth_refresh_tokens',
+    ] as const) {
+      expect(await db.selectFrom(table).select('id').execute()).toEqual([]);
+    }
+  });
+
   it('ends every grant of a deleted user', async () => {
     const now = new Date();
     await familyFromCode(now);

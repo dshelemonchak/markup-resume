@@ -15,13 +15,22 @@ import {
   type SignInDependencies,
 } from '../../app/index.ts';
 import { SESSION_COOKIE, sameOrigin } from './cookies.ts';
+import { rateLimit, type RateLimitRule } from './rate-limit.ts';
 
 export interface OAuthAppDependencies {
   readonly oauth: OAuthDependencies;
   readonly signIn: Pick<SignInDependencies, 'sessions' | 'now'>;
   /** Where the browser opens the app; the issuer and every endpoint live under it. */
   readonly appOrigin: string;
+  /** Who sends a request, for the rate limits: the remote address. */
+  readonly clientAddress: (c: Context) => string;
 }
+
+const MINUTE = 60 * 1000;
+/** Registration is open to anyone, so one address may register only a few clients an hour. */
+const REGISTER_LIMIT: RateLimitRule = { limit: 10, windowMs: 60 * MINUTE };
+/** A client exchanges a code or refreshes about once an hour; this leaves room and stops guessing at speed. */
+const TOKEN_LIMIT: RateLimitRule = { limit: 60, windowMs: MINUTE };
 
 /** The parameters of an authorisation request, carried from the query to the consent form and back. */
 const AUTHORIZATION_PARAMS = [
@@ -43,6 +52,7 @@ const AUTHORIZATION_PARAMS = [
  *   GET  /oauth/authorize                             checks the request; sign-in, then the consent page
  *   POST /oauth/authorize                             the user's answer on the consent page
  *   POST /oauth/token                                 codes and refresh tokens for tokens
+ * Registration and the token endpoint are rate-limited per remote address.
  */
 export function createOAuthApp(dependencies: OAuthAppDependencies): Hono {
   const { oauth, appOrigin } = dependencies;
@@ -63,11 +73,13 @@ export function createOAuthApp(dependencies: OAuthAppDependencies): Hono {
     resourceName: 'Markup Résumé',
   };
 
+  const limitBy = { clientKey: dependencies.clientAddress };
+
   const app = new Hono();
 
   app.all('/.well-known/*', (c) => oauthMetadataResponse(c.req.raw, metadataOptions) ?? c.notFound());
 
-  app.post('/oauth/register', async (c) => {
+  app.post('/oauth/register', rateLimit(REGISTER_LIMIT, limitBy), async (c) => {
     let body: unknown;
     try {
       body = await c.req.json();
@@ -132,7 +144,7 @@ export function createOAuthApp(dependencies: OAuthAppDependencies): Hono {
     return c.redirect(location, 302);
   });
 
-  app.post('/oauth/token', async (c) => {
+  app.post('/oauth/token', rateLimit(TOKEN_LIMIT, limitBy), async (c) => {
     const form = stringsOnly(await c.req.parseBody());
     const result = await exchangeToken(oauth, form);
     if (result.kind === 'error') {
@@ -207,9 +219,7 @@ function consentPage(
           <strong>${clientName}</strong> wants to read and edit your CVs in Markup
           Résumé${userName ? html` as ${userName}` : ''}.
         </p>
-        <p class="note">
-          It keeps access until you disconnect it there. Allowing sends you back to <code>${host}</code>.
-        </p>
+        <p class="note">Allowing sends you back to <code>${host}</code>.</p>
         <form method="post" action="/oauth/authorize">
           ${hidden}
           <button type="submit" name="decision" value="allow" class="primary">Allow</button>

@@ -44,6 +44,8 @@
       <div class="empty sign-in">
         @if (signInFailed) {
           <p class="text-danger-emphasis">{{ 'workspace.signIn.failed' | transloco }}</p>
+        } @else if (signInNotAllowed) {
+          <p class="text-danger-emphasis">{{ 'workspace.signIn.notAllowed' | transloco }}</p>
         }
         <p>{{ 'workspace.signIn.prompt' | transloco }}</p>
         <!-- A full navigation, not a request: the server redirects the browser to GitHub. -->

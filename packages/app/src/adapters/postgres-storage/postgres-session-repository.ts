@@ -46,4 +46,12 @@ export class PostgresSessionRepository implements SessionRepository {
   async delete(tokenHash: Uint8Array): Promise<void> {
     await this.db.deleteFrom('sessions').where('token_hash', '=', Buffer.from(tokenHash)).execute();
   }
+
+  async deleteEnded(at: { readonly expiredBefore: Date; readonly idleBefore: Date }): Promise<number> {
+    const result = await this.db
+      .deleteFrom('sessions')
+      .where((eb) => eb.or([eb('expires_at', '<', at.expiredBefore), eb('last_seen_at', '<', at.idleBefore)]))
+      .executeTakeFirst();
+    return Number(result.numDeletedRows);
+  }
 }

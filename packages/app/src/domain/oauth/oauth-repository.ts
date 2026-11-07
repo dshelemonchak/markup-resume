@@ -34,6 +34,12 @@ export interface OAuthGrantRepository {
     now: Date,
     next: NewTokens,
   ): Promise<RotateRefreshTokenResult>;
+  /**
+   * Deletes the codes and tokens that expired before this moment, then the families left with no tokens and the
+   * codes no family needs; returns how many rows went. A used refresh token stays until it expires, so a late reuse
+   * is still caught.
+   */
+  deleteExpired(before: Date): Promise<number>;
 }
 
 export interface NewAuthorizationCode {

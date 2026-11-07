@@ -41,6 +41,7 @@ const RETURN_COOKIE = '__Host-sign-in-return';
 const STATE_MAX_AGE_S = 10 * 60;
 /** Where the browser lands after a sign-in that did not work; the UI tells the user. */
 const SIGN_IN_FAILED = '/?signIn=failed';
+const SIGN_IN_NOT_ALLOWED = '/?signIn=not-allowed';
 
 /** What the API routes of a signed-in request read: the user, and their resumes and change notifier. */
 interface ApiEnv {
@@ -145,6 +146,9 @@ export function createHttpApp(
       // GitHub down, slow or answering something unexpected: a failed sign-in for the user, not a 500.
       console.error('Signing in with GitHub failed:', error);
       return c.redirect(SIGN_IN_FAILED);
+    }
+    if (result.kind === 'not-allowed') {
+      return c.redirect(SIGN_IN_NOT_ALLOWED);
     }
     if (result.kind !== 'signed-in') {
       return c.redirect(SIGN_IN_FAILED);

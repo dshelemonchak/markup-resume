@@ -47,7 +47,8 @@
     "signIn": {
       "prompt": "Sign in to see and edit your CVs.",
       "button": "Sign in with GitHub",
-      "failed": "Signing in did not work. Try again."
+      "failed": "Signing in did not work. Try again.",
+      "notAllowed": "This GitHub account has no access to this server."
     },
     "loading": "Loading CVs…",
     "unreachable": "The local server is not reachable. Start it with <code>docker compose up -d app</code>; the list comes back by itself.",

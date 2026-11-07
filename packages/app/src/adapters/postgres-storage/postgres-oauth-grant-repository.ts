@@ -157,6 +157,49 @@ export class PostgresOAuthGrantRepository implements OAuthGrantRepository {
       return { kind: 'rotated' };
     });
   }
+
+  async deleteExpired(before: Date): Promise<number> {
+    return this.db.transaction().execute(async (trx) => {
+      const results = [
+        await trx.deleteFrom('oauth_access_tokens').where('expires_at', '<', before).executeTakeFirst(),
+        await trx.deleteFrom('oauth_refresh_tokens').where('expires_at', '<', before).executeTakeFirst(),
+        // A family with no tokens left can grant nothing more.
+        await trx
+          .deleteFrom('oauth_token_families as family')
+          .where((eb) =>
+            eb.and([
+              eb.not(
+                eb.exists(
+                  eb.selectFrom('oauth_access_tokens').select('id').whereRef('family_id', '=', 'family.id'),
+                ),
+              ),
+              eb.not(
+                eb.exists(
+                  eb.selectFrom('oauth_refresh_tokens').select('id').whereRef('family_id', '=', 'family.id'),
+                ),
+              ),
+            ]),
+          )
+          .executeTakeFirst(),
+        // A code goes only once no family refers to it: deleting it would delete its family too.
+        await trx
+          .deleteFrom('oauth_authorization_codes as code')
+          .where('code.expires_at', '<', before)
+          .where((eb) =>
+            eb.not(
+              eb.exists(
+                eb
+                  .selectFrom('oauth_token_families')
+                  .select('id')
+                  .whereRef('authorization_code_id', '=', 'code.id'),
+              ),
+            ),
+          )
+          .executeTakeFirst(),
+      ];
+      return results.reduce((sum, result) => sum + Number(result.numDeletedRows), 0);
+    });
+  }
 }
 
 async function insertTokens(trx: Kysely<Database>, familyId: string, tokens: NewTokens): Promise<void> {

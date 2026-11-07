@@ -145,6 +145,31 @@ describe('PostgresSessionRepository', () => {
     await db.deleteFrom('users').where('id', '=', alex.id).execute();
     expect(await db.selectFrom('sessions').select('id').execute()).toEqual([]);
   });
+
+  it('deletes sessions that expired, or were last seen, before the given moments', async () => {
+    const alex = await createAlex();
+    const now = new Date();
+    for (const [token, expiresAt] of [
+      ['expired', new Date(now.getTime() - 2 * DAY)],
+      ['idle', new Date(now.getTime() + DAY)],
+      ['active', new Date(now.getTime() + DAY)],
+    ] as const) {
+      await sessions.create({ userId: alex.id, tokenHash: hash(token), expiresAt });
+    }
+    await db
+      .updateTable('sessions')
+      .set({ last_seen_at: new Date(now.getTime() - 3 * DAY) })
+      .where('token_hash', '=', hash('idle'))
+      .execute();
+
+    expect(
+      await sessions.deleteEnded({
+        expiredBefore: new Date(now.getTime() - DAY),
+        idleBefore: new Date(now.getTime() - 2 * DAY),
+      }),
+    ).toBe(2);
+    expect(await sessions.findActive(hash('active'), { now, idleSince: new Date(0) })).not.toBeNull();
+  });
 });
 
 describe('claimLocalResumes', () => {
