@@ -5,7 +5,7 @@ Two roots, applied in this order:
 | Root         | State                            | Creates                                                                    |
 | ------------ | -------------------------------- | -------------------------------------------------------------------------- |
 | `bootstrap/` | local, on purpose                | the S3 bucket that holds the state of every other root                     |
-| `platform/`  | in that bucket, with a lock file | GitHub OIDC provider, the deploy role, ECR repositories for the two images |
+| `platform/`  | in that bucket, with a lock file | the deploy IAM user and its policy, ECR repositories for the two images |
 
 The server (EC2, Elastic IP, security group, SSM parameters, backups) comes in a later stage.
 
@@ -33,7 +33,16 @@ terraform init -backend-config=backend.hcl
 terraform apply
 ```
 
-Its outputs are what the deploy workflow needs: `deploy_role_arn` and the ECR repository URLs.
+Its outputs are what the deploy workflow needs: the `deploy_user` name and the ECR repository URLs.
+
+The deploy user's access key is created by hand when the deploy workflow is set up, not by Terraform, so the secret
+never lands in the state:
+
+```bash
+aws iam create-access-key --user-name markup-resume-deploy
+```
+
+It goes straight into the repository's GitHub secrets and nowhere else.
 
 ## Day to day
 
