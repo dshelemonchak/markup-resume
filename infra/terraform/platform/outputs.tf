@@ -1,6 +1,6 @@
-output "deploy_role_arn" {
-  description = "For the deploy workflow (aws-actions/configure-aws-credentials, role-to-assume)."
-  value       = aws_iam_role.deploy.arn
+output "deploy_user" {
+  description = "The IAM user the deploy workflow signs in as; its access key is created by hand."
+  value       = aws_iam_user.deploy.name
 }
 
 output "image_repositories" {
