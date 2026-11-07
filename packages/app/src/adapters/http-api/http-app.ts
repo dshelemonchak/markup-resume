@@ -69,6 +69,8 @@ export interface HttpAppOptions {
   readonly iconsDir?: string;
   /** Printing to PDF and checking it; without it, PDF export answers 501. */
   readonly pdf?: Omit<PdfExportDependencies, 'repository' | 'templates'>;
+  /** Whether the app can serve requests now, e.g. the database answers; without it, /api/health always says ok. */
+  readonly isHealthy?: () => Promise<boolean>;
 }
 
 /**
@@ -88,6 +90,8 @@ export interface HttpAppOptions {
  *                                                 "claude-changed" when a Claude session comes, goes or acts
  *   GET  /api/v1/fonts/:file, /api/v1/icons/:file the style library's fonts and icons, used by template styles
  *   GET  /api/v1/claude/sessions                  Claude sessions connected now
+ *
+ * For the container healthcheck and the deploy, with no session: GET /api/health, 200 or 503.
  *
  * Returns the app and a close function that stops listening for CV changes and ends open
  * streams, so the HTTP server can shut down without waiting for clients.
@@ -275,6 +279,12 @@ export function createHttpApp(
 
   // Assets go first: their routes answer before the API's session check, which matches every /api/v1 path.
   const app = new Hono();
+  app.get('/api/health', async (c) => {
+    const healthy = options.isHealthy ? await options.isHealthy() : true;
+    return c.json({ status: healthy ? 'ok' : 'unavailable' }, healthy ? 200 : 503, {
+      'Cache-Control': 'no-store',
+    });
+  });
   app.route('/', auth);
   app.route('/', assets);
   app.route('/', api);

@@ -20,7 +20,7 @@ import { createHttpApp } from './adapters/http-api/http-app.ts';
 import { createOAuthApp } from './adapters/http-api/oauth-app.ts';
 import { createMcpHttpApp, type McpAuth, mcpAuthKind } from './adapters/mcp-server/mcp-http.ts';
 import { inspectPdf } from './adapters/poppler-pdf-inspector/inspect-pdf.ts';
-import { connectDatabase } from './adapters/postgres-storage/connect-database.ts';
+import { connectDatabase, isDatabaseReachable } from './adapters/postgres-storage/connect-database.ts';
 import { PostgresOAuthClientRepository } from './adapters/postgres-storage/postgres-oauth-client-repository.ts';
 import { PostgresOAuthGrantRepository } from './adapters/postgres-storage/postgres-oauth-grant-repository.ts';
 import { PostgresResumeRepository } from './adapters/postgres-storage/postgres-resume-repository.ts';
@@ -93,6 +93,7 @@ const { app, close } = createHttpApp(
   {
     fontsDir,
     iconsDir,
+    isHealthy: () => isDatabaseReachable(db),
     // Chrome runs next to this server and opens the CV from it, over IPv4 like the server listens.
     ...(chromePath && {
       pdf: {

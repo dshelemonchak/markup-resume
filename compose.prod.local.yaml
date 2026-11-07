@@ -1,0 +1,42 @@
+# Runs compose.prod.yaml on this machine, to try the production images before a deploy:
+#   docker compose -f compose.prod.yaml -f compose.prod.local.yaml up --build -d
+#   open https://localhost (Caddy's local certificate: the browser warns once)
+#   docker compose -f compose.prod.yaml -f compose.prod.local.yaml down -v
+# Sign-in with GitHub needs an OAuth App whose callback is https://localhost/auth/github/callback; without one the
+# app still starts and everything but signing in can be checked.
+
+name: markup-resume-prod-local
+
+services:
+  db:
+    environment:
+      POSTGRES_PASSWORD: local
+  app:
+    build:
+      context: .
+      target: runtime
+    image: markup-resume:runtime
+    environment:
+      DATABASE_URL: postgres://markup:local@db:5432/markup
+      GITHUB_CLIENT_ID: ${GITHUB_CLIENT_ID:-local}
+      GITHUB_CLIENT_SECRET: ${GITHUB_CLIENT_SECRET:-local}
+      APP_ORIGIN: https://localhost
+      MCP_URL: https://localhost/mcp
+      ALLOWED_GITHUB_IDS: ${OWNER_GITHUB_ID:-0}
+  web:
+    build:
+      context: .
+      target: web
+    image: markup-resume:web
+    environment:
+      SITE_ADDRESS: localhost
+
+volumes:
+  # A volume of its own that down -v removes, unlike the server's.
+  db-data:
+    external: false
+    name: markup-resume-db-prod-local
+  caddy-data:
+    name: markup-resume-prod-local-caddy-data
+  caddy-config:
+    name: markup-resume-prod-local-caddy-config

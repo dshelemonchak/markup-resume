@@ -9,3 +9,4 @@ reference
 docs
 .env
 .env.*
+**/.terraform
