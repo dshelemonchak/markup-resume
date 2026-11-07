@@ -37,3 +37,19 @@ jobs:
         run: docker compose run --rm --user root dev pnpm install --frozen-lockfile
       - name: Database tests
         run: docker compose run --rm --user root dev pnpm test:db
+
+  # Terraform (ADR-0029): formatting and a validation of each root, with no AWS credentials and no state.
+  terraform:
+    runs-on: ubuntu-latest
+    env:
+      TERRAFORM: docker run --rm -v ${{ github.workspace }}/infra/terraform:/tf hashicorp/terraform:1.17.1
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Format
+        run: $TERRAFORM -chdir=/tf fmt -check -recursive -diff
+      - name: Validate
+        run: |
+          for root in bootstrap platform; do
+            $TERRAFORM -chdir=/tf/$root init -backend=false -input=false
+            $TERRAFORM -chdir=/tf/$root validate
+          done
