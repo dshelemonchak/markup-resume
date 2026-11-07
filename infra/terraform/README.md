@@ -2,9 +2,9 @@
 
 Two roots, applied in this order:
 
-| Root         | State                            | Creates                                                                    |
-| ------------ | -------------------------------- | -------------------------------------------------------------------------- |
-| `bootstrap/` | local, on purpose                | the S3 bucket that holds the state of every other root                     |
+| Root         | State                            | Creates                                                                 |
+| ------------ | -------------------------------- | ----------------------------------------------------------------------- |
+| `bootstrap/` | local, on purpose                | the S3 bucket that holds the state of every other root                  |
 | `platform/`  | in that bucket, with a lock file | the deploy IAM user and its policy, ECR repositories for the two images |
 
 The server (EC2, Elastic IP, security group, SSM parameters, backups) comes in a later stage.
