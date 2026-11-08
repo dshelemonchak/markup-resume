@@ -3,8 +3,8 @@ import { TranslocoPipe } from '@jsverse/transloco';
 import type { ClaudeSessionLine } from '../claude-status';
 
 /**
- * How to connect Claude to Markup Résumé's MCP server, which the app serves at /mcp (ADR-0023): Claude Code
- * picks it up from .mcp.json. Claude Desktop needs a public HTTPS address, so it waits for the hosted version.
+ * How to connect Claude to Markup Résumé's MCP server, which the app serves at /mcp (ADR-0023): both Claude Code
+ * and Claude Desktop are pointed at the hosted HTTPS address, the same for a local and a hosted run.
  * A native modal <dialog>: focus stays inside, Escape closes it; closedby="any" also closes it
  * on a backdrop click where the browser supports it.
  */

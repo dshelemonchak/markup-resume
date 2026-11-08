@@ -139,11 +139,11 @@
     "noToolCalls": "no tool calls yet",
     "code": {
       "title": "Claude Code",
-      "text": "Open this project folder in Claude Code. It finds the Markup Résumé server in <code>.mcp.json</code> and asks once to enable it. Run <code>/mcp</code> to check that it is connected."
+      "text": "Run <code>claude mcp add --transport http markup-resume https://markup-resume.xyz/mcp</code>, then <code>/mcp</code> in Claude Code to sign in with GitHub and check that it is connected."
     },
     "desktop": {
       "title": "Claude Desktop",
-      "text": "Not available in this local setup yet: Claude Desktop connects only to servers with a public HTTPS address. It arrives with the hosted version."
+      "text": "In Claude Desktop or claude.ai, open Settings → Connectors → Add custom connector, enter <code>https://markup-resume.xyz/mcp</code> and sign in with GitHub when asked."
     }
   }
 }
