@@ -1,0 +1,322 @@
+/*
+ * Markup Résumé template "classic", version 0.0.3: the original Figma design, one A4 page with a left sidebar.
+ * Inserted into the document by Markup Résumé as <style id="resume-lib"> (ADR-0006); documents never edit it.
+ *
+ * Every size is in px of the Figma frame, as in the design. The frame is 989 px wide; .resume-page zooms it to
+ * the A4 width (794 CSS px), so 1 Figma px = 0.8028 CSS px in the rendered page and in the PDF.
+ * Where the design has half pixels, they are rounded up in some places and down in others, so the offsets do
+ * not add up down the page: compared with the original PDF, every word is within 0.3 mm of its place.
+ */
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  src: url('/api/v1/fonts/inter-latin-400-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 500;
+  src: url('/api/v1/fonts/inter-latin-500-normal.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 700;
+  src: url('/api/v1/fonts/inter-latin-700-normal.woff2') format('woff2');
+}
+
+:root {
+  --resume-page-margin: 40px;
+  --resume-column-gap: 38px;
+  --resume-section-gap: 29px;
+  --resume-heading-gap: 12px;
+
+  --resume-font: 'Inter', -apple-system, 'Helvetica Neue', Arial, sans-serif;
+  --resume-fs-name: 28px;
+  --resume-lh-name: 34px;
+  --resume-fs-heading: 16px;
+  --resume-lh-heading: 24px;
+  --resume-fs-body: 14px;
+  --resume-lh-body: 20px;
+  --resume-lh-tight: 17px;
+
+  --resume-ink: #000; /* name, headings, roles, summary */
+  --resume-meta: #505050; /* headline, dates, project domains */
+  --resume-text: #464646; /* lists: skills, achievements, languages */
+}
+
+/* Base */
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  print-color-adjust: exact;
+}
+
+body {
+  margin: 0;
+  background: #fff;
+  color: var(--resume-ink);
+  font-family: var(--resume-font);
+}
+
+/* Sizes are set on the zoomed page, not on body, so that they are in Figma px. */
+.resume-page {
+  font-size: var(--resume-fs-body);
+  line-height: var(--resume-lh-body);
+  /* Letter spacing and ligatures break words apart in extracted PDF text. */
+  font-kerning: normal;
+  font-variant-ligatures: none;
+  letter-spacing: normal;
+  hyphens: manual;
+  overflow-wrap: break-word;
+}
+
+/* Element defaults, with no specificity (:where), so that every class rule below wins over them. */
+:where(.resume-page) :where(h1, h2, h3, h4, p, ul) {
+  margin: 0;
+  padding: 0;
+}
+:where(.resume-page) :where(h3, h4) {
+  font-size: var(--resume-fs-body);
+}
+:where(.resume-page) :where(ul) {
+  list-style: none;
+}
+:where(.resume-page) :where(a) {
+  color: inherit;
+  text-decoration: none;
+}
+:where(.resume-page) :where(strong) {
+  font-weight: 700;
+}
+:where(.resume-page) :where(time) {
+  font: inherit;
+}
+
+/*
+ * The A4 sheet: the Figma frame, zoomed to the A4 width. On screen the padding is the margin; in print the
+ * @page margins repeat on every page (@page is not zoomed, hence the factor there).
+ */
+@page {
+  size: A4;
+  margin: calc(40px * 0.8028);
+}
+.resume-page {
+  zoom: 0.8028; /* 989 px Figma → 794 px A4 */
+  width: 989px;
+  min-height: calc(989px * 297 / 210);
+  padding: var(--resume-page-margin);
+}
+@media print {
+  .resume-page {
+    width: auto;
+    min-height: 0;
+    padding: 0;
+  }
+}
+
+/* Header and section headings */
+
+.resume-name {
+  margin-top: 12px;
+  font-size: var(--resume-fs-name);
+  line-height: var(--resume-lh-name);
+  font-weight: 700;
+}
+.resume-headline {
+  margin-top: 5px;
+  color: var(--resume-meta);
+}
+
+/* Every section heading has its own class, so the rules can say which heading belongs to which section. */
+:is(
+  .resume-summary-header,
+  .resume-contacts-header,
+  .resume-skills-header,
+  .resume-education-header,
+  .resume-experience-header,
+  .resume-languages-header
+) {
+  margin-bottom: var(--resume-heading-gap);
+  font-size: var(--resume-fs-heading);
+  line-height: var(--resume-lh-heading);
+  font-weight: 700;
+}
+
+/* Summary */
+
+.resume-summary {
+  margin-top: 23px;
+}
+.resume-summary-header {
+  margin-bottom: 14px;
+}
+.resume-summary p + p {
+  margin-top: 6px;
+}
+
+/* Two columns: sidebar 300, gap 38, main 571 (in the 909 px between the margins) */
+
+.resume-columns {
+  display: grid;
+  grid-template-columns: minmax(0, 300fr) minmax(0, 571fr);
+  column-gap: var(--resume-column-gap);
+  align-items: start;
+  margin-top: var(--resume-section-gap);
+}
+.resume-sidebar {
+  padding-top: 1px;
+}
+:is(.resume-sidebar, .resume-main) > section + section {
+  margin-top: var(--resume-section-gap);
+}
+
+/* Contacts: the icon comes from the resume-contact-<kind> class, so the document holds no SVG. */
+
+.resume-contact {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  break-inside: avoid;
+}
+.resume-contact + .resume-contact {
+  margin-top: 8px;
+}
+.resume-contact::before {
+  content: '';
+  flex: none;
+  width: 20px;
+  height: 20px;
+  background: center / contain no-repeat;
+}
+.resume-contact a[href^='http'] {
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
+/* Bulleted lists */
+
+:is(.resume-skill-list, .resume-achievements) {
+  padding-left: 21px;
+  list-style: disc;
+  color: var(--resume-text);
+}
+
+/* Skills */
+
+.resume-skills-header {
+  margin-bottom: 13px;
+}
+.resume-skill-group h3 {
+  font-weight: 400;
+  color: var(--resume-text);
+}
+.resume-skill-group + .resume-skill-group {
+  margin-top: var(--resume-lh-body);
+}
+
+/* Education */
+
+.resume-school-name {
+  font-weight: 700;
+  line-height: var(--resume-lh-tight);
+}
+.resume-degree .resume-dates {
+  margin-top: 15px;
+  color: var(--resume-meta);
+}
+.resume-degree-name {
+  margin-top: 4px;
+}
+
+/* Experience */
+
+.resume-experience-header {
+  margin-bottom: 27px;
+}
+.resume-employer + .resume-employer {
+  margin-top: var(--resume-section-gap);
+}
+.resume-employer-name {
+  font-weight: 700;
+  line-height: var(--resume-lh-tight);
+}
+.resume-employer-header .resume-dates {
+  color: var(--resume-meta);
+  line-height: var(--resume-lh-tight);
+}
+.resume-employer-header + .resume-project {
+  margin-top: 31px;
+}
+.resume-project + .resume-project {
+  margin-top: 23px;
+}
+.resume-project-header .resume-dates,
+.resume-domain {
+  color: var(--resume-meta);
+}
+.resume-role {
+  margin-top: 4px;
+  font-weight: 500;
+}
+.resume-achievements {
+  margin-top: 9px;
+}
+
+/* Languages */
+
+.resume-language-list {
+  color: var(--resume-text);
+}
+.resume-language-list li + li {
+  margin-top: 8px;
+}
+
+/* Keep small units together when a CV runs onto a second page. */
+
+:is(
+  .resume-employer-header,
+  .resume-project-header,
+  .resume-degree,
+  .resume-skill-group,
+  .resume-achievements li
+) {
+  break-inside: avoid;
+}
+.resume-page :is(h2, h3, h4) {
+  break-after: avoid;
+}
+
+/* Contact icons: Bootstrap Icons (MIT) on a disc, files in @markup-resume/styles/icons; the LinkedIn mark is drawn
+   for this design. */
+
+.resume-contact-email::before {
+  background-image: url('/api/v1/icons/email.svg');
+}
+.resume-contact-phone::before {
+  background-image: url('/api/v1/icons/phone.svg');
+}
+.resume-contact-website::before {
+  background-image: url('/api/v1/icons/website.svg');
+}
+.resume-contact-location::before {
+  background-image: url('/api/v1/icons/location.svg');
+}
+.resume-contact-linkedin::before {
+  background-image: url('/api/v1/icons/linkedin.svg');
+}
+.resume-contact-telegram::before {
+  background-image: url('/api/v1/icons/telegram.svg');
+}
+.resume-contact-github::before {
+  background-image: url('/api/v1/icons/github.svg');
+}

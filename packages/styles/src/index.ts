@@ -1,7 +1,7 @@
 // The style library (ADR-0006): CV templates with their rules for Claude, plus the fonts and icons they use.
 // Template files are read on every call, not cached: the MCP server runs for as long as Claude is open, and
 // an edit to a template's files must reach Claude without restarting it. A new template (a new entry in
-// TEMPLATES) still needs a restart, as does the template list in the MCP handshake.
+// TEMPLATES or ARCHIVED_TEMPLATES) still needs a restart, as does the template list in the MCP handshake.
 import { existsSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
@@ -12,13 +12,25 @@ export const fontsDir = fileURLToPath(new URL('fonts/inter/', PACKAGE_DIR));
 export const iconsDir = fileURLToPath(new URL('icons/', PACKAGE_DIR));
 
 /**
- * The templates by reference: what a document names in <meta name="resume:template">, "<name>@<semver>",
- * mapped to its folder under templates/.
+ * The current templates by reference: what a document names in <meta name="resume:template">, "<name>@<semver>",
+ * mapped to its folder under templates/. Only these are offered for a new CV.
  */
 const TEMPLATES: ReadonlyMap<string, string> = new Map([
   ['classic@0.0.4', 'classic'],
   ['dev-classic@0.0.2', 'dev-classic'],
 ]);
+
+/**
+ * Earlier versions of the templates, frozen as they were released: a stored CV that names one keeps its look and
+ * its rules. When a template's version is bumped, copy its files to templates/archive/<ref>/ and list it here.
+ */
+const ARCHIVED_TEMPLATES: ReadonlyMap<string, string> = new Map([
+  ['classic@0.0.3', 'archive/classic@0.0.3'],
+  ['dev-classic@0.0.1', 'archive/dev-classic@0.0.1'],
+]);
+
+/** A template's folder under templates/, current or archived; undefined for an unknown reference. */
+const folderOf = (ref: string): string | undefined => TEMPLATES.get(ref) ?? ARCHIVED_TEMPLATES.get(ref);
 
 /**
  * The versions of a template's look: the designed one, and one column for applicant tracking systems
@@ -31,12 +43,13 @@ function read(
   ref: string,
   file: 'template.css' | 'rules.md' | 'example.html' | 'schema.json',
 ): string | null {
-  const folder = TEMPLATES.get(ref);
+  const folder = folderOf(ref);
   return folder ? readFileSync(new URL(`templates/${folder}/${file}`, PACKAGE_DIR), 'utf8') : null;
 }
 
 /** The templates as Markup Résumé's TemplateCatalog port expects them. */
 export const templateCatalog = {
+  /** The current templates, which a new CV may use; the archived versions still work for CVs that name them. */
   refs: (): readonly string[] => [...TEMPLATES.keys()],
   /**
    * The CSS Markup Résumé inserts into the document. The ATS variant is the template's CSS with ats/<name>.css
@@ -47,7 +60,7 @@ export const templateCatalog = {
     if (css === null || variant === 'visual') {
       return css;
     }
-    const ats = new URL(`ats/${TEMPLATES.get(ref)!}.css`, PACKAGE_DIR);
+    const ats = new URL(`ats/${ref.split('@')[0]!}.css`, PACKAGE_DIR);
     return existsSync(ats) ? `${css}\n${readFileSync(ats, 'utf8')}` : null;
   },
   /** The design system for whoever writes the document (Claude), and a complete example built by it. */
