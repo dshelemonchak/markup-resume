@@ -57,6 +57,28 @@ describe('DocumentCanvas', () => {
     expect(frame.style.height).toBe('1125px');
   });
 
+  it('goes back to the A4 height when a shorter CV replaces a taller one', async () => {
+    const { fixture, root } = await render();
+    const frame = root.querySelector('iframe')!;
+    /** Loads a document whose content is `content` px tall; scrollHeight is never below the frame's own height. */
+    async function load(content: number) {
+      const document = window.document.implementation.createHTMLDocument('CV');
+      Object.defineProperty(frame, 'contentDocument', { value: document, configurable: true });
+      Object.defineProperty(document.documentElement, 'scrollHeight', {
+        get: () => Math.max(content, Number.parseInt(frame.style.height, 10) || 0),
+        configurable: true,
+      });
+      document.documentElement.getBoundingClientRect = () => ({ height: content }) as DOMRect;
+      frame.dispatchEvent(new Event('load'));
+      await fixture.whenStable();
+    }
+    await load(1800);
+    expect(frame.style.height).toBe('1800px');
+    await load(900);
+    expect(frame.style.height).toBe('1123px');
+    expect(root.querySelector('.overflow')).toBeNull();
+  });
+
   describe('overflow shadow', () => {
     /** Loads a frame document of the given height. */
     async function load(fixture: Awaited<ReturnType<typeof render>>['fixture'], height: number) {
