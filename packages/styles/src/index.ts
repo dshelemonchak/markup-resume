@@ -16,8 +16,8 @@ export const iconsDir = fileURLToPath(new URL('icons/', PACKAGE_DIR));
  * mapped to its folder under templates/.
  */
 const TEMPLATES: ReadonlyMap<string, string> = new Map([
-  ['classic@0.0.3', 'classic'],
-  ['dev-classic@0.0.1', 'dev-classic'],
+  ['classic@0.0.4', 'classic'],
+  ['dev-classic@0.0.2', 'dev-classic'],
 ]);
 
 /**
