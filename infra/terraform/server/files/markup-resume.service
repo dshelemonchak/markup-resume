@@ -1,0 +1,17 @@
+[Unit]
+Description=Markup Résumé (compose.prod.yaml, settings from SSM)
+Requires=docker.service
+After=docker.service network-online.target
+Wants=network-online.target
+# Put in place by the deploy; skipped until the first one.
+ConditionPathExists=/opt/markup-resume/compose.prod.yaml
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+# docker login keeps the ECR token in $HOME/.docker.
+Environment=HOME=/root
+ExecStart=/usr/local/bin/markup-resume-up
+
+[Install]
+WantedBy=multi-user.target

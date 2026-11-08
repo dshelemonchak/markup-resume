@@ -49,7 +49,7 @@ jobs:
         run: $TERRAFORM -chdir=/tf fmt -check -recursive -diff
       - name: Validate
         run: |
-          for root in bootstrap platform; do
+          for root in bootstrap platform server; do
             $TERRAFORM -chdir=/tf/$root init -backend=false -input=false
             $TERRAFORM -chdir=/tf/$root validate
           done
