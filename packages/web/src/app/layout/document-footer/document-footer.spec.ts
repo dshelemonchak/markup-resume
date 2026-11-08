@@ -1,4 +1,5 @@
 import { TestBed } from '@angular/core/testing';
+import { RELEASE_VERSION } from '../../version';
 import { DocumentFooter } from './document-footer';
 
 describe('DocumentFooter', () => {
@@ -30,5 +31,14 @@ describe('DocumentFooter', () => {
     expect(root.querySelector('mr-zoom-control .level')!.textContent?.trim()).toBe('80%');
     root.querySelector<HTMLButtonElement>('mr-zoom-control [aria-label="Zoom in"]')!.click();
     expect(fixture.componentInstance.zoom()).toBe(1);
+  });
+
+  it('shows the app version at the right end', async () => {
+    TestBed.configureTestingModule({ providers: [{ provide: RELEASE_VERSION, useValue: 'v1.2.3' }] });
+    const { root } = await render({ info: null });
+    const version = root.querySelector('.version')!;
+    expect(version.textContent).toBe('v1.2.3');
+    expect(version.getAttribute('title')).toBe('App version');
+    expect(version.nextElementSibling).toBeNull();
   });
 });

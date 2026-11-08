@@ -52,7 +52,9 @@ COPY --chown=node:node packages/styles/package.json packages/styles/
 COPY --chown=node:node packages/web/package.json packages/web/
 RUN pnpm install --frozen-lockfile
 COPY --chown=node:node . .
-RUN pnpm --filter @markup-resume/web build
+# The release version the UI shows (deploy workflow); empty builds show "dev".
+ARG APP_VERSION=
+RUN pnpm --filter @markup-resume/web build --define "APP_VERSION='${APP_VERSION}'"
 
 # Production app: the API and MCP server, with only the dependencies of the app
 # and the style library. Node runs the TypeScript sources directly, as in dev.
