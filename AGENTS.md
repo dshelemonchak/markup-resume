@@ -43,9 +43,9 @@ them; ask if a check needs one.
 - **Templates:** a template is `template.css`, `schema.json` (allowed classes and nesting), `rules.md` (the same
   rules for Claude) and `example.html`; a test keeps them consistent. CV documents use the `resume-` class and
   `resume:*` meta namespace. Any change to a template's files bumps its version (`TEMPLATES` in
-  `packages/styles/src/index.ts`, the heading of `rules.md`, the meta in `example.html`). Earlier versions stay
-  valid: copy the old files to `templates/archive/<name>@<version>/` and list them in `ARCHIVED_TEMPLATES`, so
-  stored CVs keep rendering.
+  `packages/styles/src/index.ts`, the heading of `rules.md`, the meta in `example.html`). A document that names
+  an earlier version of a template gets the latest one with the same major version, so minor and patch changes
+  must stay compatible; a breaking change takes a new major.
 - **SVG:** separate `.svg` files only, never `data:` URIs.
 - **Database:** schema changes are new Kysely migrations in `adapters/postgres-storage/migrations/`
   (`YYYY-MM-DD-description.ts`), applied at app startup; never edit an applied one.
