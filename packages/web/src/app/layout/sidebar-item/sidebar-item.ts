@@ -3,11 +3,20 @@ import { TranslocoPipe } from '@jsverse/transloco';
 import type { ResumeListItem } from '../resume-list-item';
 import { GlassPanel } from '../../ui/glass-panel/glass-panel';
 import { NgbDropdown, NgbDropdownItem, NgbDropdownMenu, NgbDropdownToggle } from '@ng-bootstrap/ng-bootstrap';
+import { DummyMark } from '../../ui/dummy-mark/dummy-mark';
 
 /** One CV row in the sidebar. Display only for now; hover actions and rename come later. */
 @Component({
   selector: 'mr-sidebar-item',
-  imports: [TranslocoPipe, GlassPanel, NgbDropdown, NgbDropdownToggle, NgbDropdownMenu, NgbDropdownItem],
+  imports: [
+    TranslocoPipe,
+    GlassPanel,
+    NgbDropdown,
+    NgbDropdownToggle,
+    NgbDropdownMenu,
+    NgbDropdownItem,
+    DummyMark,
+  ],
   templateUrl: './sidebar-item.html',
   styleUrl: './sidebar-item.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
