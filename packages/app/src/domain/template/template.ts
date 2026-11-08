@@ -7,9 +7,13 @@ import { readMetaTag } from '../document/meta-tags.ts';
  */
 export type TemplateVariant = 'visual' | 'ats';
 
-/** Port: the templates a CV can name in <meta name="resume:template" content="classic@0.0.3"> (ADR-0006). */
+/**
+ * Port: the templates a CV can name in <meta name="resume:template" content="classic@0.0.4"> (ADR-0006). The lookups
+ * (styles, guide, schema) also know earlier versions of the templates, so a stored CV that names one still validates
+ * and renders as it was written; only `refs` leaves them out.
+ */
 export interface TemplateCatalog {
-  /** Every reference a document may name, e.g. "classic@0.0.3". */
+  /** The current templates, e.g. "classic@0.0.4": what a new CV may name. */
   refs(): readonly string[];
   /** The template's CSS for the variant (visual by default), or null when there is no such template or variant. */
   styles(ref: string, variant?: TemplateVariant): string | null;

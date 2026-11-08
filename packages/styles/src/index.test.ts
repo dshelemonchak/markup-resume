@@ -22,6 +22,18 @@ describe('templateCatalog', () => {
     expect(templateCatalog.styles('classic@9.9.9', 'ats')).toBeNull();
   });
 
+  it('still serves the earlier versions of the templates, without offering them for a new CV', () => {
+    for (const ref of ['classic@0.0.3', 'dev-classic@0.0.1']) {
+      expect(templateCatalog.refs()).not.toContain(ref);
+      expect(templateCatalog.styles(ref)).toContain('.resume-page');
+      expect(templateCatalog.styles(ref, 'ats')).toContain('.resume-columns');
+      expect(templateCatalog.schema(ref)?.classes).toBeDefined();
+      const guide = templateCatalog.guide(ref);
+      expect(guide?.rules).toContain(`version ${ref.split('@')[1]!}`);
+      expect(guide?.example).toContain(`<meta name="resume:template" content="${ref}" />`);
+    }
+  });
+
   it('knows nothing about other references', () => {
     expect(templateCatalog.styles('classic@9.9.9')).toBeNull();
     expect(templateCatalog.guide('modern@0.0.1')).toBeNull();
