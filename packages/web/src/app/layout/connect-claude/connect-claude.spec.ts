@@ -30,10 +30,12 @@ describe('ConnectClaude', () => {
     expect(dialog.open).toBe(false);
   });
 
-  it('explains Claude Code, and that Claude Desktop waits for the hosted version', async () => {
+  it('explains Claude Code, and that Claude Desktop uses the hosted address', async () => {
     const { root } = await render();
-    expect(root.querySelector('#connect-claude-code + p')!.innerHTML).toContain('<code>.mcp.json</code>');
-    expect(root.querySelector('#connect-claude-desktop + p')!.textContent).toContain('hosted version');
+    expect(root.querySelector('#connect-claude-code + p')!.innerHTML).toContain('<code>/mcp</code>');
+    expect(root.querySelector('#connect-claude-desktop + p')!.textContent).toContain(
+      'https://markup-resume.xyz/mcp',
+    );
     expect(root.querySelector('a[download]')).toBeNull();
   });
 
