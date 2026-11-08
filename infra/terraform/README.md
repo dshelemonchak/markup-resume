@@ -36,14 +36,17 @@ terraform apply
 
 Its outputs are what the deploy workflow needs: the `deploy_user` name and the ECR repository URLs.
 
-The deploy user's access key is created by hand when the deploy workflow is set up, not by Terraform, so the secret
-never lands in the state:
+The deploy user's access key is created by hand, not by Terraform, so the secret never lands in the state. It goes
+straight into the repository's GitHub secrets, which the deploy workflow (`.github/workflows/deploy.yml`) reads, and
+nowhere else:
 
 ```bash
-aws iam create-access-key --user-name markup-resume-deploy
+key=$(aws iam create-access-key --user-name markup-resume-deploy \
+  --query 'AccessKey.[AccessKeyId,SecretAccessKey]' --output text)
+gh secret set AWS_ACCESS_KEY_ID --body "$(cut -f1 <<<"$key")"
+gh secret set AWS_SECRET_ACCESS_KEY --body "$(cut -f2 <<<"$key")"
+unset key
 ```
-
-It goes straight into the repository's GitHub secrets and nowhere else.
 
 ## The server
 
@@ -73,33 +76,18 @@ for `compose.prod.yaml`. Then, in this order:
    takes `POSTGRES_PASSWORD` when it creates the database on first start; changing it later takes an `ALTER USER` as
    well.
 
-3. **Images** (until the deploy workflow does this), from the repository root:
-
-   ```bash
-   registry=<account id>.dkr.ecr.eu-north-1.amazonaws.com
-   tag=$(git rev-parse HEAD)
-   aws ecr get-login-password | docker login --username AWS --password-stdin "$registry"
-   docker buildx build --platform linux/arm64 --target runtime -t "$registry/markup-resume-app:$tag" --push .
-   docker buildx build --platform linux/arm64 --target web -t "$registry/markup-resume-web:$tag" --push .
-   aws ssm put-parameter --overwrite --name /markup-resume/APP_IMAGE --value "$registry/markup-resume-app:$tag"
-   aws ssm put-parameter --overwrite --name /markup-resume/WEB_IMAGE --value "$registry/markup-resume-web:$tag"
-   ```
-
-4. **Start** (until the deploy workflow does this): put `compose.prod.yaml` on the server and start the unit, which
-   assembles `/etc/markup-resume/app.env` from the parameters, pulls the images and brings them up:
-
-   ```bash
-   aws ssm send-command --instance-ids <instance_id> --document-name AWS-RunShellScript \
-     --parameters "commands=echo $(base64 < compose.prod.yaml | tr -d '\n') | base64 -d > /opt/markup-resume/compose.prod.yaml && systemctl restart markup-resume"
-   ```
+3. **Deploy:** Actions → Deploy → Run workflow. It builds and pushes the images, sets `APP_IMAGE` and `WEB_IMAGE`,
+   puts `compose.prod.yaml` on the server and restarts the unit, which assembles `/etc/markup-resume/app.env` from the
+   parameters, pulls the images and brings them up. After that, every merge to `main` that changes the app deploys by
+   itself and is released as the next version (a `vX.Y.Z` tag with a GitHub Release).
 
 A shell on the server, without SSH: `aws ssm start-session --target <instance_id>` (needs the Session Manager plugin
 for the AWS CLI). Logs of the first boot are in `/var/log/cloud-init-output.log`, of the unit in
 `journalctl -u markup-resume`.
 
 A change to `server/files/` or `server/user-data.tf` replaces the instance on the next apply: a minute or two of
-downtime, the data volume (database, certificates) moves to the new one, and the parameters and images stay. Only
-step 4 is repeated afterwards.
+downtime, the data volume (database, certificates) moves to the new one, and the parameters and images stay. The new
+instance waits for `compose.prod.yaml`: run the Deploy workflow by hand afterwards.
 
 ## Day to day
 

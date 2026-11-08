@@ -32,8 +32,8 @@ data "aws_iam_policy_document" "deploy" {
     resources = [for repository in aws_ecr_repository.images : repository.arn]
   }
 
-  # Run the deploy commands on the server, and only there: instances tagged as this project's (the server comes in
-  # stage 4), with AWS's shell-script document.
+  # Run the deploy commands on the server, and only there: instances tagged as this project's (../server), with AWS's
+  # shell-script document.
   statement {
     sid       = "DeployToServer"
     actions   = ["ssm:SendCommand"]
@@ -57,6 +57,25 @@ data "aws_iam_policy_document" "deploy" {
     sid       = "DeployResult"
     actions   = ["ssm:GetCommandInvocation", "ssm:ListCommandInvocations"]
     resources = ["*"]
+  }
+
+  # Find the server by its Project tag, so the workflow needs no instance id, which changes when the server is
+  # replaced. The action has no resource of its own.
+  statement {
+    sid       = "FindServer"
+    actions   = ["ssm:DescribeInstanceInformation"]
+    resources = ["*"]
+  }
+
+  # Point the server at the new images (../server/parameters.tf), so a reboot starts the same version. Only these two
+  # parameters: the secrets stay out of reach.
+  statement {
+    sid     = "SetImageTags"
+    actions = ["ssm:PutParameter"]
+    resources = [
+      for name in ["APP_IMAGE", "WEB_IMAGE"] :
+      "arn:aws:ssm:${var.region}:${data.aws_caller_identity.current.account_id}:parameter/markup-resume/${name}"
+    ]
   }
 }
 

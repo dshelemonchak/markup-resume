@@ -1,0 +1,139 @@
+# Production deploy (ADR-0029, stage 5): on a merge to main that changes the app, build the arm64 images, push them to
+# ECR tagged with the commit, point the server at them, restart it through SSM Run Command, check /api/health, and
+# release the next SemVer version (.github/scripts/next-version.sh) as a tag with a GitHub Release.
+name: Deploy
+
+on:
+  push:
+    branches: [main]
+    # Only what ends up in the images or on the server: docs, Terraform and the other workflows do not deploy.
+    paths:
+      - packages/**
+      - package.json
+      - pnpm-lock.yaml
+      - pnpm-workspace.yaml
+      - Dockerfile
+      - .dockerignore
+      - compose.prod.yaml
+      - deploy/**
+      - .github/workflows/deploy.yml
+      - .github/scripts/next-version.sh
+  # By hand (Actions → Deploy → Run workflow): the head of main again, e.g. after the server was replaced.
+  workflow_dispatch:
+
+# One deploy at a time, in the order of the merges; a deploy is never cancelled halfway.
+concurrency:
+  group: deploy
+  cancel-in-progress: false
+
+permissions:
+  contents: write # the version tag and its release
+
+env:
+  AWS_REGION: eu-north-1
+  # The markup-resume-deploy user (infra/terraform/platform/deploy-user.tf); its key is in the repository's secrets.
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  SITE: https://markup-resume.xyz
+
+jobs:
+  deploy:
+    # arm64 like the server: the images build natively, without emulation. Free for public repositories.
+    runs-on: ubuntu-24.04-arm
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0 # the tags and the commits since the last one, for the version
+
+      - name: Version
+        id: version
+        run: echo "version=$(.github/scripts/next-version.sh)" >> "$GITHUB_OUTPUT"
+
+      - name: Sign in to ECR
+        run: |
+          account=$(aws sts get-caller-identity --query Account --output text)
+          # The logs of a public repository are public.
+          echo "::add-mask::$account"
+          registry=$account.dkr.ecr.$AWS_REGION.amazonaws.com
+          echo "REGISTRY=$registry" >> "$GITHUB_ENV"
+          aws ecr get-login-password | docker login --username AWS --password-stdin "$registry"
+
+      - name: Build and push the images
+        run: |
+          push() { # <Dockerfile target> <repository>
+            local image=$REGISTRY/$2:$GITHUB_SHA
+            # Tags are immutable: when the deploy is re-run, the images of this commit are already there.
+            if docker manifest inspect "$image" >/dev/null 2>&1; then
+              echo "$image is already in ECR"
+              return
+            fi
+            # No provenance attestation: it would be one more untagged image in the repository, counted by the
+            # lifecycle rule that keeps the last 10.
+            docker buildx build --platform linux/arm64 --provenance=false --target "$1" -t "$image" --push .
+          }
+          push runtime markup-resume-app
+          push web markup-resume-web
+
+      - name: Point the server at the new images
+        run: |
+          aws ssm put-parameter --overwrite --name /markup-resume/APP_IMAGE \
+            --value "$REGISTRY/markup-resume-app:$GITHUB_SHA" >/dev/null
+          aws ssm put-parameter --overwrite --name /markup-resume/WEB_IMAGE \
+            --value "$REGISTRY/markup-resume-web:$GITHUB_SHA" >/dev/null
+
+      - name: Restart the server with them
+        run: |
+          instance=$(aws ssm describe-instance-information --filters Key=tag:Project,Values=markup-resume \
+            --query 'InstanceInformationList[0].InstanceId' --output text)
+          if [[ $instance == None ]]; then
+            echo "::error::No server tagged Project=markup-resume is online in SSM."
+            exit 1
+          fi
+
+          # This commit's compose.prod.yaml, then the unit: env file from SSM, ECR login, pull, up -d. The unit's
+          # log is printed either way.
+          script=$(jq -n --arg compose "$(base64 -w0 compose.prod.yaml)" '{commands: [
+            "set -e",
+            "echo \($compose) | base64 -d > /opt/markup-resume/compose.prod.yaml",
+            "systemctl restart markup-resume || failed=1",
+            "journalctl -u markup-resume -n 40 --no-pager -o cat",
+            "exit ${failed:-0}"
+          ]}')
+          command=$(aws ssm send-command --instance-ids "$instance" --document-name AWS-RunShellScript \
+            --comment "deploy ${GITHUB_SHA::7}" --parameters "$script" --query Command.CommandId --output text)
+
+          # Up to 10 minutes: pulling a new image takes most of it.
+          for _ in $(seq 120); do
+            status=$(aws ssm get-command-invocation --command-id "$command" --instance-id "$instance" \
+              --query Status --output text 2>/dev/null || echo Pending)
+            if [[ $status != Pending && $status != InProgress && $status != Delayed ]]; then
+              break
+            fi
+            sleep 5
+          done
+          aws ssm get-command-invocation --command-id "$command" --instance-id "$instance" \
+            --query '[StandardOutputContent, StandardErrorContent]' --output text
+          if [[ $status != Success ]]; then
+            echo "::error::The deploy command on $instance ended with: $status"
+            exit 1
+          fi
+
+      - name: Check the site
+        run: |
+          for _ in $(seq 24); do
+            if curl -fsS -o /dev/null "$SITE/api/health"; then
+              echo "$SITE is healthy"
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "::error::$SITE/api/health did not answer 200 within 2 minutes."
+          exit 1
+
+      - name: Release
+        if: steps.version.outputs.version != ''
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: gh release create "$VERSION" --target "$GITHUB_SHA" --title "$VERSION" --generate-notes
