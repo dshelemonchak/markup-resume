@@ -50,6 +50,12 @@ jobs:
         id: version
         run: echo "version=$(.github/scripts/next-version.sh)" >> "$GITHUB_OUTPUT"
 
+      # The version the UI shows: the one released by this run, or, when the run repeats a released commit, its tag.
+      - name: App version
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: echo "APP_VERSION=${VERSION:-$(git describe --exact-match --tags --match 'v[0-9]*.[0-9]*.[0-9]*' HEAD)}" >> "$GITHUB_ENV"
+
       - name: Sign in to ECR
         run: |
           account=$(aws sts get-caller-identity --query Account --output text)
@@ -70,7 +76,8 @@ jobs:
             fi
             # No provenance attestation: it would be one more untagged image in the repository, counted by the
             # lifecycle rule that keeps the last 10.
-            docker buildx build --platform linux/arm64 --provenance=false --target "$1" -t "$image" --push .
+            docker buildx build --platform linux/arm64 --provenance=false --build-arg APP_VERSION="$APP_VERSION" \
+              --target "$1" -t "$image" --push .
           }
           push runtime markup-resume-app
           push web markup-resume-web

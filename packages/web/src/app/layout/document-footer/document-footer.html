@@ -22,4 +22,7 @@
 
   <span class="divider" aria-hidden="true"></span>
   <mr-zoom-control [(zoom)]="zoom" [scale]="scale()" />
+
+  <span class="divider" aria-hidden="true"></span>
+  <span class="version" [title]="'footer.version' | transloco">{{ version }}</span>
 </footer>
