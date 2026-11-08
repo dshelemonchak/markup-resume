@@ -1,5 +1,5 @@
 /*
- * Markup Résumé template "classic", version 0.0.3: the original Figma design, one A4 page with a left sidebar.
+ * Markup Résumé template "classic", version 0.0.4: the original Figma design, one A4 page with a left sidebar.
  * Inserted into the document by Markup Résumé as <style id="resume-lib"> (ADR-0006); documents never edit it.
  *
  * Every size is in px of the Figma frame, as in the design. The frame is 989 px wide; .resume-page zooms it to

@@ -49,6 +49,9 @@ const instructions = (refs: readonly string[]) =>
     'Before you create a CV with create_resume or change one with write_resume, call read_template for its template ' +
       'and follow those rules exactly: they list the only class names and structure the template accepts.',
     'Never write CSS: Markup Résumé puts the template styles into the document itself.',
+    'A CV must fit one A4 page; read_template gives the page size and block heights. Add them up before you save. ' +
+      'If the CV does not fit, merge skills into groups and remove the least relevant content, as the template ' +
+      'rules say, and tell the user what you cut. Never shrink fonts or spacing to make it fit.',
     'Every change is kept as a numbered revision. Address a CV by its slug for the current revision ("my-resume"), or ' +
       'by slug@number for another one ("my-resume@7"). Write by slug alone to build on the current revision. Write to ' +
       'slug@number only when the user asks to start again from that revision: the result leaves out every newer ' +
@@ -216,7 +219,8 @@ export function createMcpServer(
       title: 'Read template',
       description:
         "Returns a CV template's design system: the document structure, the only class names it accepts, " +
-        'the rules for the text, and a complete example document. Call it before create_resume or write_resume, ' +
+        'the rules for the text, the page limits (page size, margins, block heights, and what to cut when the CV ' +
+        'is too long) and a complete example document. Call it before create_resume or write_resume, ' +
         'for the template the CV names in resume:template (or the one you will use for a new CV).',
       inputSchema: z.object({
         template: z.string().describe(`Template reference, one of: ${templates.refs().join(', ')}.`),

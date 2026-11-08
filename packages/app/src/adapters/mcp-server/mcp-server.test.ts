@@ -207,6 +207,13 @@ describe('MCP server', () => {
     expect(instructions).toContain('classic@0.0.3');
   });
 
+  it('tells Claude in the handshake that the CV is one page and what to cut when it is not', () => {
+    const instructions = client.getInstructions();
+    expect(instructions).toContain('fit one A4 page');
+    expect(instructions).toContain('merge skills into groups');
+    expect(instructions).toContain('Never shrink fonts');
+  });
+
   it("returns a template's rules with its example, and names the templates for an unknown one", async () => {
     const result = await client.callTool({ name: 'read_template', arguments: { template: 'classic@0.0.3' } });
     expect(textOf(result)).toBe('# Rules\n\n## Example document\n\n```html\n<!doctype html>\n```\n');
