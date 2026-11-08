@@ -86,7 +86,8 @@
     "pageSize": "{{ pages }} · {{ size }}",
     "widthMm": "{{ width }} mm",
     "exported": "Exported 14:32",
-    "report": "Validation report"
+    "report": "Validation report",
+    "version": "App version"
   },
   "zoom": {
     "label": "Zoom",

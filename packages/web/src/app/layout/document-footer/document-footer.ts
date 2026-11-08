@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, input, model } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, model } from '@angular/core';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { DummyMark } from '../../ui/dummy-mark/dummy-mark';
 import { GlassPanel } from '../../ui/glass-panel/glass-panel';
@@ -7,10 +7,11 @@ import type { ZoomSetting } from '../../ui/zoom';
 import type { DocumentInfo } from '../document-info';
 import type { PreviewMode } from '../preview-mode';
 import { injectTranslate } from '../../i18n/i18n';
+import { RELEASE_VERSION } from '../../version';
 
 /**
  * Status bar of the workspace, under the document.
- * Working now: pages and font measured in the preview, and the zoom controls. The validation
+ * Working now: pages and font measured in the preview, the zoom controls and the app version. The validation
  * summary, export time and the validation report are placeholders.
  */
 @Component({
@@ -25,6 +26,7 @@ export class DocumentFooter {
   readonly mode = input<PreviewMode>('visual');
   readonly zoom = model<ZoomSetting>('fit');
 
+  protected readonly version = inject(RELEASE_VERSION);
   private readonly translate = injectTranslate();
 
   /**
