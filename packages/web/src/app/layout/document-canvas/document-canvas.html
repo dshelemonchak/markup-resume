@@ -11,5 +11,10 @@
       [style.transform]="'scale(' + scale() + ')'"
       (load)="onLoad()"
     ></iframe>
+    @if (overflowing()) {
+      <div class="overflow" role="status">
+        <span class="visually-hidden">{{ 'canvas.overflow' | transloco }}</span>
+      </div>
+    }
   </div>
 </div>

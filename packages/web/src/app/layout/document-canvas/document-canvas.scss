@@ -37,3 +37,14 @@
   border: 0;
   transform-origin: 0 0;
 }
+
+// The CV is longer than its page: a red shadow along the bottom edge of the sheet.
+.overflow {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  height: 48px;
+  background: linear-gradient(to top, rgb(var(--bs-danger-rgb) / 0.55), rgb(var(--bs-danger-rgb) / 0));
+  pointer-events: none;
+}
