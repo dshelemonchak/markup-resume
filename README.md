@@ -1,35 +1,60 @@
 # Markup Résumé
 
+[![Website](https://img.shields.io/website?url=https%3A%2F%2Fmarkup-resume.xyz&label=markup-resume.xyz&up_message=online&down_message=offline)](https://markup-resume.xyz)
+[![Release](https://img.shields.io/github/v/release/dshelemonchak/markup-resume)](https://github.com/dshelemonchak/markup-resume/releases)
+[![CI](https://github.com/dshelemonchak/markup-resume/actions/workflows/check.yml/badge.svg)](https://github.com/dshelemonchak/markup-resume/actions/workflows/check.yml)
+[![Deploy](https://github.com/dshelemonchak/markup-resume/actions/workflows/deploy.yml/badge.svg)](https://github.com/dshelemonchak/markup-resume/actions/workflows/deploy.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue)](LICENSE)
+
 A workspace for tailoring CVs to different roles with the AI assistant you already use. Switch between CVs
 from the sidebar, edit through chat, see changes live and export a PDF that is checked before download.
 
 Content editing happens through MCP. The application keeps your CVs together and gives you a place to review
 the result, pin the versions you use most and export the finished document.
 
-**Status:** early development. The local MCP workflow works with both Claude Code and Codex, with one bundled
-template and sign-in with GitHub. Hosting and integrations with Claude Desktop and ChatGPT Desktop are planned.
+**Live at [markup-resume.xyz](https://markup-resume.xyz).** Sign-in is limited to an allow-list of GitHub accounts
+for now; open registration comes after a page for managing connected clients
+([#34](https://github.com/dshelemonchak/markup-resume/issues/34)).
+
+**Status:** early development, running in production. The service is hosted on AWS, provisioned with Terraform
+and deployed by GitHub Actions on every merge to `main` that changes the app. claude.ai connects to the hosted MCP
+endpoint over OAuth 2.1; locally, Claude Code and Codex use the same tools. One bundled template, sign-in with
+GitHub. Integration with ChatGPT Desktop is planned.
 
 [Stack](#tech-stack) · [Purpose](#why-this-project) · [Features](#features) · [Screenshots](#screenshots) ·
-[Setup](#getting-started) · [MCP](#mcp-integration) · [Architecture](#project-structure-and-architecture) ·
-[Development](#development) · [Roadmap](#roadmap)
+[Production](#production) · [Setup](#getting-started) · [MCP](#mcp-integration) ·
+[Architecture](#project-structure-and-architecture) · [Development](#development) · [Roadmap](#roadmap)
 
 ## Tech stack
 
 ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
 ![Angular](https://img.shields.io/badge/Angular-22-DD0031?style=for-the-badge&logo=angular&logoColor=white)
 ![RxJS](https://img.shields.io/badge/RxJS-B7178C?style=for-the-badge&logo=reactivex&logoColor=white)
+![Bootstrap](https://img.shields.io/badge/Bootstrap-7952B3?style=for-the-badge&logo=bootstrap&logoColor=white)
 ![Node.js](https://img.shields.io/badge/Node.js-24-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)
+![Hono](https://img.shields.io/badge/Hono-E36002?style=for-the-badge&logo=hono&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-18-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)
+![MCP](https://img.shields.io/badge/MCP-000000?style=for-the-badge&logo=modelcontextprotocol&logoColor=white)
+![Zod](https://img.shields.io/badge/Zod-3E67B1?style=for-the-badge&logo=zod&logoColor=white)
+![AWS](https://img.shields.io/badge/AWS-232F3E?style=for-the-badge)
+![Terraform](https://img.shields.io/badge/Terraform-844FBA?style=for-the-badge&logo=terraform&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white)
+![Caddy](https://img.shields.io/badge/Caddy-1F88C0?style=for-the-badge&logo=caddy&logoColor=white)
 ![GitHub Actions](https://img.shields.io/badge/GitHub_Actions-2088FF?style=for-the-badge&logo=githubactions&logoColor=white)
 ![Vitest](https://img.shields.io/badge/Vitest-6E9F18?style=for-the-badge&logo=vitest&logoColor=white)
+![pnpm](https://img.shields.io/badge/pnpm-F69220?style=for-the-badge&logo=pnpm&logoColor=white)
 
 - **Frontend:** Angular standalone components, signals, zoneless change detection, RxJS, SCSS, Bootstrap and
   Transloco. Live document updates through Server-Sent Events and a sandboxed preview.
 - **Backend:** Node.js, TypeScript, Hono, Kysely and PostgreSQL. Ports and adapters, SQL migrations, transactional
-  revision storage, document validation and an MCP server with Zod tool schemas.
-- **Delivery and quality:** pnpm monorepo, Docker Compose and GitHub Actions; Vitest, Angular component tests,
-  real PostgreSQL and Chromium integration tests, ESLint-enforced architecture boundaries and Prettier.
+  revision storage, document validation, an MCP server with Zod tool schemas and its own OAuth 2.1 authorisation
+  server for remote clients. PDF export through headless Chromium, checked with Poppler.
+- **Infrastructure:** AWS (EC2 Graviton, ECR, SSM Parameter Store and Session Manager, S3), all of it in
+  Terraform. Docker Compose on the server, with Caddy serving the Angular build and terminating TLS with Let's
+  Encrypt certificates.
+- **Delivery and quality:** pnpm monorepo, multi-stage Docker images, GitHub Actions for CI and continuous
+  deployment with SemVer releases from conventional commits; Vitest, Angular component tests, real PostgreSQL and
+  Chromium integration tests, ESLint-enforced architecture boundaries and Prettier.
 
 ## Why this project
 
@@ -78,6 +103,40 @@ guarantee acceptance by every applicant tracking system (ATS).
 
 _The workspace with one pinned CV and three alternative versions. Controls marked “dummy” are still under
 development._
+
+## Production
+
+The hosted service at [markup-resume.xyz](https://markup-resume.xyz) runs on one AWS instance. Everything around it
+is code in this repository: the infrastructure in [infra/terraform](infra/terraform/README.md), the runtime in
+[compose.prod.yaml](compose.prod.yaml) and [deploy/Caddyfile](deploy/Caddyfile), the pipeline in
+[deploy.yml](.github/workflows/deploy.yml).
+
+```mermaid
+flowchart LR
+  merge[Merge to main] --> gha[GitHub Actions<br/>arm64 build]
+  gha -->|images, tag = commit| ecr[(ECR)]
+  gha -->|image tags| ssm[(SSM Parameter Store)]
+  gha -->|Run Command| server
+  subgraph server[EC2 t4g.small · Docker Compose]
+    caddy[Caddy<br/>TLS, Angular build] --> app[Node.js app<br/>API, MCP, PDF export] --> db[(PostgreSQL)]
+  end
+  client[Browser, Claude] -->|HTTPS| caddy
+  ecr -.->|pull| server
+  ssm -.->|settings, secrets| server
+```
+
+- **Continuous deployment.** A merge to `main` that changes the app builds arm64 images, pushes them to ECR tagged
+  with the commit, restarts the stack over SSM Run Command, checks `/api/health` and publishes the next SemVer
+  version as a [GitHub Release](https://github.com/dshelemonchak/markup-resume/releases).
+- **No SSH.** The security group opens only ports 80 and 443; shell access goes through SSM Session Manager.
+- **Secrets stay out of git, images and Terraform state.** They live in SSM Parameter Store and are assembled into
+  the Compose environment when the stack starts. Terraform creates the parameters with write-only placeholders.
+- **Data survives the server.** PostgreSQL and Caddy's certificates live on a separate encrypted EBS volume, so
+  the instance can be replaced from Terraform without losing them.
+- **Access.** Sign-in is limited to an allow-list of GitHub accounts; MCP clients are authorised by the app's own
+  OAuth 2.1 server.
+
+Backups and monitoring are the next steps on the [roadmap](#roadmap).
 
 ## Getting started
 
@@ -149,8 +208,8 @@ and all stored CVs and revisions.
 
 This Compose setup is for local development. The UI and API need a sign-in; MCP serves only this machine (its port
 is published on `127.0.0.1`) and acts for `OWNER_GITHUB_ID`. The web port is published on all host interfaces by
-default. Do not expose this stack to the internet; hosted deployment is part
-of the roadmap.
+default. Do not expose this stack to the internet; the hosted setup is described under
+[Production](#production).
 
 ### Configuration
 
@@ -210,8 +269,8 @@ which a local server does not have.
 
 **Hosted on HTTPS, MCP is authorised with OAuth 2.1,** served by the app itself. On the first connection the client
 registers, opens the browser at Markup Résumé, where you sign in with GitHub and allow it; it then works on your CVs
-with a short-lived access token that it refreshes. Claude Desktop and claude.ai connect this way once the service is
-hosted. `MCP_URL` decides which: `https` for OAuth, `http` on localhost for a local run.
+with a short-lived access token that it refreshes. This is how claude.ai connects to
+`https://markup-resume.xyz/mcp`. `MCP_URL` decides which: `https` for OAuth, `http` on localhost for a local run.
 
 ### Available tools
 
@@ -255,7 +314,11 @@ packages/
       import-files.ts
   web/              Angular viewer and application controls
   styles/           Versioned templates, fonts and SVG icons
-.github/workflows/  CI checks and database tests
+infra/terraform/    AWS: state bucket, ECR and deploy user, the server
+deploy/             Caddyfile of the production web image
+compose.prod.yaml   Production stack: Caddy, app, PostgreSQL
+.github/workflows/  CI checks, database tests, Terraform validation and deploy
+.github/scripts/    Release version from conventional commits
 .run/               Shared JetBrains run configurations
 ```
 
@@ -291,7 +354,8 @@ docker compose exec dev pnpm --filter @markup-resume/app db:types
 ```
 
 The main test suite includes a real Chromium render. Database tests create and remove a separate test database.
-GitHub Actions runs both the main checks and PostgreSQL tests for pull requests and pushes to `main`.
+GitHub Actions runs the main checks, PostgreSQL tests and Terraform validation for pull requests and pushes to
+`main`; merges that change the app are deployed (see [Production](#production)).
 
 Shared JetBrains configurations in `.run/` start **app + web + dev** or just **db**. The app runs with Node's watch mode;
 Angular uses its development server. See [AGENTS.md](AGENTS.md) for repository conventions and layer rules.
@@ -309,7 +373,8 @@ Angular uses its development server. See [AGENTS.md](AGENTS.md) for repository c
 
 ## Roadmap
 
-The local MCP editing, live preview, revision storage, pinning and checked PDF export workflow is implemented.
+The MCP editing, live preview, revision storage, pinning and checked PDF export workflow is implemented and runs
+in production.
 The following work is planned; content editing remains through MCP.
 
 ### CV workflow
@@ -339,11 +404,21 @@ The following work is planned; content editing remains through MCP.
 
 - [x] **Sign in with GitHub:** individual accounts, browser sessions and access scoped to each user's CVs; no
       application passwords.
+- [x] **OAuth 2.1 for remote MCP:** the app is its own authorisation server; claude.ai connects to the hosted
+      endpoint.
 - [ ] **Sign in with Google.**
-- [ ] **Connect desktop assistants:** OAuth for remote MCP, with Claude Desktop and ChatGPT Desktop as primary
-      clients, alongside Claude Code and Codex. Verify login and the complete editing workflow in each client.
-- [ ] **Deploy the hosted service:** HTTPS on an OCI ARM VM, automated image builds and deployment, backups and
-      monitoring. Serve CV documents from a separate origin from the signed-in application.
+- [ ] **Open registration:** a page of connected clients with token revocation
+      ([#34](https://github.com/dshelemonchak/markup-resume/issues/34)), then sign-in beyond the allow-list.
+- [ ] **Connect desktop assistants:** verify login and the complete editing workflow in Claude Desktop and ChatGPT
+      Desktop, alongside Claude Code and Codex.
+
+### Hosting
+
+- [x] **Hosted service:** AWS EC2 (Graviton), HTTPS through Caddy and Let's Encrypt, infrastructure in Terraform,
+      continuous deployment with versioned releases.
+- [ ] **Backups:** a nightly `pg_dump` to S3 and a tested restore.
+- [ ] **Monitoring:** container logs in CloudWatch, alarms by email.
+- [ ] **Separate origin for CV documents** from the signed-in application.
 
 Fact-change detection is still being explored: the definition of a new fact and the treatment of changes to
 dates, titles, companies or metrics have not been settled.
