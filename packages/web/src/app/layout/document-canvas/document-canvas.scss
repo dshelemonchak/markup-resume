@@ -45,6 +45,6 @@
   bottom: 0;
   left: 0;
   height: 48px;
-  background: linear-gradient(to top, rgb(var(--bs-danger-rgb) / 0.55), rgb(var(--bs-danger-rgb) / 0));
+  background: linear-gradient(to top, var(--mr-overflow-color), transparent);
   pointer-events: none;
 }

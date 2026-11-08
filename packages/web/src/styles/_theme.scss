@@ -68,6 +68,10 @@
   // Stripes of the "dummy" overlay on placeholder UI: Bootstrap danger, muted.
   --mr-dummy-color: rgb(220 53 69 / 0.38);
 
+  // The shadow under a CV that is longer than its page: Bootstrap danger. Its --bs-danger-rgb is comma-separated, so
+  // it cannot take an alpha after a slash.
+  --mr-overflow-color: rgb(220 53 69 / 0.55);
+
   // Layout rhythm.
   --mr-gap: 12px;
 }
