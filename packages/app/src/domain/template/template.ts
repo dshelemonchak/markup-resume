@@ -83,10 +83,16 @@ export function withTemplateStyles(
 }
 
 const SKILL_LIST = /<ul class="resume-skill-list">[\s\S]*?<\/ul>/g;
+const SKILL_GROUP_TITLE = /(<div class="resume-skill-group">\s*<h3\b[^>]*>[\s\S]*?)(<\/h3>)/g;
 
 /** The copy of a document that the ATS version shows and exports: sections in ATS order, skills as text lines. */
 function asAtsCopy(html: string): string {
-  return withSkillCommas(inAtsOrder(html));
+  return withSkillGroupColons(withSkillCommas(inAtsOrder(html)));
+}
+
+/** Each skill group's title ends with a colon ("Frontend: Angular, RxJS"), in the markup for the same reason as the commas. */
+function withSkillGroupColons(html: string): string {
+  return html.replace(SKILL_GROUP_TITLE, '$1:$2');
 }
 
 /**

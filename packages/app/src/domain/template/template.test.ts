@@ -59,6 +59,17 @@ describe('withTemplateStyles', () => {
     );
   });
 
+  it('ends each skill group title with a colon in the ATS version only', () => {
+    const html = doc(template).replace(
+      '<body></body>',
+      '<body><div class="resume-skill-group"><h3>Frontend</h3><ul class="resume-skill-list"><li>RxJS</li></ul></div></body>',
+    );
+    const ats = withTemplateStyles(html, catalog, 'ats');
+    expect(ats.kind === 'styled' && ats.html).toContain('<h3>Frontend:</h3>');
+    const visual = withTemplateStyles(html, catalog);
+    expect(visual.kind === 'styled' && visual.html).toContain('<h3>Frontend</h3>');
+  });
+
   it('inserts the ATS styles for the ATS version, and refuses a template without one', () => {
     const withAts: TemplateCatalog = {
       ...catalog,
