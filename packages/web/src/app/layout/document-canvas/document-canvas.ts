@@ -23,6 +23,13 @@ import { type DocumentInfo, pageCount, primaryFontFamily } from '../document-inf
 const PAGE = { width: 794, height: 1123 } as const;
 
 /**
+ * Pages a CV may take: the templates are one A4 page, and their rules tell Claude so. The designed version is
+ * measured as it prints: its screen padding is the @page margin, so a document taller than the A4 sheet runs onto a
+ * second page. The ATS version is one column and runs longer by design, so it is not held to this.
+ */
+const MAX_PAGES = 1;
+
+/**
  * Preview of one CV document. The CV is a standalone HTML file rendered in a sandboxed iframe,
  * so the app's styles and the CV's styles never mix and the preview matches the PDF render:
  * no scripts run inside (no allow-scripts), but same origin lets the app measure the document
@@ -68,6 +75,7 @@ export class DocumentCanvas {
     font: this.font(),
     scale: this.scale(),
   }));
+  protected readonly overflowing = computed(() => this.mode() === 'visual' && this.info().pages > MAX_PAGES);
 
   constructor() {
     const destroyRef = inject(DestroyRef);

@@ -101,7 +101,8 @@
     "pressToCopy": "Press ⌘C"
   },
   "canvas": {
-    "title": "CV preview"
+    "title": "CV preview",
+    "overflow": "The CV is longer than one page"
   },
   "dialog": {
     "close": "Close"

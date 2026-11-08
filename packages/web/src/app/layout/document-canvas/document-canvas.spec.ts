@@ -56,4 +56,40 @@ describe('DocumentCanvas', () => {
     await fixture.whenStable();
     expect(frame.style.height).toBe('1125px');
   });
+
+  describe('overflow shadow', () => {
+    /** Loads a frame document of the given height. */
+    async function load(fixture: Awaited<ReturnType<typeof render>>['fixture'], height: number) {
+      const frame = (fixture.nativeElement as HTMLElement).querySelector('iframe')!;
+      const document = window.document.implementation.createHTMLDocument('CV');
+      Object.defineProperty(frame, 'contentDocument', { value: document, configurable: true });
+      Object.defineProperty(document.documentElement, 'scrollHeight', { value: height, configurable: true });
+      document.documentElement.getBoundingClientRect = () => ({ height }) as DOMRect;
+      frame.dispatchEvent(new Event('load'));
+      await fixture.whenStable();
+    }
+    const shadow = (root: HTMLElement) => root.querySelector('.overflow');
+
+    it('shows when the CV is taller than one page', async () => {
+      const { fixture, root } = await render();
+      await load(fixture, 1300);
+      expect(shadow(root)).not.toBeNull();
+      expect(shadow(root)!.textContent).toContain('The CV is longer than one page');
+    });
+
+    it('stays away when the CV fits the page, to the sub-pixel rounding of the measure', async () => {
+      const { fixture, root } = await render();
+      await load(fixture, 1123);
+      expect(shadow(root)).toBeNull();
+      await load(fixture, 1124.59);
+      expect(shadow(root)).toBeNull();
+    });
+
+    it('stays away in the ATS version, which is one column and may run longer', async () => {
+      const { fixture, root } = await render();
+      fixture.componentRef.setInput('mode', 'ats');
+      await load(fixture, 1300);
+      expect(shadow(root)).toBeNull();
+    });
+  });
 });
