@@ -117,11 +117,18 @@ export class DocumentCanvas {
    * Height for the frame, and the font. The frame must be at least as tall as the document, or the document
    * scrolls inside it: a vertical scrollbar, which then takes width and adds a horizontal one. scrollHeight
    * rounds a fractional height down, so the layout height is rounded up instead.
+   *
+   * scrollHeight is never below the frame's own height, so a frame left tall by the previous CV would report that
+   * height again and never shrink. The frame is set to the page height for the measure, and to the result after it.
    */
   private measure(document: Document): void {
+    const frame = this.frame().nativeElement;
+    frame.style.height = `${PAGE.height}px`;
     const root = document.documentElement;
     const height = Math.max(root.scrollHeight, Math.ceil(root.getBoundingClientRect().height));
-    this.contentHeight.set(Math.max(PAGE.height, height));
+    const contentHeight = Math.max(PAGE.height, height);
+    frame.style.height = `${contentHeight}px`;
+    this.contentHeight.set(contentHeight);
     const view = document.defaultView;
     this.font.set(
       view && document.body ? primaryFontFamily(view.getComputedStyle(document.body).fontFamily) : null,
