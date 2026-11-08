@@ -22,16 +22,25 @@ describe('templateCatalog', () => {
     expect(templateCatalog.styles('classic@9.9.9', 'ats')).toBeNull();
   });
 
-  it('still serves the earlier versions of the templates, without offering them for a new CV', () => {
-    for (const ref of ['classic@0.0.3', 'dev-classic@0.0.1']) {
-      expect(templateCatalog.refs()).not.toContain(ref);
-      expect(templateCatalog.styles(ref)).toContain('.resume-page');
-      expect(templateCatalog.styles(ref, 'ats')).toContain('.resume-columns');
-      expect(templateCatalog.schema(ref)?.classes).toBeDefined();
-      const guide = templateCatalog.guide(ref);
-      expect(guide?.rules).toContain(`version ${ref.split('@')[1]!}`);
-      expect(guide?.example).toContain(`<meta name="resume:template" content="${ref}" />`);
+  it('gives a document that names an earlier version of a template the latest one of the same major', () => {
+    for (const [old, latest] of [
+      ['classic@0.0.3', 'classic@0.0.4'],
+      ['classic@0.0.1', 'classic@0.0.4'],
+      ['dev-classic@0.0.1', 'dev-classic@0.0.2'],
+    ] as const) {
+      expect(templateCatalog.styles(old)).toBe(templateCatalog.styles(latest));
+      expect(templateCatalog.styles(old, 'ats')).toBe(templateCatalog.styles(latest, 'ats'));
+      expect(templateCatalog.schema(old)).toEqual(templateCatalog.schema(latest));
+      expect(templateCatalog.guide(old)).toEqual(templateCatalog.guide(latest));
+      expect(templateCatalog.refs()).not.toContain(old);
     }
+  });
+
+  it('does not know a later version than the latest, or another major', () => {
+    expect(templateCatalog.styles('classic@0.0.5')).toBeNull();
+    expect(templateCatalog.styles('classic@0.1.0')).toBeNull();
+    expect(templateCatalog.styles('classic@1.0.0')).toBeNull();
+    expect(templateCatalog.styles('classic@latest')).toBeNull();
   });
 
   it('knows nothing about other references', () => {

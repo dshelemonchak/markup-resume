@@ -9,11 +9,11 @@ export type TemplateVariant = 'visual' | 'ats';
 
 /**
  * Port: the templates a CV can name in <meta name="resume:template" content="classic@0.0.4"> (ADR-0006). The lookups
- * (styles, guide, schema) also know earlier versions of the templates, so a stored CV that names one still validates
- * and renders as it was written; only `refs` leaves them out.
+ * (styles, guide, schema) also accept an earlier version of a template with the same major and answer with the latest
+ * one, so a stored CV keeps working after a minor or patch change; only `refs` leaves the earlier ones out.
  */
 export interface TemplateCatalog {
-  /** The current templates, e.g. "classic@0.0.4": what a new CV may name. */
+  /** The latest version of each template, e.g. "classic@0.0.4": what a new CV names. */
   refs(): readonly string[];
   /** The template's CSS for the variant (visual by default), or null when there is no such template or variant. */
   styles(ref: string, variant?: TemplateVariant): string | null;

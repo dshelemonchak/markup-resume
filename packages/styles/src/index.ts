@@ -1,7 +1,7 @@
 // The style library (ADR-0006): CV templates with their rules for Claude, plus the fonts and icons they use.
 // Template files are read on every call, not cached: the MCP server runs for as long as Claude is open, and
 // an edit to a template's files must reach Claude without restarting it. A new template (a new entry in
-// TEMPLATES or ARCHIVED_TEMPLATES) still needs a restart, as does the template list in the MCP handshake.
+// TEMPLATES) still needs a restart, as does the template list in the MCP handshake.
 import { existsSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
@@ -12,25 +12,47 @@ export const fontsDir = fileURLToPath(new URL('fonts/inter/', PACKAGE_DIR));
 export const iconsDir = fileURLToPath(new URL('icons/', PACKAGE_DIR));
 
 /**
- * The current templates by reference: what a document names in <meta name="resume:template">, "<name>@<semver>",
- * mapped to its folder under templates/. Only these are offered for a new CV.
+ * The templates by reference: "<name>@<semver>" mapped to its folder under templates/. This is the latest version
+ * of each template; a document may also name an earlier one (see folderOf).
  */
 const TEMPLATES: ReadonlyMap<string, string> = new Map([
   ['classic@0.0.4', 'classic'],
   ['dev-classic@0.0.2', 'dev-classic'],
 ]);
 
-/**
- * Earlier versions of the templates, frozen as they were released: a stored CV that names one keeps its look and
- * its rules. When a template's version is bumped, copy its files to templates/archive/<ref>/ and list it here.
- */
-const ARCHIVED_TEMPLATES: ReadonlyMap<string, string> = new Map([
-  ['classic@0.0.3', 'archive/classic@0.0.3'],
-  ['dev-classic@0.0.1', 'archive/dev-classic@0.0.1'],
-]);
+/** "classic@0.0.3" as its name and version numbers, or null when it is not that shape. */
+function parseRef(ref: string): { name: string; version: number[] } | null {
+  const match = /^([\w-]+)@(\d+)\.(\d+)\.(\d+)$/.exec(ref);
+  return match ? { name: match[1]!, version: [Number(match[2]), Number(match[3]), Number(match[4])] } : null;
+}
 
-/** A template's folder under templates/, current or archived; undefined for an unknown reference. */
-const folderOf = (ref: string): string | undefined => TEMPLATES.get(ref) ?? ARCHIVED_TEMPLATES.get(ref);
+const olderOrSame = (a: number[], b: number[]): boolean =>
+  a[0]! < b[0]! || (a[0] === b[0] && (a[1]! < b[1]! || (a[1] === b[1] && a[2]! <= b[2]!)));
+
+/**
+ * A template's folder under templates/. A document that names an earlier version of a template (a stored CV from
+ * before a minor or patch change) gets the latest one with the same major version: those changes stay compatible,
+ * and a breaking change takes a new major, which leaves the old references unknown. A later version than the
+ * latest is unknown.
+ */
+function folderOf(ref: string): string | undefined {
+  const exact = TEMPLATES.get(ref);
+  const wanted = parseRef(ref);
+  if (exact !== undefined || wanted === null) {
+    return exact;
+  }
+  for (const [latestRef, folder] of TEMPLATES) {
+    const latest = parseRef(latestRef);
+    if (
+      latest?.name === wanted.name &&
+      latest.version[0] === wanted.version[0] &&
+      olderOrSame(wanted.version, latest.version)
+    ) {
+      return folder;
+    }
+  }
+  return undefined;
+}
 
 /**
  * The versions of a template's look: the designed one, and one column for applicant tracking systems
@@ -49,7 +71,7 @@ function read(
 
 /** The templates as Markup Résumé's TemplateCatalog port expects them. */
 export const templateCatalog = {
-  /** The current templates, which a new CV may use; the archived versions still work for CVs that name them. */
+  /** The latest version of each template: what a new CV names. */
   refs: (): readonly string[] => [...TEMPLATES.keys()],
   /**
    * The CSS Markup Résumé inserts into the document. The ATS variant is the template's CSS with ats/<name>.css
