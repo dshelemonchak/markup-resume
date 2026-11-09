@@ -141,8 +141,14 @@ accent underline and `aria-current="page"`.
 | `/account`      | Account      | name, sign-in method, numbers, Claude connections, sign out                                 |
 
 The CV editor's right panel holds the vacancy fields (link, company, position, location, status) and "Mark as
-applied with @N". Both sidebars are resizable (`role="separator"`). The status bar under the sheet shows validation,
-pages and width, font, export time, the validation report, zoom and the app version.
+applied with @N". Both sidebars are resizable (`role="separator"`).
+
+The toolbar above the sheet is one row: the Visual / ATS segmented control, the CV's status chip, "Showing
+`slug.html`" and Export PDF. The status bar under the sheet has the toolbar's height and shows validation, pages and
+width, font, export time, the validation report, the app version and the zoom. It stays on one line: as it narrows,
+the report, export time, font, validation and pages leave in that order; the zoom, in the same segmented track as
+Visual / ATS, always stays at the right end. Menus over a sidebar row appear on hover or keyboard focus, on a glass
+backing over the row's end.
 
 ### Responsive
 

@@ -20,18 +20,18 @@ async function render(resume: ResumeListItem | null, mode: PreviewMode = 'visual
 }
 
 describe('DocumentHeader', () => {
-  it('shows the selected CV title, file and status', async () => {
+  it('names the selected CV, and shows its file and status', async () => {
     const { root } = await render(CV);
     expect(root.querySelector('h1')?.textContent?.trim()).toBe('Senior Angular');
-    expect(root.querySelector('.file')?.textContent).toBe('senior-angular.html');
-    expect(root.querySelector('.badge')?.textContent?.trim()).toBe('Warnings');
+    expect(root.querySelector('.showing')?.textContent?.trim()).toBe('Showing senior-angular.html');
+    expect(root.querySelector('.chip.warning')?.textContent?.trim()).toBe('Warnings');
     expect(root.querySelector('header[mr-glass-panel]')).not.toBeNull();
   });
 
   it('shows a placeholder when no CV is selected', async () => {
     const { root } = await render(null);
     expect(root.querySelector('h1')?.textContent?.trim()).toBe('No CV selected');
-    expect(root.querySelector('.badge')).toBeNull();
+    expect(root.querySelector('.chip')).toBeNull();
   });
 
   it('switches the preview mode', async () => {
@@ -41,15 +41,11 @@ describe('DocumentHeader', () => {
     expect(fixture.componentInstance.mode()).toBe('ats');
   });
 
-  it('locks the page width to A4 in ATS mode', async () => {
-    const visual = (await render(CV, 'visual')).root;
-    expect(visual.querySelector<HTMLInputElement>('#page-width')!.disabled).toBe(false);
-    expect(visual.querySelector('[aria-label="Page width"]')).not.toBeNull();
-
-    const ats = (await render(CV, 'ats')).root;
-    expect(ats.querySelector<HTMLInputElement>('#page-width')!.disabled).toBe(true);
-    expect(ats.querySelector('[aria-label="A4 in ATS"]')).not.toBeNull();
-    expect(ats.querySelector<HTMLInputElement>('#preview-mode-ats')!.checked).toBe(true);
+  it('marks the current mode in the View group', async () => {
+    const { root } = await render(CV, 'ats');
+    expect(root.querySelector('[role="group"][aria-label="View"]')).not.toBeNull();
+    expect(root.querySelector<HTMLInputElement>('#preview-mode-ats')!.checked).toBe(true);
+    expect(root.querySelector<HTMLInputElement>('#preview-mode-visual')!.checked).toBe(false);
   });
 
   it('asks for an export, and waits while one runs', async () => {

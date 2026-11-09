@@ -20,6 +20,7 @@
     class="item-menu"
     [class.open]="menuOpen()"
     mr-glass-panel
+    variant="compact"
     ngbDropdown
     container="body"
     placement="bottom-end"
@@ -31,14 +32,16 @@
       ngbDropdownToggle
       [attr.aria-label]="'sidebarItem.actions' | transloco: { title: item().title }"
     >
-      <i class="bi bi-three-dots-vertical" aria-hidden="true"></i>
+      <i class="bi bi-three-dots" aria-hidden="true"></i>
     </button>
-    <div ngbDropdownMenu mr-glass-panel variant="compact">
+    <div ngbDropdownMenu mr-glass-panel variant="compact" class="menu">
       <button type="button" (click)="onTogglePinResume()" ngbDropdownItem>
         {{ (item().pinned ? 'sidebarItem.unpin' : 'sidebarItem.pin') | transloco }}
       </button>
       <button mrDummy type="button" ngbDropdownItem>{{ 'sidebarItem.rename' | transloco }}</button>
-      <button mrDummy type="button" ngbDropdownItem>{{ 'sidebarItem.delete' | transloco }}</button>
+      <button mrDummy type="button" ngbDropdownItem class="danger">
+        {{ 'sidebarItem.delete' | transloco }}
+      </button>
     </div>
   </div>
 </div>

@@ -33,12 +33,13 @@ describe('DocumentFooter', () => {
     expect(fixture.componentInstance.zoom()).toBe(1);
   });
 
-  it('shows the app version at the right end', async () => {
+  it('shows the app version just before the zoom, which stays at the right end', async () => {
     TestBed.configureTestingModule({ providers: [{ provide: RELEASE_VERSION, useValue: 'v1.2.3' }] });
     const { root } = await render({ info: null });
     const version = root.querySelector('.version')!;
     expect(version.textContent).toBe('v1.2.3');
     expect(version.getAttribute('title')).toBe('App version');
-    expect(version.nextElementSibling).toBeNull();
+    expect(version.nextElementSibling?.tagName).toBe('MR-ZOOM-CONTROL');
+    expect(version.nextElementSibling?.nextElementSibling).toBeNull();
   });
 });

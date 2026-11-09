@@ -65,9 +65,10 @@
   justify-content: center;
   width: 44px;
   height: 44px;
-  border: 1px solid var(--mr-separator);
+  border: 1px solid var(--mr-item-selected-border);
   border-radius: 50%;
-  background: var(--mr-control-bg);
+  background: linear-gradient(180deg, var(--mr-raised-top), var(--mr-raised-bottom));
+  box-shadow: var(--mr-shadow-button);
   color: var(--bs-body-color);
   font-size: 13px;
   font-weight: 600;
@@ -78,7 +79,7 @@
   }
 
   &:hover {
-    background: var(--mr-item-selected-bg);
+    background: var(--mr-raised-pressed);
   }
 
   &.active {

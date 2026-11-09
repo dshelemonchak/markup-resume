@@ -13,16 +13,13 @@
   }
 
   <!-- Placeholder: the time of the last export is not kept yet; nothing is stored on export. -->
-  <span mrDummy>{{ 'footer.exported' | transloco }}</span>
+  <span class="muted exported" mrDummy>{{ 'footer.exported' | transloco }}</span>
 
   <!-- Placeholder: no report panel yet; export lists the PDF's problems in a dialog. -->
-  <button type="button" class="btn btn-link btn-sm report" mrDummy disabled>
+  <button type="button" class="report" mrDummy disabled>
     {{ 'footer.report' | transloco }}
   </button>
 
-  <span class="divider" aria-hidden="true"></span>
-  <mr-zoom-control [(zoom)]="zoom" [scale]="scale()" />
-
-  <span class="divider" aria-hidden="true"></span>
   <span class="version" [title]="'footer.version' | transloco">{{ version }}</span>
+  <mr-zoom-control [(zoom)]="zoom" [scale]="scale()" />
 </footer>

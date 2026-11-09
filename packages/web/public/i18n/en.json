@@ -122,7 +122,7 @@
   },
   "header": {
     "noCv": "No CV selected",
-    "notice": "Claude updated Summary · rev 12 · 2 min ago",
+    "showing": "Showing",
     "export": "Export PDF",
     "exporting": "Exporting…",
     "status": {
@@ -132,17 +132,7 @@
     },
     "view": "View",
     "visual": "Visual",
-    "ats": "ATS",
-    "pageWidth": "Page width",
-    "pageWidthAts": "A4 in ATS",
-    "widthShort": "W",
-    "millimetres": "mm",
-    "font": "Font",
-    "fontFamily": "Font family",
-    "revisions": "Revisions",
-    "rollBack": "Roll back",
-    "revisionHistory": "Revision history",
-    "revision": "rev {{ number }}"
+    "ats": "ATS"
   },
   "footer": {
     "validation": "0 errors · 2 warnings",

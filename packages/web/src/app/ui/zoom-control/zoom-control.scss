@@ -1,29 +1,68 @@
-// Compact enough to sit in the status bar's line.
+// The segmented track of the toolbar's Visual / ATS switch, so both bars speak the same language: out, level, in,
+// and Fit, raised while it is on.
 :host {
-  display: flex;
-  align-items: center;
+  display: inline-flex;
   gap: 2px;
+  padding: 3px;
+  border: 1px solid var(--mr-control-border);
+  border-radius: 10px;
+  background: var(--mr-segment-track);
+  box-shadow: var(--mr-shadow-segment-track);
 }
 
-.btn {
-  min-width: 28px;
-  height: 28px;
+.segment {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  height: 36px;
   padding: 0 6px;
-  font-size: 12px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--bs-secondary-color);
+  font-size: 13px;
+  font-weight: 500;
+  transition: background-color 0.12s;
+
+  &:hover:not(:disabled) {
+    background: rgb(var(--mr-light-rgb) / 0.6);
+  }
+
+  &:active:not(:disabled) {
+    background: var(--mr-ghost-pressed-bg);
+  }
+
+  &:disabled {
+    color: var(--mr-text-muted);
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--mr-accent);
+    outline-offset: 2px;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
 }
 
 .level {
-  min-width: 48px;
+  min-width: 56px;
+  color: var(--bs-body-color);
   font-variant-numeric: tabular-nums;
 }
 
-.fit[aria-pressed='true'] {
-  background: var(--mr-pressed-bg);
+.fit {
+  padding: 0 12px;
 }
 
-.divider {
-  width: 1px;
-  height: 16px;
-  margin: 0 4px;
-  background: var(--mr-divider);
+.fit[aria-pressed='true'] {
+  border-color: var(--mr-separator);
+  background: var(--mr-segment-on);
+  color: var(--bs-body-color);
+  font-weight: 600;
+  box-shadow: var(--mr-shadow-segment-on);
 }

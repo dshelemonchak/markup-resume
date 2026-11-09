@@ -1,8 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, input, model, output } from '@angular/core';
 import { TranslocoPipe } from '@jsverse/transloco';
-import { DummyMark } from '../../ui/dummy-mark/dummy-mark';
 import { GlassPanel } from '../../ui/glass-panel/glass-panel';
-import { RibbonGroup } from '../../ui/ribbon-group/ribbon-group';
 import type { ResumeListItem, ResumeListItemStatus } from '../resume-list-item';
 import type { PreviewMode } from '../preview-mode';
 
@@ -11,19 +9,17 @@ import type { PreviewMode } from '../preview-mode';
  * t(header.status.valid, header.status.warning, header.status.notExported)
  */
 const STATUS_BADGE: Record<ResumeListItemStatus, { readonly key: string; readonly css: string }> = {
-  valid: { key: 'header.status.valid', css: 'text-bg-success' },
-  warning: { key: 'header.status.warning', css: 'text-bg-warning' },
-  'not-exported': { key: 'header.status.notExported', css: 'text-bg-secondary' },
+  valid: { key: 'header.status.valid', css: 'success' },
+  warning: { key: 'header.status.warning', css: 'warning' },
+  'not-exported': { key: 'header.status.notExported', css: 'neutral' },
 };
 
 /**
- * Top bar of the workspace: the selected CV's title row and the settings ribbon.
- * Working now: the title row, Export PDF and the Visual / ATS switch. The Claude notice, page width,
- * font and revisions are placeholders.
+ * Toolbar of the CV editor, one row: the Visual / ATS switch, the selected CV's status and file, and Export PDF.
  */
 @Component({
   selector: 'mr-document-header',
-  imports: [DummyMark, GlassPanel, RibbonGroup, TranslocoPipe],
+  imports: [GlassPanel, TranslocoPipe],
   templateUrl: './document-header.html',
   styleUrl: './document-header.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -39,5 +35,4 @@ export class DocumentHeader {
     const resume = this.resume();
     return resume ? STATUS_BADGE[resume.status] : null;
   });
-  protected readonly isAts = computed(() => this.mode() === 'ats');
 }
