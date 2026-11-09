@@ -1,4 +1,9 @@
 <main class="page" aria-labelledby="in-development-title">
-  <h1 id="in-development-title" class="title">{{ titleKey() | transloco }}</h1>
-  <p class="status">{{ 'inDevelopment.text' | transloco }}</p>
+  <img class="screen" [src]="picture() + '-screen.svg'" alt="" />
+  <section mr-glass-panel class="teaser">
+    <img class="art" [src]="picture() + '.svg'" alt="" width="160" height="96" />
+    <h1 id="in-development-title" class="title">{{ titleKey() | transloco }}</h1>
+    <p class="text">{{ teaserKey() | transloco }}</p>
+    <span class="status">{{ 'inDevelopment.status' | transloco }}</span>
+  </section>
 </main>

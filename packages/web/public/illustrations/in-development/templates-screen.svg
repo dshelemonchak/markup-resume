@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 760">
+  <!-- The future Templates screen, as faint blocks behind the teaser. -->
+  <style>
+    .panel { fill: #ffffff; }
+    .glass { fill: #ffffff; fill-opacity: 0.7; }
+    .bar { fill: #e2e8f0; }
+    .strong { fill: #cbd5e1; }
+    .accent { fill: #c7d2fe; }
+    .dashed { fill: none; stroke: #cbd5e1; stroke-width: 2; stroke-dasharray: 8 6; }
+    @media (prefers-color-scheme: dark) {
+      .panel { fill: rgb(255 255 255 / 0.06); }
+      .glass { fill: rgb(255 255 255 / 0.09); fill-opacity: 1; }
+      .bar { fill: rgb(255 255 255 / 0.1); }
+      .strong { fill: rgb(255 255 255 / 0.16); }
+      .accent { fill: rgb(165 180 252 / 0.35); }
+      .dashed { stroke: rgb(255 255 255 / 0.16); }
+    }
+  </style>
+  <rect class="strong" x="60" y="24" width="200" height="30" rx="4"/>
+  <rect class="bar" x="60" y="70" width="560" height="14" rx="4"/>
+  <rect class="panel" x="60" y="120" width="350" height="600" rx="12"/>
+  <rect class="bar" x="60" y="120" width="350" height="330" rx="12"/>
+  <rect class="panel" x="155" y="144" width="160" height="226" rx="2"/>
+  <rect class="strong" x="171" y="162" width="80" height="8" rx="2"/>
+  <rect class="bar" x="171" y="188" width="120" height="8" rx="2"/>
+  <rect class="bar" x="171" y="214" width="60" height="8" rx="2"/>
+  <rect class="bar" x="171" y="240" width="130" height="8" rx="2"/>
+  <rect class="bar" x="171" y="266" width="100" height="8" rx="2"/>
+  <rect class="bar" x="171" y="292" width="120" height="8" rx="2"/>
+  <rect class="bar" x="171" y="318" width="90" height="8" rx="2"/>
+  <rect class="strong" x="80" y="476" width="120" height="18" rx="4"/>
+  <rect class="bar" x="210" y="478" width="90" height="14" rx="4"/>
+  <rect class="bar" x="80" y="512" width="300" height="12" rx="4"/>
+  <rect class="bar" x="80" y="532" width="260" height="12" rx="4"/>
+  <rect class="bar" x="80" y="566" width="310" height="54" rx="8"/>
+  <rect class="bar" x="80" y="646" width="120" height="40" rx="8"/>
+  <rect class="bar" x="212" y="646" width="130" height="40" rx="8"/>
+  <rect class="panel" x="430" y="120" width="350" height="600" rx="12"/>
+  <rect class="bar" x="430" y="120" width="350" height="330" rx="12"/>
+  <rect class="panel" x="525" y="144" width="160" height="226" rx="2"/>
+  <rect class="strong" x="541" y="162" width="80" height="8" rx="2"/>
+  <rect class="bar" x="541" y="188" width="120" height="8" rx="2"/>
+  <rect class="bar" x="541" y="214" width="60" height="8" rx="2"/>
+  <rect class="bar" x="541" y="240" width="130" height="8" rx="2"/>
+  <rect class="bar" x="541" y="266" width="100" height="8" rx="2"/>
+  <rect class="bar" x="541" y="292" width="120" height="8" rx="2"/>
+  <rect class="bar" x="541" y="318" width="90" height="8" rx="2"/>
+  <rect class="strong" x="450" y="476" width="120" height="18" rx="4"/>
+  <rect class="bar" x="580" y="478" width="90" height="14" rx="4"/>
+  <rect class="bar" x="450" y="512" width="300" height="12" rx="4"/>
+  <rect class="bar" x="450" y="532" width="260" height="12" rx="4"/>
+  <rect class="bar" x="450" y="566" width="310" height="54" rx="8"/>
+  <rect class="bar" x="450" y="646" width="120" height="40" rx="8"/>
+  <rect class="bar" x="582" y="646" width="130" height="40" rx="8"/>
+  <rect class="dashed" x="801" y="121" width="338" height="598" rx="12"/>
+  <rect class="strong" x="830" y="380" width="150" height="18" rx="4"/>
+  <rect class="bar" x="830" y="414" width="260" height="12" rx="4"/>
+  <rect class="bar" x="830" y="434" width="220" height="12" rx="4"/>
+</svg>

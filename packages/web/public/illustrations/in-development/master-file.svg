@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 96">
+  <style>
+    .sheet { fill: none; stroke: #94a3b8; stroke-width: 1.5; }
+    .line { fill: none; stroke: #cbd5e1; stroke-width: 2.5; stroke-linecap: round; }
+    .accent { fill: #4338ca; }
+    .pick { fill: none; stroke: #4338ca; stroke-width: 2.5; stroke-linecap: round; }
+    /* Lines leave the long file for the one-page CV. */
+    .moving { animation: pick 2.6s ease-in-out infinite backwards; }
+    .moving:nth-of-type(2) { animation-delay: 0.4s; }
+    .moving:nth-of-type(3) { animation-delay: 0.8s; }
+    @keyframes pick {
+      0% { transform: translate(0, 0); opacity: 0; }
+      15%, 70% { opacity: 1; }
+      100% { transform: translate(56px, 4px); opacity: 0; }
+    }
+    @media (prefers-color-scheme: dark) {
+      .sheet { stroke: #8e8e93; }
+      .line { stroke: #48484a; }
+      .accent { fill: #a5b4fc; }
+      .pick { stroke: #a5b4fc; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      * { animation: none !important; }
+    }
+  </style>
+  <path class="sheet" d="M14 4H60V92H14Z"/>
+  <path class="line" d="M22 14H50M22 23H46M22 32H52M22 41H42M22 50H50M22 59H44M22 68H48M22 77H40M22 86H46"/>
+  <g class="pick">
+    <path class="moving" d="M54 23H64"/>
+    <path class="moving" d="M54 41H64"/>
+    <path class="moving" d="M54 59H64"/>
+  </g>
+  <path class="sheet" d="M110 20H134L144 30V78H110Z"/>
+  <path class="accent" d="M134 20L144 30H134Z"/>
+</svg>

@@ -4,13 +4,36 @@
 }
 
 .page {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 16px;
+}
+
+// The future screen, too faint and soft to read as working UI.
+.screen {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: top center;
+  opacity: 0.55;
+  filter: blur(1.5px);
+  pointer-events: none;
+}
+
+.teaser {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 8px;
-  height: 100%;
-  padding: 16px;
+  gap: 10px;
+  width: 100%;
+  max-width: 400px;
+  padding: 28px 24px 24px;
   text-align: center;
 }
 
@@ -20,7 +43,19 @@
   font-weight: 650;
 }
 
-.status {
+.text {
   margin: 0;
   color: var(--mr-text-muted);
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+.status {
+  padding: 3px 10px;
+  border: 1px solid var(--mr-selected-border);
+  border-radius: 6px;
+  background: var(--mr-selected-bg);
+  color: var(--mr-accent);
+  font-size: 12px;
+  font-weight: 600;
 }

@@ -11,7 +11,11 @@
     "account": "Account"
   },
   "inDevelopment": {
-    "text": "In development"
+    "status": "In development",
+    "applications": "Track where you applied and which CV revision you sent, frozen at the moment you applied.",
+    "masterFile": "Everything you have done, in your own words and at any length. Claude picks from it for each CV.",
+    "templates": "Pick a design for your CV. A template fixes the look; Claude only writes the content it allows.",
+    "account": "Your sign-in methods, the Claude apps you connected, and numbers on your CVs and applications."
   },
   "landing": {
     "source": "Source on GitHub",

@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 96">
+  <style>
+    .outline { fill: none; stroke: #94a3b8; stroke-width: 1.5; }
+    .person { fill: #cbd5e1; }
+    .shoulders { fill: none; stroke: #cbd5e1; stroke-width: 3; stroke-linecap: round; }
+    .dot { fill: #1f9d55; }
+    /* Each connected Claude breathes, the second half a beat later. */
+    .ring { transform-box: fill-box; transform-origin: center; animation: breathe 2s ease-out infinite; }
+    .ring.later { animation-delay: 1s; }
+    @keyframes breathe {
+      0% { transform: scale(1); opacity: 0.7; }
+      100% { transform: scale(2.6); opacity: 0; }
+    }
+    @media (prefers-color-scheme: dark) {
+      .outline { stroke: #8e8e93; }
+      .person { fill: #48484a; }
+      .shoulders { stroke: #48484a; }
+      .dot { fill: #30d158; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      * { animation: none !important; }
+      .ring { opacity: 0; }
+    }
+  </style>
+  <circle class="outline" cx="80" cy="48" r="20"/>
+  <circle class="person" cx="80" cy="42" r="6"/>
+  <path class="shoulders" d="M68 60Q80 48 92 60"/>
+  <path class="outline" d="M60 48H36M100 48H124"/>
+  <circle class="dot ring" cx="30" cy="48" r="5"/>
+  <circle class="dot" cx="30" cy="48" r="5"/>
+  <circle class="dot ring later" cx="130" cy="48" r="5"/>
+  <circle class="dot" cx="130" cy="48" r="5"/>
+</svg>

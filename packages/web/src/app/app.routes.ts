@@ -1,10 +1,11 @@
 import type { Routes } from '@angular/router';
+import type { Section } from './pages/in-development-section';
 
-/** A screen that is not built yet; `titleKey` is its Transloco title. */
-const inDevelopment = (path: string, titleKey: string) => ({
+/** A screen that is not built yet, shown by the stand-in page for its section. */
+const inDevelopment = (path: string, section: Section) => ({
   path,
   loadComponent: () => import('./pages/in-development/in-development').then((m) => m.InDevelopment),
-  data: { titleKey },
+  data: { section },
 });
 
 export const routes: Routes = [
@@ -21,10 +22,10 @@ export const routes: Routes = [
         path: 'cvs',
         loadComponent: () => import('./pages/workspace/workspace').then((m) => m.Workspace),
       },
-      inDevelopment('applications', 'nav.applications'),
-      inDevelopment('master-file', 'nav.masterFile'),
-      inDevelopment('templates', 'nav.templates'),
-      inDevelopment('account', 'nav.account'),
+      inDevelopment('applications', 'applications'),
+      inDevelopment('master-file', 'masterFile'),
+      inDevelopment('templates', 'templates'),
+      inDevelopment('account', 'account'),
       {
         path: 'dev-playground',
         loadComponent: () => import('./pages/playground/playground').then((m) => m.Playground),
