@@ -3,7 +3,7 @@
   max-height: calc(100vh - 32px);
   padding: 0;
   border: 0;
-  border-radius: 16px;
+  border-radius: 12px;
   background: var(--bs-body-bg);
   color: var(--bs-body-color);
   box-shadow: var(--mr-shadow-dialog);
@@ -115,4 +115,11 @@
   .last-used {
     color: var(--bs-secondary-color);
   }
+}
+
+.close {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  padding: 0;
 }

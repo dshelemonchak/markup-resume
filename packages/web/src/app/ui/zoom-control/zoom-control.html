@@ -1,6 +1,6 @@
 <button
   type="button"
-  class="btn btn-sm"
+  class="segment"
   [attr.aria-label]="'zoom.out' | transloco"
   [disabled]="!canZoomOut()"
   (click)="zoomOut()"
@@ -9,7 +9,7 @@
 </button>
 <button
   type="button"
-  class="btn btn-sm level"
+  class="segment level"
   [attr.aria-label]="'zoom.level' | transloco"
   (click)="resetZoom()"
 >
@@ -17,14 +17,13 @@
 </button>
 <button
   type="button"
-  class="btn btn-sm"
+  class="segment"
   [attr.aria-label]="'zoom.in' | transloco"
   [disabled]="!canZoomIn()"
   (click)="zoomIn()"
 >
   <i class="bi bi-plus-lg" aria-hidden="true"></i>
 </button>
-<span class="divider" aria-hidden="true"></span>
-<button type="button" class="btn btn-sm fit" [attr.aria-pressed]="zoom() === 'fit'" (click)="fit()">
+<button type="button" class="segment fit" [attr.aria-pressed]="zoom() === 'fit'" (click)="fit()">
   {{ 'zoom.fit' | transloco }}
 </button>

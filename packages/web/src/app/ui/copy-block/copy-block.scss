@@ -7,8 +7,8 @@ pre {
   margin: 0;
   // The right side stays clear of the Copy button.
   padding: 12px 96px 12px 14px;
-  border-radius: 10px;
-  background: var(--bs-tertiary-bg);
+  border-radius: 8px;
+  background: var(--mr-code-bg);
   font-size: 12px;
   white-space: pre-wrap;
 }
@@ -20,6 +20,5 @@ pre {
   display: flex;
   align-items: center;
   gap: 4px;
-  background: var(--bs-body-bg);
   font-size: 12px;
 }

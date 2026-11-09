@@ -41,6 +41,30 @@
   --mr-selected-text: #1e293b;
   --mr-success-bg: #e3f4ea;
   --mr-success-text: #17663a;
+  --mr-success-border: #c7e8d4;
+  --mr-connected: #1f9d55; // the "connected" and "valid" dots
+
+  // Status chips (DESIGN.md): neutral for "not exported", amber for warnings.
+  --mr-chip-bg: #f1f5f9;
+  --mr-chip-text: var(--mr-text-muted);
+  --mr-chip-border: #e2e8f0;
+  --mr-warning-bg: #fff7e8;
+  --mr-warning-text: #6b4a0f;
+  --mr-warning-border: #f3dcae;
+
+  // Destructive text: Delete in menus.
+  --mr-danger-text: #b42318;
+
+  // Segmented control: a sunken track with the selected segment raised on it.
+  --mr-segment-track: #e8ecf2;
+  --mr-segment-on: #fff;
+  --mr-shadow-segment-track: inset 0 1px 2px rgb(var(--mr-shadow-rgb) / 0.08);
+  --mr-shadow-segment-on:
+    inset 0 1px 0 var(--mr-raised-highlight), 0 1px 3px rgb(var(--mr-shadow-rgb) / 0.16);
+
+  // Ghost buttons (zoom, close): transparent until hovered.
+  --mr-ghost-hover-bg: rgb(var(--mr-ink-rgb) / 0.07);
+  --mr-ghost-pressed-bg: rgb(var(--mr-ink-rgb) / 0.13);
 
   // A chat message, as the landing page quotes one.
   --mr-bubble-bg: #1e293b;
@@ -68,8 +92,8 @@
   --mr-glass-border-alpha: 0.65;
   --mr-glass-highlight-alpha: 0.9;
   --mr-glass-shadow-alpha: 0.12;
-  --mr-glass-radius: 16px;
-  --mr-glass-radius-compact: 12px;
+  --mr-glass-radius: 12px;
+  --mr-glass-radius-compact: 10px;
 
   // …and the values components use, derived from them.
   --mr-glass-bg: rgb(var(--mr-light-rgb) / var(--mr-glass-opacity));
@@ -87,24 +111,24 @@
   --mr-divider: rgb(var(--mr-ink-rgb) / 0.12);
 
   // Fills of controls on glass.
-  --mr-control-bg: rgb(var(--mr-light-rgb) / 0.6); // buttons
-  --mr-input-bg: rgb(var(--mr-light-rgb) / 0.7); // text fields
+  --mr-input-bg: #fff; // text fields
+  --mr-shadow-input: inset 0 1px 2px rgb(var(--mr-shadow-rgb) / 0.06);
   --mr-pressed-bg: rgb(var(--mr-ink-rgb) / 0.08); // a toggle that is on
   --mr-code-bg: rgb(var(--mr-ink-rgb) / 0.06); // code snippets
-  --mr-notice-bg: rgb(231 241 255 / 0.85); // the notice pill in the header
 
   // List items in the sidebar.
-  --mr-item-hover-bg: rgb(var(--mr-light-rgb) / 0.5);
-  --mr-item-selected-bg: rgb(var(--mr-light-rgb) / 0.9);
-  --mr-item-selected-border: rgb(var(--mr-light-rgb) / 0.95);
+  --mr-item-hover-bg: #f1f5f9;
+  --mr-item-selected-bg: #f8fafc;
+  --mr-item-selected-border: #e2e8f0;
 
   // Status dot ring, scrollbars, modal backdrops.
   --mr-dot-ring: rgb(var(--mr-ink-rgb) / 0.2);
   --mr-scrollbar: rgb(var(--mr-ink-rgb) / 0.25);
   --mr-backdrop: rgb(var(--mr-shadow-rgb) / 0.25);
 
-  // Shadows: a raised list item, the CV sheet, dialogs.
+  // Shadows: a raised list item, a menu, the CV sheet, dialogs.
   --mr-shadow-raised: 0 2px 8px rgb(var(--mr-shadow-rgb) / 0.06);
+  --mr-shadow-menu: 0 12px 32px rgb(var(--mr-shadow-rgb) / 0.16);
   --mr-shadow-sheet: 0 12px 40px rgb(var(--mr-shadow-rgb) / 0.14), 0 1px 3px rgb(var(--mr-shadow-rgb) / 0.08);
   --mr-shadow-dialog: 0 24px 64px rgb(var(--mr-shadow-rgb) / 0.2), 0 1px 3px rgb(var(--mr-shadow-rgb) / 0.08);
 
@@ -160,6 +184,20 @@
     --mr-selected-text: var(--bs-body-color);
     --mr-success-bg: rgb(52 199 89 / 0.16);
     --mr-success-text: #7ee2a0;
+    --mr-success-border: rgb(52 199 89 / 0.3);
+    --mr-connected: #30d158;
+    --mr-chip-bg: rgb(var(--mr-ink-rgb) / 0.08);
+    --mr-chip-border: rgb(var(--mr-ink-rgb) / 0.12);
+    --mr-warning-bg: rgb(255 159 10 / 0.16);
+    --mr-warning-text: #ffd27a;
+    --mr-warning-border: rgb(255 159 10 / 0.35);
+    --mr-danger-text: #ff8a80;
+    --mr-segment-track: #1c1c1e;
+    --mr-segment-on: #3a3a3c;
+    --mr-input-bg: #1c1c1e;
+    --mr-item-hover-bg: rgb(var(--mr-light-rgb) / 0.5);
+    --mr-item-selected-bg: rgb(var(--mr-light-rgb) / 0.9);
+    --mr-item-selected-border: rgb(var(--mr-light-rgb) / 0.95);
     --mr-bubble-bg: #3a3a3c;
 
     --mr-github-bg: #f6f8fa;
@@ -175,9 +213,9 @@
     --mr-glass-opacity: 0.6;
     --mr-glass-shadow-alpha: 0.35;
 
-    --mr-notice-bg: rgb(var(--mr-ink-rgb) / 0.08);
     --mr-backdrop: rgb(var(--mr-shadow-rgb) / 0.5);
     --mr-shadow-raised: 0 2px 8px rgb(var(--mr-shadow-rgb) / 0.3);
+    --mr-shadow-menu: 0 12px 32px rgb(var(--mr-shadow-rgb) / 0.45);
     --mr-shadow-sheet: 0 12px 40px rgb(var(--mr-shadow-rgb) / 0.5), 0 1px 3px rgb(var(--mr-shadow-rgb) / 0.4);
     --mr-shadow-dialog:
       0 24px 64px rgb(var(--mr-shadow-rgb) / 0.6), 0 1px 3px rgb(var(--mr-shadow-rgb) / 0.4);

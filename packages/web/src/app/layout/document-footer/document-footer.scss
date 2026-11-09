@@ -1,15 +1,24 @@
+// The bar's own width decides what fits, not the window's: the sidebar takes part of the window.
 :host {
   display: block;
+  container-type: inline-size;
 }
 
+// Status bar under the sheet (DESIGN.md): validation, pages and width, font, export time, report, version, zoom.
+// The same height and padding as the toolbar above the sheet. Always one line: when it is narrow, the least useful
+// items leave first; the version and the zoom stay, the zoom always at the right end.
 .footer {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
-  gap: 4px 16px;
-  padding: 4px 8px 4px 20px;
+  gap: 16px;
+  padding: 6px 14px;
   color: var(--bs-secondary-color);
-  font-size: 12px;
+  font-size: 13px;
+  white-space: nowrap;
+
+  > * {
+    flex: none;
+  }
 }
 
 .validation {
@@ -18,19 +27,62 @@
   gap: 6px;
 
   .bi {
-    color: var(--bs-success);
+    color: var(--mr-success-text);
     font-size: 14px;
   }
 }
 
-.report {
-  margin-left: auto;
-  padding: 0;
-  font-size: 12px;
+.muted {
+  color: var(--mr-text-muted);
 }
 
-.divider {
-  width: 1px;
-  height: 16px;
-  background: var(--mr-divider);
+// A text button; disabled until the report panel exists.
+.report {
+  min-height: 32px;
+  padding: 0 4px;
+  border: 0;
+  background: none;
+  color: var(--mr-text-muted);
+  font-size: 13px;
+
+  &:disabled {
+    cursor: not-allowed;
+  }
+}
+
+.version {
+  margin-left: auto;
+  font-family: var(--bs-font-monospace);
+  font-size: 12px;
+  color: var(--mr-text-muted);
+}
+
+@container (max-width: 815px) {
+  .report {
+    display: none;
+  }
+}
+
+@container (max-width: 690px) {
+  .exported {
+    display: none;
+  }
+}
+
+@container (max-width: 585px) {
+  .font {
+    display: none;
+  }
+}
+
+@container (max-width: 540px) {
+  .validation {
+    display: none;
+  }
+}
+
+@container (max-width: 380px) {
+  .pages {
+    display: none;
+  }
 }

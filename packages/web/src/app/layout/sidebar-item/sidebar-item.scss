@@ -7,7 +7,8 @@
   border: 1px solid transparent;
   border-radius: 10px;
 
-  &:hover {
+  &:hover,
+  &:has(:focus-visible) {
     background: var(--mr-item-hover-bg);
   }
 
@@ -21,9 +22,10 @@
     }
   }
 
-  // The menu shows on hover, and while the keyboard is inside the item, so Tab reaches its button.
+  // The menu shows on hover, and while keyboard focus is inside the item, so Tab reaches its button. Not on any
+  // focus: a click leaves focus on the row, and the menu would stay after the pointer has left.
   &:hover,
-  &:focus-within {
+  &:has(:focus-visible) {
     .item-menu {
       display: flex;
     }
@@ -36,26 +38,31 @@
   align-items: center;
   gap: 10px;
   width: 100%;
-  padding: 8px;
+  padding: 8px 10px;
   border: 0;
   border-radius: inherit;
   background: none;
   color: inherit;
   text-align: left;
+
+  &:focus-visible {
+    outline: 2px solid var(--mr-accent);
+    outline-offset: 2px;
+  }
 }
 
-// A sibling of the main button, laid over its right end: a click here never selects the CV.
+// A sibling of the main button, laid over its right end on a glass backing that covers the text under it: a click
+// here never selects the CV.
 .item-menu {
   position: absolute;
   top: 0;
   right: 0;
   z-index: 1;
   display: none;
-  justify-content: center;
   align-items: center;
-  width: 50px;
+  justify-content: center;
+  width: 46px;
   height: 100%;
-  border-radius: 10px;
 
   &.open {
     display: flex;
@@ -66,8 +73,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: 36px;
+  height: 36px;
   padding: 0;
   border: 0;
   border-radius: 8px;
@@ -80,7 +87,7 @@
   }
 
   &:focus-visible {
-    outline: 2px solid var(--bs-primary);
+    outline: 2px solid var(--mr-accent);
     outline-offset: 1px;
   }
 
@@ -90,14 +97,45 @@
   }
 }
 
+// The row's actions, on glass (DESIGN.md: menus are glass).
+.menu {
+  --bs-dropdown-min-width: 168px;
+  --bs-dropdown-padding-x: 4px;
+  --bs-dropdown-padding-y: 4px;
+  --bs-dropdown-item-padding-x: 10px;
+  --bs-dropdown-item-padding-y: 0;
+  --bs-dropdown-item-border-radius: 6px;
+  --bs-dropdown-font-size: 14px;
+  --bs-dropdown-link-color: var(--bs-body-color);
+  --bs-dropdown-link-hover-color: var(--bs-body-color);
+  --bs-dropdown-link-hover-bg: var(--mr-item-hover-bg);
+  --bs-dropdown-link-active-color: var(--bs-body-color);
+  --bs-dropdown-link-active-bg: var(--mr-raised-pressed);
+
+  box-shadow: var(--mr-shadow-menu);
+
+  button {
+    display: flex;
+    align-items: center;
+    min-height: 36px;
+  }
+
+  .danger {
+    --bs-dropdown-link-color: var(--mr-danger-text);
+    --bs-dropdown-link-hover-color: var(--mr-danger-text);
+  }
+}
+
+// Validation of the last export; a CV not exported yet has a grey dot with a ring, so it stays visible on white.
 .status {
   flex: none;
   width: 8px;
   height: 8px;
   border-radius: 50%;
+  box-shadow: inset 0 0 0 1px var(--mr-dot-ring);
 
   &.valid {
-    background: var(--bs-success);
+    background: var(--mr-connected);
   }
 
   &.warning {
@@ -105,7 +143,7 @@
   }
 
   &.not-exported {
-    background: var(--bs-gray-500);
+    background: var(--mr-control-border);
   }
 }
 
@@ -123,13 +161,19 @@
   white-space: nowrap;
 }
 
+.title {
+  font-size: 14px;
+  font-weight: 500;
+}
+
 .subtitle {
+  font-family: var(--bs-font-monospace);
   font-size: 12px;
-  color: var(--bs-secondary-color);
+  color: var(--mr-text-muted);
 }
 
 .pin {
   flex: none;
   font-size: 14px;
-  color: var(--bs-secondary-color);
+  color: var(--mr-text-muted);
 }

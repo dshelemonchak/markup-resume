@@ -2,6 +2,12 @@
 // Colours come from the theme; Bootstrap's own --bs-btn-* variables keep the text and border of every state.
 
 .btn {
+  // Disabled (DESIGN.md): a flat slate fill with muted text, not a faded copy of the button.
+  --bs-btn-disabled-opacity: 1;
+  --bs-btn-disabled-bg: var(--mr-raised-pressed);
+  --bs-btn-disabled-border-color: var(--mr-control-border);
+  --bs-btn-disabled-color: var(--mr-text-muted);
+
   transition:
     color 0.12s,
     background-color 0.12s,
@@ -77,4 +83,19 @@
     background-image: none;
     box-shadow: none;
   }
+}
+
+// Ghost: no surface until hovered, for icon buttons in bars and dialogs (zoom, close).
+.btn-ghost {
+  --bs-btn-color: var(--bs-body-color);
+  --bs-btn-hover-color: var(--bs-body-color);
+  --bs-btn-active-color: var(--bs-body-color);
+  --bs-btn-hover-bg: var(--mr-ghost-hover-bg);
+  --bs-btn-active-bg: var(--mr-ghost-pressed-bg);
+  --bs-btn-disabled-color: var(--mr-text-muted);
+  --bs-btn-disabled-bg: transparent;
+  --bs-btn-border-color: transparent;
+  --bs-btn-hover-border-color: transparent;
+  --bs-btn-active-border-color: transparent;
+  --bs-btn-disabled-border-color: transparent;
 }
