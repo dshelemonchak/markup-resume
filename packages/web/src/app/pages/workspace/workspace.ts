@@ -11,6 +11,7 @@ import {
   signal,
   viewChild,
 } from '@angular/core';
+import { Router } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { ResumeApi, type PdfProblemDto } from '../../api/resume-api';
 import { toResumeListItem } from '../../api/to-resume-list-item';
@@ -48,6 +49,7 @@ import type { ZoomSetting } from '../../ui/zoom';
 export class Workspace {
   private readonly api = inject(ResumeApi);
   private readonly locale = injectLocale();
+  private readonly router = inject(Router);
 
   // value() throws while a resource is in its error state (server down), so read it only when there is one.
   protected readonly resumes = computed(() =>
@@ -163,7 +165,9 @@ export class Workspace {
     } catch (error) {
       console.error(error);
       this.signOutFailed.set(true);
+      return;
     }
+    await this.router.navigate(['/']);
   }
 
   protected async togglePinResume(slug: string): Promise<void> {

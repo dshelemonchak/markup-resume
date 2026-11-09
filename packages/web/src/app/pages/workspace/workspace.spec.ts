@@ -1,9 +1,12 @@
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
+import { Router, provideRouter } from '@angular/router';
+import { RouterTestingHarness } from '@angular/router/testing';
 import type { ResumeListItemDto } from '../../api/resume-api';
 import { sessionExpiryInterceptor } from '../../api/session-expiry';
 import { ConnectClaude } from '../../layout/connect-claude/connect-claude';
+import { Landing } from '../landing/landing';
 import { Workspace } from './workspace';
 
 class FakeEventSource {
@@ -270,8 +273,48 @@ describe('Workspace', () => {
     expect(frameSrc()).toBe('/api/v1/resumes/first/document?v=1');
   });
 
-  it('says so when signing out does not reach the server', async () => {
+  it('returns to the landing page after signing out', async () => {
+    TestBed.configureTestingModule({
+      providers: [
+        provideRouter([
+          { path: '', pathMatch: 'full', component: Landing },
+          { path: 'cvs', component: Workspace },
+        ]),
+      ],
+    });
+    const http = TestBed.inject(HttpTestingController);
+    const router = TestBed.inject(Router);
+    // Navigation and resources answer in macrotasks; the open requests keep the app from being stable.
+    const settle = async () => {
+      await new Promise((resolve) => setTimeout(resolve));
+      TestBed.tick();
+    };
+    const harness = await RouterTestingHarness.create();
+    const opened = harness.navigateByUrl('/cvs');
+    await settle();
+    http.expectOne('/api/v1/user').flush({ name: 'Alex' });
+    await settle();
+    http.expectOne('/api/v1/resumes').flush(CVS);
+    http.expectOne('/api/v1/claude/sessions').flush([]);
+    await opened;
+
+    harness.routeNativeElement!.querySelector<HTMLButtonElement>('mr-sidebar .sign-out')!.click();
+    http
+      .expectOne({ method: 'POST', url: '/auth/logout' })
+      .flush(null, { status: 204, statusText: 'No Content' });
+    await settle();
+    http
+      .expectOne('/api/v1/user')
+      .flush({ error: 'unauthenticated' }, { status: 401, statusText: 'Unauthorized' });
+    await settle();
+    await harness.fixture.whenStable();
+    expect(router.url).toBe('/');
+    expect(harness.routeNativeElement!.querySelector('mr-landing, .btn-github')).not.toBeNull();
+  });
+
+  it('says so when signing out does not reach the server, and stays on the CVs', async () => {
     const { fixture, http, root } = await render();
+    const navigate = vi.spyOn(TestBed.inject(Router), 'navigate');
     root.querySelector<HTMLButtonElement>('mr-sidebar .sign-out')!.click();
     http
       .expectOne({ method: 'POST', url: '/auth/logout' })
@@ -279,6 +322,7 @@ describe('Workspace', () => {
     await fixture.whenStable();
     expect(root.querySelector('mr-sidebar .sign-out-failed')!.textContent).toContain('still signed in');
     expect(root.querySelector('mr-sidebar .account .name')!.textContent).toBe('Alex');
+    expect(navigate).not.toHaveBeenCalled();
   });
 
   it('tells loading from an unreachable server, and recovers when the server is back', async () => {
