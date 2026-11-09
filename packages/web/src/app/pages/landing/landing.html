@@ -1,0 +1,116 @@
+<header class="bar">
+  <div class="wrap bar-row">
+    <a class="brand" routerLink="/">
+      <img src="mark.svg" alt="" width="24" height="24" />
+      <span class="name">{{ 'app.name' | transloco }}</span>
+    </a>
+    <a class="plain-link" href="https://github.com/dshelemonchak/markup-resume">{{
+      'landing.source' | transloco
+    }}</a>
+    <!-- A full navigation, not a request: the server redirects the browser to GitHub. -->
+    <a class="btn btn-outline-secondary sign-in-small" href="/auth/github">{{
+      'landing.signIn' | transloco
+    }}</a>
+  </div>
+</header>
+
+<main>
+  <section class="wrap hero" aria-labelledby="hero-title">
+    <div class="hero-text">
+      @if (signInFailed) {
+        <p class="alert-line" role="alert">{{ 'landing.signInFailed' | transloco }}</p>
+      } @else if (signInNotAllowed) {
+        <p class="alert-line" role="alert">{{ 'landing.signInNotAllowed' | transloco }}</p>
+      }
+      <h1 id="hero-title">{{ 'landing.hero.title' | transloco }}</h1>
+      <p class="lead">{{ 'landing.hero.lead' | transloco }}</p>
+      <div class="providers">
+        <a class="btn-github" href="/auth/github">
+          <i class="bi bi-github" aria-hidden="true"></i>
+          {{ 'landing.hero.github' | transloco }}
+        </a>
+        <span class="provider-soon">
+          <button type="button" class="btn-google" disabled aria-describedby="google-soon">
+            <img src="icons/google-g.svg" alt="" width="20" height="20" />
+            {{ 'landing.hero.google' | transloco }}
+          </button>
+          <span id="google-soon" class="muted">{{ 'landing.comingSoon' | transloco }}</span>
+        </span>
+      </div>
+      <p class="muted small">{{ 'landing.hero.allowList' | transloco }}</p>
+    </div>
+
+    <figure class="ledger" aria-labelledby="ledger-caption">
+      <figcaption id="ledger-caption" class="visually-hidden">
+        {{ 'landing.ledger.caption' | transloco }}
+      </figcaption>
+      <p class="prompt">{{ 'landing.ledger.prompt' | transloco }}</p>
+      <div class="revisions">
+        <div class="revisions-head">
+          <span>{{ 'landing.ledger.revisions' | transloco }}</span>
+          <span class="mono">angular-senior.html</span>
+        </div>
+        <div class="revision current">
+          <span class="mono rev">&#64;9</span>
+          <span class="what">{{ 'landing.ledger.rev9' | transloco }}</span>
+          <span class="chip">{{ 'landing.ledger.checked' | transloco }}</span>
+        </div>
+        <div class="revision">
+          <span class="mono rev">&#64;8</span>
+          <span class="what">{{ 'landing.ledger.rev8' | transloco }}</span>
+        </div>
+        <div class="revision">
+          <span class="mono rev">&#64;7</span>
+          <span class="what">{{ 'landing.ledger.rev7' | transloco }}</span>
+        </div>
+      </div>
+    </figure>
+  </section>
+
+  <section class="band" aria-labelledby="mcp-title">
+    <div class="wrap split">
+      <div>
+        <h2 id="mcp-title">{{ 'landing.mcp.title' | transloco }}</h2>
+        <p>{{ 'landing.mcp.client' | transloco }}</p>
+        <p>{{ 'landing.mcp.rules' | transloco }}</p>
+      </div>
+      <div class="tools">
+        <p class="tools-title">{{ 'landing.mcp.toolsTitle' | transloco }}</p>
+        <dl>
+          @for (tool of tools; track tool.name) {
+            <div class="tool">
+              <dt class="mono">{{ tool.name }}</dt>
+              <dd>{{ tool.description | transloco }}</dd>
+            </div>
+          }
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <section class="wrap split pdf" aria-labelledby="pdf-title">
+    <div class="checks">
+      <p class="checks-title">{{ 'landing.pdf.checksTitle' | transloco }}</p>
+      <ul>
+        @for (check of pdfChecks; track check) {
+          <li><i class="bi bi-check-lg" aria-hidden="true"></i>{{ check | transloco }}</li>
+        }
+      </ul>
+      <p class="muted small">{{ 'landing.pdf.report' | transloco }}</p>
+    </div>
+    <div>
+      <h2 id="pdf-title">{{ 'landing.pdf.title' | transloco }}</h2>
+      <p>{{ 'landing.pdf.text' | transloco }}</p>
+    </div>
+  </section>
+
+  <section class="wrap next" aria-labelledby="next-title">
+    <h2 id="next-title">{{ 'landing.comingSoon' | transloco }}</h2>
+    <p>{{ 'landing.next' | transloco }}</p>
+  </section>
+</main>
+
+<footer class="wrap footer">
+  <span>{{ 'landing.footer' | transloco }}</span>
+  <a class="plain-link" href="https://github.com/dshelemonchak/markup-resume">GitHub</a>
+</footer>

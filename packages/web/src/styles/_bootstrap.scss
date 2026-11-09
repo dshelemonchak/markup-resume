@@ -9,6 +9,16 @@
 @import 'bootstrap/scss/functions';
 // Dark mode follows the system setting (prefers-color-scheme), not a data-bs-theme attribute.
 $color-mode-type: media-query;
+// Brand (DESIGN.md): indigo accent, Schibsted Grotesk for the UI, DM Mono for slugs and code. The fonts are loaded
+// in index.html.
+$primary: #4338ca;
+$font-family-sans-serif:
+  'Schibsted Grotesk',
+  system-ui,
+  -apple-system,
+  'Segoe UI',
+  sans-serif;
+$font-family-monospace: 'DM Mono', ui-monospace, Menlo, monospace;
 @import 'bootstrap/scss/variables';
 @import 'bootstrap/scss/variables-dark';
 @import 'bootstrap/scss/maps';

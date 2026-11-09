@@ -1,13 +1,23 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
+import { ResumeApi } from '../../api/resume-api';
+import { AppHeader } from '../app-header/app-header';
 
 /**
- * Application frame: the full-window background (base colour + two blurred glows)
- * that every screen of the tool sits on. Content is projected into it.
+ * Frame of the signed-in pages: the flat app background, the global header, and the page under it.
+ * The landing page has its own layout and does not use it.
  */
 @Component({
   selector: 'mr-shell',
+  imports: [AppHeader, RouterOutlet],
   templateUrl: './shell.html',
   styleUrl: './shell.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class Shell {}
+export class Shell {
+  private readonly api = inject(ResumeApi);
+
+  protected readonly userName = computed(() =>
+    this.api.currentUser.hasValue() ? this.api.currentUser.value().name : null,
+  );
+}

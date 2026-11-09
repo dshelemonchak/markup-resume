@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <style>
+    .sheet { fill: #1e293b; }
+    .fold { fill: #a5b4fc; }
+    .mark { stroke: #ffffff; }
+    @media (prefers-color-scheme: dark) {
+      .sheet { fill: #f1f5f9; }
+      .fold { fill: #4338ca; }
+      .mark { stroke: #0f172a; }
+    }
+  </style>
+  <path class="sheet" d="M12 4H40L52 16V60H12Z"/>
+  <path class="fold" d="M40 4L52 16H40Z"/>
+  <path class="mark" d="M36 28L24 38L36 48" fill="none" stroke-width="8" stroke-linejoin="miter" stroke-linecap="butt"/>
+</svg>

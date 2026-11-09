@@ -1,0 +1,344 @@
+:host {
+  display: block;
+  min-height: 100dvh;
+  background: var(--mr-surface-base);
+}
+
+.wrap {
+  max-width: 1120px;
+  margin: 0 auto;
+  padding-inline: 16px;
+  box-sizing: content-box;
+}
+
+.mono {
+  font-family: var(--bs-font-monospace);
+}
+
+.muted {
+  color: var(--mr-text-muted);
+}
+
+.small {
+  font-size: 13px;
+}
+
+.plain-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 12px;
+  color: var(--bs-secondary-color);
+  text-decoration: none;
+
+  &:hover {
+    color: var(--bs-body-color);
+  }
+}
+
+// Sticky frosted header (DESIGN.md).
+.bar {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--mr-glass-bar-bg);
+  backdrop-filter: var(--mr-glass-blur);
+  -webkit-backdrop-filter: var(--mr-glass-blur);
+  border-bottom: 1px solid var(--mr-separator);
+}
+
+.bar-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding-block: 10px;
+}
+
+.brand {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  gap: 10px;
+  min-height: 44px;
+  color: var(--bs-body-color);
+  font-weight: 650;
+  text-decoration: none;
+}
+
+.sign-in-small {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  font-weight: 600;
+}
+
+.hero {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 48px;
+  padding-block: 72px 96px;
+}
+
+.hero-text {
+  flex: 1 1 460px;
+  min-width: 0;
+
+  h1 {
+    max-width: 15ch;
+    margin: 0;
+    font-size: clamp(34px, 4.6vw, 54px);
+    font-weight: 700;
+    line-height: 1.08;
+    letter-spacing: -0.02em;
+  }
+}
+
+.alert-line {
+  color: var(--bs-danger-text-emphasis);
+}
+
+.lead {
+  max-width: 52ch;
+  margin: 20px 0 32px;
+  color: var(--bs-secondary-color);
+  font-size: 18px;
+  line-height: 1.55;
+}
+
+.providers,
+.provider-soon {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+// GitHub's own look; the colours switch with the theme.
+.btn-github {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 48px;
+  padding: 0 20px;
+  border: 1px solid var(--mr-github-border);
+  border-radius: 8px;
+  background: var(--mr-github-bg);
+  color: var(--mr-github-text);
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+  box-shadow: var(--mr-github-shadow);
+
+  &:hover {
+    background: var(--mr-github-hover-bg);
+    color: var(--mr-github-text);
+  }
+
+  &:active {
+    background: var(--mr-github-pressed-bg);
+    transform: translateY(1px);
+  }
+}
+
+// Google's branding rules: Roboto Medium 14/20, 40 px tall with a 44 px hit area, 4 px radius. Disabled until
+// Google sign-in exists.
+.btn-google {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--mr-google-disabled-border);
+  border-radius: 4px;
+  background: var(--mr-google-disabled-bg);
+  color: var(--mr-google-disabled-text);
+  font:
+    500 14px/20px Roboto,
+    system-ui,
+    sans-serif;
+  letter-spacing: 0.25px;
+
+  &::after {
+    content: '';
+    position: absolute;
+    inset: -2px 0;
+  }
+
+  img {
+    opacity: 0.38;
+  }
+}
+
+.ledger {
+  display: flex;
+  flex: 1 1 400px;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+  margin: 0;
+}
+
+.prompt {
+  align-self: flex-end;
+  max-width: 380px;
+  margin: 0;
+  padding: 14px 16px;
+  border-radius: 12px 12px 4px;
+  background: var(--mr-bubble-bg);
+  color: var(--mr-bubble-text);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.revisions {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 18px;
+  border: 1px solid var(--mr-glass-border);
+  border-radius: 12px;
+  background: var(--mr-glass-bg);
+  backdrop-filter: var(--mr-glass-blur);
+  -webkit-backdrop-filter: var(--mr-glass-blur);
+  box-shadow: var(--mr-glass-shadow);
+}
+
+.revisions-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  color: var(--mr-text-muted);
+  font-size: 13px;
+}
+
+.revision {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  color: var(--bs-secondary-color);
+  font-size: 14px;
+
+  &.current {
+    border-color: var(--mr-selected-border);
+    background: var(--mr-selected-bg);
+    color: var(--mr-selected-text);
+  }
+
+  .rev {
+    font-size: 15px;
+    font-weight: 600;
+  }
+
+  .what {
+    flex: 1 1 auto;
+  }
+}
+
+.chip {
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: var(--mr-success-bg);
+  color: var(--mr-success-text);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+h2 {
+  margin: 0 0 12px;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+p {
+  line-height: 1.6;
+}
+
+.band {
+  padding-block: 72px;
+  border-block: 1px solid var(--mr-separator);
+  background: var(--bs-body-bg);
+}
+
+.split {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 48px;
+
+  > * {
+    flex: 1 1 380px;
+    min-width: 0;
+  }
+}
+
+.tools-title,
+.checks-title {
+  margin: 0 0 12px;
+  font-weight: 600;
+}
+
+.tools dl {
+  margin: 0;
+}
+
+.tool {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  padding: 10px 0;
+  border-top: 1px solid var(--mr-separator);
+
+  dt {
+    flex: 0 0 140px;
+    font-weight: 500;
+  }
+
+  dd {
+    margin: 0;
+    color: var(--bs-secondary-color);
+  }
+}
+
+.pdf {
+  padding-block: 72px;
+}
+
+.checks ul {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0 0 12px;
+  padding: 0;
+  list-style: none;
+
+  .bi {
+    margin-right: 8px;
+    color: var(--mr-success-text);
+  }
+}
+
+.next {
+  padding-block: 0 72px;
+
+  p {
+    max-width: 60ch;
+    color: var(--bs-secondary-color);
+  }
+}
+
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  padding-block: 24px;
+  border-top: 1px solid var(--mr-separator);
+  color: var(--mr-text-muted);
+  font-size: 14px;
+}

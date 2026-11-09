@@ -1,40 +1,16 @@
 :host {
-  position: relative;
-  display: block;
+  display: flex;
+  flex-direction: column;
   height: 100dvh;
-  // clip, not hidden: the glows overhang the edges, and a hidden-overflow box can still be
-  // scrolled by the browser (focus, scrollIntoView), which shifted the whole UI.
+  // clip, not hidden: a hidden-overflow box can still be scrolled by the browser (focus, scrollIntoView),
+  // which shifted the whole UI.
   overflow: clip;
   background: var(--mr-surface-base);
 }
 
-// Decorative glows: they give the frosted-glass panels something to blur.
-.glow {
-  position: absolute;
-  border-radius: 50%;
-  pointer-events: none;
-}
-
-.glow-primary {
-  top: -160px;
-  left: -120px;
-  width: 620px;
-  height: 620px;
-  background: var(--mr-glow-primary);
-  filter: blur(80px);
-}
-
-.glow-secondary {
-  right: -140px;
-  bottom: -220px;
-  width: 700px;
-  height: 700px;
-  background: var(--mr-glow-secondary);
-  filter: blur(90px);
-}
-
 .content {
   position: relative;
-  height: 100%;
+  flex: 1;
+  min-height: 0;
   padding: var(--mr-gap);
 }
