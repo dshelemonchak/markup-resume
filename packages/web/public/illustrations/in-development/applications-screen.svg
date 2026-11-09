@@ -1,0 +1,105 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 760">
+  <!-- The future Applications screen, as faint blocks behind the teaser. -->
+  <style>
+    .panel { fill: #ffffff; }
+    .glass { fill: #ffffff; fill-opacity: 0.7; }
+    .bar { fill: #e2e8f0; }
+    .strong { fill: #cbd5e1; }
+    .accent { fill: #c7d2fe; }
+    .dashed { fill: none; stroke: #cbd5e1; stroke-width: 2; stroke-dasharray: 8 6; }
+    @media (prefers-color-scheme: dark) {
+      .panel { fill: rgb(255 255 255 / 0.06); }
+      .glass { fill: rgb(255 255 255 / 0.09); fill-opacity: 1; }
+      .bar { fill: rgb(255 255 255 / 0.1); }
+      .strong { fill: rgb(255 255 255 / 0.16); }
+      .accent { fill: rgb(165 180 252 / 0.35); }
+      .dashed { stroke: rgb(255 255 255 / 0.16); }
+    }
+  </style>
+  <rect class="panel" x="0" y="0" width="790" height="760" rx="12"/>
+  <rect class="strong" x="24" y="24" width="160" height="22" rx="4"/>
+  <rect class="bar" x="560" y="18" width="90" height="34" rx="8"/>
+  <rect class="accent" x="664" y="18" width="104" height="34" rx="8"/>
+  <rect class="bar" x="24" y="72" width="220" height="30" rx="8"/>
+  <rect class="bar" x="260" y="72" width="44" height="30" rx="8"/>
+  <rect class="bar" x="312" y="72" width="64" height="30" rx="8"/>
+  <rect class="bar" x="384" y="72" width="72" height="30" rx="8"/>
+  <rect class="bar" x="464" y="72" width="70" height="30" rx="8"/>
+  <rect class="bar" x="542" y="72" width="60" height="30" rx="8"/>
+  <rect class="bar" x="610" y="72" width="76" height="30" rx="8"/>
+  <rect class="bar" x="694" y="72" width="70" height="30" rx="8"/>
+  <rect class="bar" x="24" y="128" width="742" height="2" rx="1"/>
+  <rect class="strong" x="24" y="150" width="70" height="10" rx="4"/>
+  <rect class="strong" x="190" y="150" width="70" height="10" rx="4"/>
+  <rect class="strong" x="380" y="150" width="50" height="10" rx="4"/>
+  <rect class="strong" x="480" y="150" width="60" height="10" rx="4"/>
+  <rect class="strong" x="590" y="150" width="50" height="10" rx="4"/>
+  <rect class="strong" x="700" y="150" width="66" height="10" rx="4"/>
+  <rect class="bar" x="24" y="176" width="742" height="1" rx="0"/>
+  <rect class="strong" x="24" y="190" width="110" height="14" rx="4"/>
+  <rect class="bar" x="190" y="190" width="210" height="12" rx="4"/>
+  <rect class="accent" x="380" y="186" width="70" height="22" rx="6"/>
+  <rect class="bar" x="480" y="187" width="90" height="20" rx="6"/>
+  <rect class="bar" x="590" y="190" width="50" height="12" rx="4"/>
+  <rect class="bar" x="726" y="190" width="40" height="12" rx="4"/>
+  <rect class="bar" x="24" y="240" width="742" height="1" rx="0"/>
+  <rect class="strong" x="24" y="254" width="90" height="14" rx="4"/>
+  <rect class="bar" x="190" y="254" width="240" height="12" rx="4"/>
+  <rect class="bar" x="380" y="250" width="64" height="22" rx="6"/>
+  <rect class="bar" x="480" y="251" width="80" height="20" rx="6"/>
+  <rect class="bar" x="590" y="254" width="50" height="12" rx="4"/>
+  <rect class="bar" x="726" y="254" width="40" height="12" rx="4"/>
+  <rect class="bar" x="24" y="304" width="742" height="1" rx="0"/>
+  <rect class="strong" x="24" y="318" width="120" height="14" rx="4"/>
+  <rect class="bar" x="190" y="318" width="170" height="12" rx="4"/>
+  <rect class="bar" x="380" y="314" width="52" height="22" rx="6"/>
+  <rect class="bar" x="590" y="318" width="40" height="12" rx="4"/>
+  <rect class="bar" x="726" y="318" width="40" height="12" rx="4"/>
+  <rect class="bar" x="24" y="368" width="742" height="1" rx="0"/>
+  <rect class="strong" x="24" y="382" width="100" height="14" rx="4"/>
+  <rect class="bar" x="190" y="382" width="220" height="12" rx="4"/>
+  <rect class="bar" x="380" y="378" width="72" height="22" rx="6"/>
+  <rect class="bar" x="480" y="379" width="100" height="20" rx="6"/>
+  <rect class="bar" x="590" y="382" width="50" height="12" rx="4"/>
+  <rect class="bar" x="726" y="382" width="40" height="12" rx="4"/>
+  <rect class="bar" x="24" y="432" width="742" height="1" rx="0"/>
+  <rect class="strong" x="24" y="446" width="80" height="14" rx="4"/>
+  <rect class="bar" x="190" y="446" width="160" height="12" rx="4"/>
+  <rect class="bar" x="380" y="442" width="72" height="22" rx="6"/>
+  <rect class="bar" x="480" y="443" width="104" height="20" rx="6"/>
+  <rect class="bar" x="590" y="446" width="40" height="12" rx="4"/>
+  <rect class="bar" x="726" y="446" width="40" height="12" rx="4"/>
+  <rect class="bar" x="24" y="496" width="742" height="1" rx="0"/>
+  <rect class="strong" x="24" y="510" width="110" height="14" rx="4"/>
+  <rect class="bar" x="190" y="510" width="200" height="12" rx="4"/>
+  <rect class="bar" x="380" y="506" width="54" height="22" rx="6"/>
+  <rect class="bar" x="480" y="507" width="104" height="20" rx="6"/>
+  <rect class="bar" x="590" y="510" width="50" height="12" rx="4"/>
+  <rect class="bar" x="726" y="510" width="40" height="12" rx="4"/>
+  <rect class="bar" x="24" y="560" width="742" height="1" rx="0"/>
+  <rect class="strong" x="24" y="574" width="96" height="14" rx="4"/>
+  <rect class="bar" x="190" y="574" width="190" height="12" rx="4"/>
+  <rect class="bar" x="380" y="570" width="64" height="22" rx="6"/>
+  <rect class="bar" x="480" y="571" width="84" height="20" rx="6"/>
+  <rect class="bar" x="590" y="574" width="50" height="12" rx="4"/>
+  <rect class="bar" x="726" y="574" width="40" height="12" rx="4"/>
+  <rect class="bar" x="24" y="624" width="742" height="1" rx="0"/>
+  <rect class="strong" x="24" y="638" width="104" height="14" rx="4"/>
+  <rect class="bar" x="190" y="638" width="230" height="12" rx="4"/>
+  <rect class="bar" x="380" y="634" width="70" height="22" rx="6"/>
+  <rect class="bar" x="480" y="635" width="92" height="20" rx="6"/>
+  <rect class="bar" x="590" y="638" width="40" height="12" rx="4"/>
+  <rect class="bar" x="726" y="638" width="40" height="12" rx="4"/>
+  <rect class="glass" x="810" y="0" width="390" height="640" rx="12"/>
+  <rect class="strong" x="834" y="28" width="180" height="20" rx="4"/>
+  <rect class="bar" x="834" y="58" width="230" height="12" rx="4"/>
+  <rect class="accent" x="1110" y="28" width="66" height="22" rx="6"/>
+  <rect class="bar" x="834" y="100" width="70" height="10" rx="4"/>
+  <rect class="bar" x="834" y="120" width="342" height="44" rx="8"/>
+  <rect class="bar" x="834" y="188" width="60" height="10" rx="4"/>
+  <rect class="bar" x="834" y="208" width="342" height="44" rx="8"/>
+  <rect class="bar" x="834" y="276" width="150" height="10" rx="4"/>
+  <rect class="bar" x="834" y="296" width="342" height="110" rx="8"/>
+  <rect class="bar" x="834" y="430" width="130" height="10" rx="4"/>
+  <rect class="bar" x="834" y="450" width="342" height="150" rx="8"/>
+</svg>

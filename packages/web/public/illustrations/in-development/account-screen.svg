@@ -1,0 +1,69 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 760">
+  <!-- The future Account screen, as faint blocks behind the teaser. -->
+  <style>
+    .panel { fill: #ffffff; }
+    .glass { fill: #ffffff; fill-opacity: 0.7; }
+    .bar { fill: #e2e8f0; }
+    .strong { fill: #cbd5e1; }
+    .accent { fill: #c7d2fe; }
+    .dashed { fill: none; stroke: #cbd5e1; stroke-width: 2; stroke-dasharray: 8 6; }
+    @media (prefers-color-scheme: dark) {
+      .panel { fill: rgb(255 255 255 / 0.06); }
+      .glass { fill: rgb(255 255 255 / 0.09); fill-opacity: 1; }
+      .bar { fill: rgb(255 255 255 / 0.1); }
+      .strong { fill: rgb(255 255 255 / 0.16); }
+      .accent { fill: rgb(165 180 252 / 0.35); }
+      .dashed { stroke: rgb(255 255 255 / 0.16); }
+    }
+  </style>
+  <rect class="panel" x="100" y="24" width="1000" height="110" rx="12"/>
+  <circle class="strong" cx="166" cy="79" r="34"/>
+  <rect class="strong" x="220" y="56" width="200" height="22" rx="4"/>
+  <rect class="bar" x="220" y="90" width="300" height="14" rx="4"/>
+  <rect class="bar" x="990" y="60" width="86" height="38" rx="8"/>
+  <rect class="panel" x="100" y="154" width="620" height="560" rx="12"/>
+  <rect class="strong" x="124" y="178" width="160" height="20" rx="4"/>
+  <rect class="bar" x="124" y="222" width="132" height="96" rx="10"/>
+  <rect class="strong" x="140" y="240" width="70" height="10" rx="4"/>
+  <rect class="strong" x="140" y="266" width="50" height="30" rx="6"/>
+  <rect class="bar" x="270" y="222" width="132" height="96" rx="10"/>
+  <rect class="strong" x="286" y="240" width="70" height="10" rx="4"/>
+  <rect class="strong" x="286" y="266" width="50" height="30" rx="6"/>
+  <rect class="bar" x="416" y="222" width="132" height="96" rx="10"/>
+  <rect class="strong" x="432" y="240" width="70" height="10" rx="4"/>
+  <rect class="strong" x="432" y="266" width="50" height="30" rx="6"/>
+  <rect class="bar" x="562" y="222" width="132" height="96" rx="10"/>
+  <rect class="strong" x="578" y="240" width="70" height="10" rx="4"/>
+  <rect class="strong" x="578" y="266" width="50" height="30" rx="6"/>
+  <rect class="strong" x="124" y="350" width="260" height="16" rx="4"/>
+  <rect class="bar" x="124" y="390" width="100" height="12" rx="4"/>
+  <rect class="bar" x="244" y="386" width="420" height="20" rx="6"/>
+  <rect class="bar" x="680" y="390" width="16" height="12" rx="4"/>
+  <rect class="bar" x="124" y="436" width="100" height="12" rx="4"/>
+  <rect class="bar" x="244" y="432" width="340" height="20" rx="6"/>
+  <rect class="bar" x="680" y="436" width="16" height="12" rx="4"/>
+  <rect class="bar" x="124" y="482" width="100" height="12" rx="4"/>
+  <rect class="accent" x="244" y="478" width="260" height="20" rx="6"/>
+  <rect class="bar" x="680" y="482" width="16" height="12" rx="4"/>
+  <rect class="bar" x="124" y="528" width="100" height="12" rx="4"/>
+  <rect class="bar" x="244" y="524" width="180" height="20" rx="6"/>
+  <rect class="bar" x="680" y="528" width="16" height="12" rx="4"/>
+  <rect class="bar" x="124" y="574" width="100" height="12" rx="4"/>
+  <rect class="bar" x="244" y="570" width="120" height="20" rx="6"/>
+  <rect class="bar" x="680" y="574" width="16" height="12" rx="4"/>
+  <rect class="bar" x="124" y="620" width="100" height="12" rx="4"/>
+  <rect class="bar" x="244" y="616" width="300" height="20" rx="6"/>
+  <rect class="bar" x="680" y="620" width="16" height="12" rx="4"/>
+  <rect class="panel" x="740" y="154" width="360" height="220" rx="12"/>
+  <rect class="strong" x="764" y="178" width="170" height="20" rx="4"/>
+  <rect class="bar" x="764" y="222" width="312" height="48" rx="8"/>
+  <rect class="bar" x="764" y="286" width="312" height="48" rx="8"/>
+  <rect class="panel" x="740" y="394" width="360" height="220" rx="12"/>
+  <rect class="strong" x="764" y="418" width="190" height="20" rx="4"/>
+  <circle class="accent" cx="780" cy="486" r="6"/>
+  <rect class="strong" x="800" y="480" width="140" height="14" rx="4"/>
+  <rect class="bar" x="990" y="480" width="86" height="12" rx="4"/>
+  <circle class="accent" cx="780" cy="550" r="6"/>
+  <rect class="strong" x="800" y="544" width="140" height="14" rx="4"/>
+  <rect class="bar" x="990" y="544" width="86" height="12" rx="4"/>
+</svg>

@@ -1,0 +1,55 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 96">
+  <style>
+    .sheet { fill: none; stroke: #94a3b8; stroke-width: 1.5; }
+    .line { fill: none; stroke: #cbd5e1; stroke-width: 3; stroke-linecap: round; }
+    .accent { fill: #4338ca; }
+    .link { fill: none; stroke: #94a3b8; stroke-width: 1.5; stroke-dasharray: 3 3; }
+    .tag { fill: #f1f5f9; stroke: #cbd5e1; }
+    .tag-text { fill: #334155; font: 500 8px ui-monospace, Menlo, monospace; }
+    .chip-text { font: 600 10px Inter, system-ui, sans-serif; text-anchor: middle; }
+    .neutral rect { fill: #f1f5f9; stroke: #e2e8f0; }
+    .neutral text { fill: #334155; }
+    .interview rect { fill: #e0e7ff; stroke: #c7d2fe; }
+    .interview text { fill: #3730a3; }
+    .offer rect { fill: #e3f4ea; stroke: #c7e8d4; }
+    .offer text { fill: #17663a; }
+    /* Saved → Applied → Interview → Offer, one after another. */
+    .status { opacity: 0; animation: status 6s infinite; }
+    .applied { animation-delay: 1.5s; }
+    .interview { animation-delay: 3s; }
+    .offer { animation-delay: 4.5s; }
+    @keyframes status {
+      0% { opacity: 0; }
+      3%, 22% { opacity: 1; }
+      25%, 100% { opacity: 0; }
+    }
+    @media (prefers-color-scheme: dark) {
+      .sheet, .link { stroke: #8e8e93; }
+      .line { stroke: #48484a; }
+      .accent { fill: #a5b4fc; }
+      .tag { fill: rgb(255 255 255 / 0.08); stroke: rgb(255 255 255 / 0.18); }
+      .tag-text, .neutral text { fill: #d1d1d6; }
+      .neutral rect { fill: rgb(255 255 255 / 0.08); stroke: rgb(255 255 255 / 0.14); }
+      .interview rect { fill: rgb(129 140 248 / 0.16); stroke: rgb(129 140 248 / 0.35); }
+      .interview text { fill: #c7d2fe; }
+      .offer rect { fill: rgb(48 209 88 / 0.16); stroke: rgb(48 209 88 / 0.35); }
+      .offer text { fill: #86efac; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      * { animation: none !important; }
+      .interview { opacity: 1; }
+    }
+  </style>
+  <path class="sheet" d="M22 10H52L62 20V86H22Z"/>
+  <path class="accent" d="M52 10L62 20H52Z"/>
+  <path class="line" d="M30 34H52M30 45H54M30 56H44"/>
+  <rect class="tag" x="40" y="68" width="40" height="14" rx="4"/>
+  <text class="tag-text" x="60" y="78" text-anchor="middle">cv@7</text>
+  <path class="link" d="M68 44H86"/>
+  <g class="chip-text">
+    <g class="status neutral"><rect x="90" y="35" width="56" height="18" rx="5"/><text x="118" y="48">Saved</text></g>
+    <g class="status neutral applied"><rect x="90" y="35" width="56" height="18" rx="5"/><text x="118" y="48">Applied</text></g>
+    <g class="status interview"><rect x="90" y="35" width="56" height="18" rx="5"/><text x="118" y="48">Interview</text></g>
+    <g class="status offer"><rect x="90" y="35" width="56" height="18" rx="5"/><text x="118" y="48">Offer</text></g>
+  </g>
+</svg>

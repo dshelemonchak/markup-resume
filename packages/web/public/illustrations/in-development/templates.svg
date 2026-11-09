@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 96">
+  <style>
+    .paper { fill: #ffffff; stroke: #94a3b8; stroke-width: 1.5; }
+    .line { fill: none; stroke: #cbd5e1; stroke-width: 2.5; stroke-linecap: round; }
+    .accent { fill: #4338ca; }
+    /* The back sheets fan out from under the front one. */
+    .left, .right { transform-origin: 80px 88px; animation: fan-left 3.2s ease-in-out infinite; }
+    .right { animation-name: fan-right; }
+    @keyframes fan-left {
+      0%, 100% { transform: rotate(0); }
+      50% { transform: rotate(-12deg); }
+    }
+    @keyframes fan-right {
+      0%, 100% { transform: rotate(0); }
+      50% { transform: rotate(12deg); }
+    }
+    @media (prefers-color-scheme: dark) {
+      .paper { fill: #3a3a3c; stroke: #8e8e93; }
+      .line { stroke: #5a5a5e; }
+      .accent { fill: #a5b4fc; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      * { animation: none !important; }
+      .left { transform: rotate(-8deg); }
+      .right { transform: rotate(8deg); }
+    }
+  </style>
+  <path class="paper left" d="M62 16H90L100 26V88H62Z"/>
+  <path class="paper right" d="M62 16H90L100 26V88H62Z"/>
+  <path class="paper" d="M62 12H90L100 22V88H62Z"/>
+  <path class="accent" d="M90 12L100 22H90Z"/>
+  <path class="line" d="M70 32H92M70 44H76M80 44H92M70 54H76M80 54H90M70 64H76M80 64H92"/>
+</svg>
