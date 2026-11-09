@@ -10,9 +10,9 @@ describe('App', () => {
     }).compileComponents();
   });
 
-  it('renders the router outlet inside the shell', async () => {
+  it('renders the router outlet', async () => {
     const fixture = TestBed.createComponent(App);
     await fixture.whenStable();
-    expect((fixture.nativeElement as HTMLElement).querySelector('mr-shell router-outlet')).not.toBeNull();
+    expect((fixture.nativeElement as HTMLElement).querySelector('router-outlet')).not.toBeNull();
   });
 });

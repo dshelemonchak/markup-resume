@@ -7,7 +7,7 @@ import type { ResumeListItem, ResumeListState } from '../resume-list-item';
 import { SidebarItem } from '../sidebar-item/sidebar-item';
 
 /**
- * Left sidebar: brand, import, search, pinned and other CVs, Claude's connection status, which also opens the
+ * Left sidebar: import, search, pinned and other CVs, Claude's connection status, which also opens the
  * way to connect it, and the signed-in user with a way to sign out.
  * Presentational: the list comes in through inputs, selection and the connect request go out
  * through outputs. Import and search are placeholders for now.

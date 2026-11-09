@@ -1,0 +1,29 @@
+<header class="app-header">
+  <a class="brand" routerLink="/cvs">
+    <img src="mark.svg" alt="" width="22" height="22" />
+    <span class="name">{{ 'app.name' | transloco }}</span>
+  </a>
+
+  <nav class="nav" [attr.aria-label]="'nav.label' | transloco">
+    @for (link of links; track link.path) {
+      <a class="nav-link" [routerLink]="link.path" routerLinkActive="active" ariaCurrentWhenActive="page">
+        {{ link.label | transloco }}
+      </a>
+    }
+  </nav>
+
+  <a
+    class="account"
+    routerLink="/account"
+    routerLinkActive="active"
+    ariaCurrentWhenActive="page"
+    [attr.aria-label]="'nav.account' | transloco"
+    [title]="userName() ?? ('nav.account' | transloco)"
+  >
+    @if (initials(); as initials) {
+      <span aria-hidden="true">{{ initials }}</span>
+    } @else {
+      <i class="bi bi-person-circle" aria-hidden="true"></i>
+    }
+  </a>
+</header>

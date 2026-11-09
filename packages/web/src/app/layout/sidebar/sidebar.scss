@@ -11,25 +11,6 @@
   padding: 16px 12px;
 }
 
-.brand {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 0 4px;
-
-  .logo {
-    width: 24px;
-    height: 24px;
-    border-radius: 7px;
-    background: var(--mr-brand);
-  }
-
-  .name {
-    font-weight: 600;
-    font-size: 15px;
-  }
-}
-
 .import {
   display: flex;
   align-items: center;

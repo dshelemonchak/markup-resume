@@ -9,19 +9,65 @@
   --mr-light-rgb: 255 255 255; // fills on glass: panels, hover, selection
   --mr-shadow-rgb: 15 23 42; // shadows and backdrops, dark in every theme
 
-  // App background and its two blurred colour glows.
+  // App background: flat, without glows (DESIGN.md).
   --mr-surface-base: #eef1f6;
-  --mr-glow-opacity: 0.4;
-  --mr-glow-primary: rgb(13 110 253 / var(--mr-glow-opacity));
-  --mr-glow-secondary: rgb(111 66 193 / var(--mr-glow-opacity));
+
+  // The accent (indigo ink) and the states of the primary button. Bootstrap's $primary is the same colour.
+  --mr-accent: #4338ca;
+  --mr-accent-top: #5048e0; // top of the primary button's gradient
+  --mr-accent-hover: #3730a3;
+  --mr-accent-hover-top: #4239c4;
+  --mr-accent-pressed: #2e2a8a;
+  --mr-accent-edge: #2a2680; // bottom edge of the primary button
+  --mr-on-accent: #fff;
+
+  // Secondary buttons: a raised light surface.
+  --mr-raised-top: #fff;
+  --mr-raised-bottom: #f4f6fa;
+  --mr-raised-hover-top: #f8fafc;
+  --mr-raised-hover-bottom: #eceff4;
+  --mr-raised-pressed: #e2e8f0;
+  --mr-raised-highlight: #fff;
+  --mr-control-border: #cbd5e1;
+  --mr-shadow-button-primary:
+    inset 0 1px 0 rgb(255 255 255 / 0.28), 0 1px 2px rgb(46 42 138 / 0.35), 0 2px 6px rgb(15 23 42 / 0.12);
+  --mr-shadow-button-primary-pressed: inset 0 2px 4px rgb(0 0 0 / 0.35);
+  --mr-shadow-button: inset 0 1px 0 var(--mr-raised-highlight), 0 1px 2px rgb(var(--mr-shadow-rgb) / 0.08);
+  --mr-shadow-button-pressed: inset 0 2px 3px rgb(var(--mr-shadow-rgb) / 0.18);
+
+  // Selection and success states.
+  --mr-selected-bg: #eef2ff;
+  --mr-selected-border: #c7d2fe;
+  --mr-selected-text: #1e293b;
+  --mr-success-bg: #e3f4ea;
+  --mr-success-text: #17663a;
+
+  // A chat message, as the landing page quotes one.
+  --mr-bubble-bg: #1e293b;
+  --mr-bubble-text: #f8fafc;
+
+  // Sign-in buttons in their providers' own colours (DESIGN.md). GitHub: dark on a light page, light on a dark one.
+  --mr-github-bg: #24292f;
+  --mr-github-hover-bg: #32383f;
+  --mr-github-pressed-bg: #1b1f23;
+  --mr-github-border: #1b1f23;
+  --mr-github-text: #fff;
+  --mr-github-shadow: inset 0 1px 0 rgb(255 255 255 / 0.12), 0 1px 2px rgb(15 23 42 / 0.2);
+  // Google's disabled button (its branding rules: 38% content, 12% border).
+  --mr-google-disabled-bg: rgb(255 255 255 / 0.38);
+  --mr-google-disabled-border: rgb(31 31 31 / 0.12);
+  --mr-google-disabled-text: rgb(31 31 31 / 0.38);
+
+  // Muted text, the lightest allowed: 5.7:1 on the background.
+  --mr-text-muted: #556274;
 
   // Frosted glass: base values…
-  --mr-glass-opacity: 0.5;
-  --mr-glass-blur-radius: 30px;
+  --mr-glass-opacity: 0.62;
+  --mr-glass-blur-radius: 26px;
   --mr-glass-saturation: 160%;
-  --mr-glass-border-alpha: 0;
-  --mr-glass-highlight-alpha: 0;
-  --mr-glass-shadow-alpha: 0.1;
+  --mr-glass-border-alpha: 0.65;
+  --mr-glass-highlight-alpha: 0.9;
+  --mr-glass-shadow-alpha: 0.12;
   --mr-glass-radius: 16px;
   --mr-glass-radius-compact: 12px;
 
@@ -31,7 +77,10 @@
   --mr-glass-border: rgb(var(--mr-light-rgb) / var(--mr-glass-border-alpha));
   --mr-glass-shadow:
     inset 0 1px 0 rgb(var(--mr-light-rgb) / var(--mr-glass-highlight-alpha)),
-    0 8px 32px rgb(var(--mr-shadow-rgb) / var(--mr-glass-shadow-alpha));
+    0 1px 2px rgb(var(--mr-shadow-rgb) / 0.06),
+    0 10px 28px rgb(var(--mr-shadow-rgb) / var(--mr-glass-shadow-alpha));
+  // A full-width bar (the app header): a little more opaque than a panel, a hairline instead of a border.
+  --mr-glass-bar-bg: rgb(var(--mr-light-rgb) / 0.72);
 
   // Lines: a hairline between areas, and a short vertical bar between controls.
   --mr-separator: rgb(var(--mr-ink-rgb) / 0.08);
@@ -58,9 +107,6 @@
   --mr-shadow-raised: 0 2px 8px rgb(var(--mr-shadow-rgb) / 0.06);
   --mr-shadow-sheet: 0 12px 40px rgb(var(--mr-shadow-rgb) / 0.14), 0 1px 3px rgb(var(--mr-shadow-rgb) / 0.08);
   --mr-shadow-dialog: 0 24px 64px rgb(var(--mr-shadow-rgb) / 0.2), 0 1px 3px rgb(var(--mr-shadow-rgb) / 0.08);
-
-  // The logo mark next to the app name.
-  --mr-brand: var(--bs-dark);
 
   // The CV sheet is paper in every theme: the PDF is white.
   --mr-paper: #fff;
@@ -99,7 +145,32 @@
     --mr-shadow-rgb: 0 0 0;
 
     --mr-surface-base: #161618;
-    --mr-glow-opacity: 0.08;
+
+    --mr-accent: #a5b4fc; // light indigo: 8.9:1 on the dark background
+    --mr-raised-top: #3a3a3c;
+    --mr-raised-bottom: #2c2c2e;
+    --mr-raised-hover-top: #444446;
+    --mr-raised-hover-bottom: #363638;
+    --mr-raised-pressed: #242426;
+    --mr-raised-highlight: rgb(255 255 255 / 0.08);
+    --mr-control-border: #48484a;
+    --mr-text-muted: rgb(235 235 245 / 0.6);
+    --mr-selected-bg: rgb(129 140 248 / 0.16);
+    --mr-selected-border: rgb(129 140 248 / 0.35);
+    --mr-selected-text: var(--bs-body-color);
+    --mr-success-bg: rgb(52 199 89 / 0.16);
+    --mr-success-text: #7ee2a0;
+    --mr-bubble-bg: #3a3a3c;
+
+    --mr-github-bg: #f6f8fa;
+    --mr-github-hover-bg: #e6eaef;
+    --mr-github-pressed-bg: #d8dee5;
+    --mr-github-border: #d0d7de;
+    --mr-github-text: #24292f;
+    --mr-github-shadow: inset 0 1px 0 #fff, 0 1px 2px rgb(0 0 0 / 0.3);
+    --mr-google-disabled-bg: rgb(19 19 20 / 0.38);
+    --mr-google-disabled-border: rgb(142 145 143 / 0.12);
+    --mr-google-disabled-text: rgb(227 227 227 / 0.38);
 
     --mr-glass-opacity: 0.6;
     --mr-glass-shadow-alpha: 0.35;
@@ -111,7 +182,6 @@
     --mr-shadow-dialog:
       0 24px 64px rgb(var(--mr-shadow-rgb) / 0.6), 0 1px 3px rgb(var(--mr-shadow-rgb) / 0.4);
 
-    --mr-brand: var(--bs-body-color);
     --mr-dummy-color: rgb(234 134 143 / 0.4);
   }
 }

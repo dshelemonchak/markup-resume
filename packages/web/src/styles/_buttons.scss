@@ -1,0 +1,80 @@
+// Tactile buttons (DESIGN.md): a vertical gradient, a light top edge and a 1 px press, over Bootstrap's buttons.
+// Colours come from the theme; Bootstrap's own --bs-btn-* variables keep the text and border of every state.
+
+.btn {
+  transition:
+    color 0.12s,
+    background-color 0.12s,
+    border-color 0.12s,
+    box-shadow 0.12s,
+    transform 0.06s;
+
+  &:active:not(:disabled) {
+    transform: translateY(1px);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    transition: none;
+  }
+}
+
+.btn-primary {
+  --bs-btn-color: var(--mr-on-accent);
+  --bs-btn-hover-color: var(--mr-on-accent);
+  --bs-btn-active-color: var(--mr-on-accent);
+  --bs-btn-border-color: var(--mr-accent-hover);
+  --bs-btn-hover-border-color: var(--mr-accent-hover);
+  --bs-btn-active-bg: var(--mr-accent-pressed);
+  --bs-btn-active-border-color: var(--mr-accent-edge);
+
+  border-bottom-color: var(--mr-accent-edge);
+  background-image: linear-gradient(180deg, var(--mr-accent-top), var(--bs-primary));
+  box-shadow: var(--mr-shadow-button-primary);
+
+  &:hover {
+    background-image: linear-gradient(180deg, var(--mr-accent-hover-top), var(--mr-accent-hover));
+  }
+
+  &:active:not(:disabled),
+  &.active {
+    background-image: none;
+    box-shadow: var(--mr-shadow-button-primary-pressed);
+  }
+
+  &:disabled {
+    background-image: none;
+    box-shadow: none;
+  }
+}
+
+// The secondary button of the design: a raised light surface rather than an outline.
+.btn-outline-secondary {
+  --bs-btn-color: var(--bs-body-color);
+  --bs-btn-hover-color: var(--bs-body-color);
+  --bs-btn-active-color: var(--bs-body-color);
+  --bs-btn-border-color: var(--mr-control-border);
+  --bs-btn-hover-border-color: var(--mr-control-border);
+  --bs-btn-active-border-color: var(--mr-control-border);
+  --bs-btn-hover-bg: var(--mr-raised-hover-bottom);
+  --bs-btn-active-bg: var(--mr-raised-pressed);
+  --bs-btn-disabled-color: var(--mr-text-muted);
+  --bs-btn-disabled-border-color: var(--mr-control-border);
+
+  background-image: linear-gradient(180deg, var(--mr-raised-top), var(--mr-raised-bottom));
+  box-shadow: var(--mr-shadow-button);
+
+  &:hover {
+    background-image: linear-gradient(180deg, var(--mr-raised-hover-top), var(--mr-raised-hover-bottom));
+  }
+
+  &:active:not(:disabled),
+  &.active {
+    background-image: none;
+    box-shadow: var(--mr-shadow-button-pressed);
+  }
+
+  &:disabled {
+    background-image: none;
+    box-shadow: none;
+  }
+}

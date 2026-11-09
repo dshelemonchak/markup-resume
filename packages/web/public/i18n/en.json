@@ -2,6 +2,67 @@
   "app": {
     "name": "Markup Résumé"
   },
+  "nav": {
+    "label": "Main",
+    "applications": "Applications",
+    "cvs": "CVs",
+    "masterFile": "Master file",
+    "templates": "Templates",
+    "account": "Account"
+  },
+  "inDevelopment": {
+    "text": "In development"
+  },
+  "landing": {
+    "source": "Source on GitHub",
+    "signIn": "Sign in",
+    "signInFailed": "Signing in did not work. Try again.",
+    "signInNotAllowed": "This GitHub account has no access to this server.",
+    "comingSoon": "Coming soon",
+    "hero": {
+      "title": "Ask Claude for a CV. Get a page you can check, version and send.",
+      "lead": "Each CV is a standalone HTML document on a fixed template. Claude edits it over MCP, you watch it change live, and every PDF is compared with the page before you download it.",
+      "github": "Sign in with GitHub",
+      "google": "Sign in with Google",
+      "allowList": "Sign-in is limited to an allow-list of GitHub accounts for now."
+    },
+    "ledger": {
+      "caption": "A CV and its revisions",
+      "prompt": "Tailor my angular-senior CV to this vacancy and keep it on one page.",
+      "revisions": "Revisions",
+      "rev9": "Summary and skills rewritten for the vacancy",
+      "rev8": "Experience trimmed to fit A4",
+      "rev7": "First version on the template",
+      "checked": "PDF checked"
+    },
+    "mcp": {
+      "title": "Claude does the writing, in the client you already use",
+      "client": "Connect claude.ai or Claude Code once. The app never calls a model itself: there is no AI key to set up here and no editor to learn.",
+      "rules": "Each template comes with rules Claude reads first, and every write is validated against them, so a CV cannot drift from its design.",
+      "toolsTitle": "The MCP tools",
+      "tools": {
+        "list": "See your CVs",
+        "readTemplate": "Learn a template's classes and page limits",
+        "create": "Start a CV on a template",
+        "read": "Open the current or any earlier revision",
+        "write": "Save a change as a new revision"
+      }
+    },
+    "pdf": {
+      "checksTitle": "Before the PDF is yours, the app compares it with the page",
+      "checks": {
+        "words": "Every word is in the PDF text layer",
+        "order": "Blocks read in the same order",
+        "links": "Links survive and stay clickable",
+        "fonts": "Fonts are embedded"
+      },
+      "report": "If something is off, you get a report instead of the file, and can still download it anyway.",
+      "title": "No separate check to remember",
+      "text": "It runs on every export. It does not promise that an ATS will accept the file; it promises the file says what the page says."
+    },
+    "next": "An applications tracker where each entry points to the exact revision you sent, a master file Claude writes every CV from, and cover letters exported as PDF.",
+    "footer": "Markup Résumé · MIT license"
+  },
   "sidebar": {
     "label": "CVs",
     "importHtml": "Import HTML",
@@ -46,9 +107,7 @@
   "workspace": {
     "signIn": {
       "prompt": "Sign in to see and edit your CVs.",
-      "button": "Sign in with GitHub",
-      "failed": "Signing in did not work. Try again.",
-      "notAllowed": "This GitHub account has no access to this server."
+      "button": "Sign in with GitHub"
     },
     "loading": "Loading CVs…",
     "unreachable": "The local server is not reachable. Start it with <code>docker compose up -d app</code>; the list comes back by itself.",

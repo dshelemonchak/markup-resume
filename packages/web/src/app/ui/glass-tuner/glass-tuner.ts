@@ -26,7 +26,6 @@ const PARAMS: readonly TunerParam[] = [
   { name: '--mr-glass-border-alpha', label: 'Border', min: 0, max: 1, step: 0.05, unit: '' },
   { name: '--mr-glass-highlight-alpha', label: 'Top highlight', min: 0, max: 1, step: 0.05, unit: '' },
   { name: '--mr-glass-shadow-alpha', label: 'Shadow', min: 0, max: 0.4, step: 0.01, unit: '' },
-  { name: '--mr-glow-opacity', label: 'Background glow', min: 0, max: 0.8, step: 0.05, unit: '' },
 ];
 
 /**
