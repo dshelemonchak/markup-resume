@@ -3,6 +3,7 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { TestBed } from '@angular/core/testing';
 import type { ResumeListItemDto } from '../../api/resume-api';
 import { sessionExpiryInterceptor } from '../../api/session-expiry';
+import { ConnectClaude } from '../../layout/connect-claude/connect-claude';
 import { Workspace } from './workspace';
 
 class FakeEventSource {
@@ -160,6 +161,18 @@ describe('Workspace', () => {
     ]);
     await fixture.whenStable();
     expect(root.querySelector('.connection')!.getAttribute('aria-label')).toBe('Claude Desktop connected');
+  });
+
+  it('offers to connect Claude while there are no CVs yet', async () => {
+    const open = vi.spyOn(ConnectClaude.prototype, 'open').mockImplementation(() => undefined);
+    const { root } = await render([]);
+    const empty = root.querySelector('.document-area .first-cv')!;
+    expect(empty.querySelector('h2')!.textContent).toContain('Connect Claude to write your first CV');
+    expect(empty.querySelector('.prompt')!.textContent).toContain('Create a CV for me');
+
+    empty.querySelector<HTMLButtonElement>('button')!.click();
+    expect(open).toHaveBeenCalledOnce();
+    open.mockRestore();
   });
 
   it('shows the way to sign in, and asks for nothing else, while nobody is signed in', async () => {

@@ -56,7 +56,20 @@
     } @else if (listState() === 'failed') {
       <p class="empty" [innerHTML]="'workspace.failed' | transloco"></p>
     } @else {
-      <p class="empty" [innerHTML]="'workspace.empty' | transloco"></p>
+      <div class="empty first-cv">
+        <span class="first-cv-icon" aria-hidden="true"><i class="bi bi-plug"></i></span>
+        <h2 class="first-cv-title">{{ 'workspace.empty.title' | transloco }}</h2>
+        <p class="first-cv-text">{{ 'workspace.empty.text' | transloco }}</p>
+        <button type="button" class="btn btn-primary first-cv-connect" (click)="connectClaude.open()">
+          <i class="bi bi-plug" aria-hidden="true"></i>
+          {{ 'workspace.empty.connect' | transloco }}
+        </button>
+        <p class="first-cv-clients">{{ 'workspace.empty.clients' | transloco }}</p>
+        <div class="first-cv-ask">
+          <p>{{ 'workspace.empty.ask' | transloco }}</p>
+          <p class="prompt">{{ 'connectClaude.prompt' | transloco }}</p>
+        </div>
+      </div>
     }
   </main>
   <mr-document-footer

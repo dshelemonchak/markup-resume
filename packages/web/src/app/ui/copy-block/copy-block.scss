@@ -5,7 +5,8 @@
 
 pre {
   margin: 0;
-  padding: 12px 14px;
+  // The right side stays clear of the Copy button.
+  padding: 12px 96px 12px 14px;
   border-radius: 10px;
   background: var(--bs-tertiary-bg);
   font-size: 12px;
