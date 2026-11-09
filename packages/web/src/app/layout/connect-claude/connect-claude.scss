@@ -50,6 +50,47 @@
   font-weight: 600;
 }
 
+.steps {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 0;
+  padding-left: 20px;
+}
+
+.copy {
+  margin-top: 6px;
+}
+
+.section .sign-in {
+  margin-top: 6px;
+  color: var(--bs-secondary-color);
+}
+
+.ask {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--mr-separator);
+
+  p {
+    margin: 0;
+    font-size: 13px;
+    color: var(--bs-secondary-color);
+  }
+
+  .prompt {
+    padding: 10px 14px;
+    border-radius: 14px 14px 14px 4px;
+    background: var(--mr-bubble-bg);
+    color: var(--mr-bubble-text);
+    font-size: 14px;
+  }
+}
+
 .sessions {
   display: flex;
   flex-direction: column;

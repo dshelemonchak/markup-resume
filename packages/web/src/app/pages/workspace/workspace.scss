@@ -46,3 +46,76 @@
   color: var(--bs-secondary-color);
   text-align: center;
 }
+
+// No CVs yet: the way to connect Claude, which writes the first one.
+.first-cv {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  max-width: 460px;
+  padding-inline: 16px;
+
+  p {
+    margin: 0;
+  }
+}
+
+.first-cv-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border: 1px solid var(--mr-selected-border);
+  border-radius: 16px;
+  background: var(--mr-selected-bg);
+  color: var(--mr-accent);
+  font-size: 26px;
+}
+
+.first-cv-title {
+  margin: 0;
+  color: var(--bs-body-color);
+  font-size: 22px;
+  font-weight: 600;
+  line-height: 1.3;
+}
+
+.first-cv-text {
+  font-size: 15px;
+  line-height: 1.55;
+}
+
+.first-cv-connect {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding-inline: 20px;
+}
+
+.first-cv-clients {
+  font-size: 13px;
+}
+
+.first-cv-ask {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  align-self: stretch;
+  margin-top: 16px;
+  padding-top: 20px;
+  border-top: 1px solid var(--mr-separator);
+  font-size: 13px;
+}
+
+.prompt {
+  padding: 10px 14px;
+  border-radius: 14px 14px 4px;
+  background: var(--mr-bubble-bg);
+  color: var(--mr-bubble-text);
+  font-size: 14px;
+  line-height: 1.45;
+}

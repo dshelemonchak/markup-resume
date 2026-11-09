@@ -38,16 +38,30 @@
       </section>
     }
 
-    <section class="section" aria-labelledby="connect-claude-code">
-      <h3 id="connect-claude-code" class="section-title">{{ 'connectClaude.code.title' | transloco }}</h3>
-      <p [innerHTML]="'connectClaude.code.text' | transloco"></p>
-    </section>
-
     <section class="section" aria-labelledby="connect-claude-desktop">
       <h3 id="connect-claude-desktop" class="section-title">
         {{ 'connectClaude.desktop.title' | transloco }}
       </h3>
-      <p [innerHTML]="'connectClaude.desktop.text' | transloco"></p>
+      <ol class="steps">
+        <li [innerHTML]="'connectClaude.desktop.open' | transloco"></li>
+        <li>
+          {{ 'connectClaude.desktop.paste' | transloco }}
+          <mr-copy-block class="copy" [text]="mcpUrl" />
+        </li>
+        <li>{{ 'connectClaude.desktop.signIn' | transloco }}</li>
+      </ol>
     </section>
+
+    <section class="section" aria-labelledby="connect-claude-code">
+      <h3 id="connect-claude-code" class="section-title">{{ 'connectClaude.code.title' | transloco }}</h3>
+      <p>{{ 'connectClaude.code.run' | transloco }}</p>
+      <mr-copy-block class="copy" [text]="claudeCodeCommand" />
+      <p class="sign-in" [innerHTML]="'connectClaude.code.signIn' | transloco"></p>
+    </section>
+
+    <div class="ask">
+      <p>{{ 'connectClaude.ask' | transloco }}</p>
+      <p class="prompt">{{ 'connectClaude.prompt' | transloco }}</p>
+    </div>
   </div>
 </dialog>

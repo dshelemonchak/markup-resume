@@ -30,12 +30,15 @@ describe('ConnectClaude', () => {
     expect(dialog.open).toBe(false);
   });
 
-  it('explains Claude Code, and that Claude Desktop uses the hosted address', async () => {
+  it('gives Claude Desktop the hosted address and Claude Code the command, each to copy', async () => {
     const { root } = await render();
-    expect(root.querySelector('#connect-claude-code + p')!.innerHTML).toContain('<code>/mcp</code>');
-    expect(root.querySelector('#connect-claude-desktop + p')!.textContent).toContain(
-      'https://markup-resume.xyz/mcp',
+    const copyText = (section: string) =>
+      root.querySelector(`[aria-labelledby="${section}"] mr-copy-block code`)!.textContent;
+    expect(copyText('connect-claude-desktop')).toBe('https://markup-resume.xyz/mcp');
+    expect(copyText('connect-claude-code')).toBe(
+      'claude mcp add --transport http markup-resume https://markup-resume.xyz/mcp',
     );
+    expect(root.querySelector('.sign-in')!.innerHTML).toContain('<code>/mcp</code>');
     expect(root.querySelector('a[download]')).toBeNull();
   });
 

@@ -110,9 +110,15 @@
       "button": "Sign in with GitHub"
     },
     "loading": "Loading CVs…",
-    "unreachable": "The local server is not reachable. Start it with <code>docker compose up -d app</code>; the list comes back by itself.",
-    "failed": "The server could not load the CVs; see <code>docker compose logs app</code>. Trying again every few seconds.",
-    "empty": "No CVs yet. Ask Claude to create one, add an example with <code>docker compose exec dev pnpm seed</code>, or bring CVs from an earlier version with <code>docker compose exec dev pnpm import:files</code>."
+    "unreachable": "Markup Résumé is not reachable right now. The list comes back by itself as soon as it is.",
+    "failed": "The server could not load your CVs. Trying again every few seconds.",
+    "empty": {
+      "title": "Connect Claude to write your first CV",
+      "text": "Markup Résumé has no editor of its own. Claude writes and edits your CVs over MCP, and every change shows up here as it happens.",
+      "connect": "Connect Claude",
+      "clients": "Works with Claude Desktop, claude.ai and Claude Code.",
+      "ask": "Already connected? Ask Claude:"
+    }
   },
   "header": {
     "noCv": "No CV selected",
@@ -192,17 +198,22 @@
   },
   "connectClaude": {
     "title": "Connect Claude",
-    "intro": "Markup Résumé gives Claude tools to list, read and write your CVs. The app serves them itself while it is running.",
+    "intro": "Claude gets tools to list, read and write your CVs. Connect it once and sign in with the same GitHub account.",
     "connectedNow": "Connected now",
     "lastUsed": "last used {{ time }}",
     "noToolCalls": "no tool calls yet",
+    "desktop": {
+      "title": "Claude Desktop or claude.ai",
+      "open": "Open <strong>Settings → Connectors → Add custom connector</strong>.",
+      "paste": "Paste this address:",
+      "signIn": "Sign in with GitHub when Claude asks."
+    },
     "code": {
       "title": "Claude Code",
-      "text": "Run <code>claude mcp add --transport http markup-resume https://markup-resume.xyz/mcp</code>, then <code>/mcp</code> in Claude Code to sign in with GitHub and check that it is connected."
+      "run": "Run this command:",
+      "signIn": "Then run <code>/mcp</code> in Claude Code and sign in with GitHub."
     },
-    "desktop": {
-      "title": "Claude Desktop",
-      "text": "In Claude Desktop or claude.ai, open Settings → Connectors → Add custom connector, enter <code>https://markup-resume.xyz/mcp</code> and sign in with GitHub when asked."
-    }
+    "ask": "Then ask Claude:",
+    "prompt": "Create a CV for me on the classic template."
   }
 }
