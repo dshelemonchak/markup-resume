@@ -54,8 +54,9 @@ export class Landing {
   protected readonly pdfChecks = PDF_CHECKS;
 
   constructor() {
+    // Only a confirmed user: while the user reloads (right after signing out) the old value is still there.
     effect(() => {
-      if (this.api.currentUser.hasValue()) {
+      if (this.api.currentUser.status() === 'resolved') {
         void this.router.navigateByUrl('/cvs', { replaceUrl: true });
       }
     });
