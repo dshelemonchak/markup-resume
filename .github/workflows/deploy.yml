@@ -70,8 +70,12 @@ jobs:
         run: |
           push() { # <Dockerfile target> <repository>
             local image=$REGISTRY/$2:$GITHUB_SHA
-            # Tags are immutable: when the deploy is re-run, the images of this commit are already there.
-            if docker manifest inspect "$image" >/dev/null 2>&1; then
+            # Tags are immutable: when the deploy is re-run, the images of this commit are already there. Asked through
+            # the ECR API: docker manifest inspect failed for existing images and hid why.
+            local found
+            found=$(aws ecr batch-get-image --repository-name "$2" --image-ids imageTag="$GITHUB_SHA" \
+              --query 'length(images)' --output text)
+            if [[ $found != 0 ]]; then
               echo "$image is already in ECR"
               return
             fi
