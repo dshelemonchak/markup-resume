@@ -12,13 +12,19 @@ export type Generated<T> =
 
 export type IdentityProvider = 'github' | 'google';
 
-export type ResumeTag = 'angular' | 'frontend' | 'fullstack' | 'react';
-
 export type RevisionAuthor = 'claude' | 'system' | 'user';
 
 export type RevisionKind = 'restore' | 'write';
 
+export type SalaryPeriod = 'hour' | 'month' | 'year';
+
+export type Seniority = 'intern' | 'junior' | 'lead' | 'middle' | 'senior';
+
+export type Tag = 'angular' | 'frontend' | 'fullstack' | 'react';
+
 export type Timestamp = ColumnType<Date, Date | string, Date | string>;
+
+export type VacancyStatus = 'applied' | 'interview' | 'no_reply' | 'offer' | 'rejected' | 'saved';
 
 export interface OauthAccessTokens {
   created_at: Generated<Timestamp>;
@@ -82,7 +88,6 @@ export interface ResumeRevisions {
 }
 
 export interface Resumes {
-  company_name: string | null;
   created_at: Generated<Timestamp>;
   current_revision_id: string;
   deleted_at: Timestamp | null;
@@ -92,12 +97,11 @@ export interface Resumes {
   slug: string;
   title: string;
   updated_at: Generated<Timestamp>;
-  vacancy_url: string | null;
 }
 
 export interface ResumeTags {
   resume_id: string;
-  tag: ResumeTag;
+  tag: Tag;
 }
 
 export interface Sessions {
@@ -125,6 +129,33 @@ export interface Users {
   name: string | null;
 }
 
+export interface Vacancies {
+  applied_at: Timestamp | null;
+  company_name: string | null;
+  created_at: Generated<Timestamp>;
+  deleted_at: Timestamp | null;
+  id: Generated<string>;
+  location: string | null;
+  notes: string | null;
+  owner_id: string;
+  position: string | null;
+  resume_id: string | null;
+  salary_currency: string | null;
+  salary_max: number | null;
+  salary_min: number | null;
+  salary_period: SalaryPeriod | null;
+  seniority: Seniority | null;
+  sent_revision_id: string | null;
+  status: Generated<VacancyStatus>;
+  updated_at: Generated<Timestamp>;
+  url: string | null;
+}
+
+export interface VacancyTags {
+  tag: Tag;
+  vacancy_id: string;
+}
+
 export interface DB {
   oauth_access_tokens: OauthAccessTokens;
   oauth_authorization_codes: OauthAuthorizationCodes;
@@ -137,4 +168,6 @@ export interface DB {
   sessions: Sessions;
   user_identities: UserIdentities;
   users: Users;
+  vacancies: Vacancies;
+  vacancy_tags: VacancyTags;
 }
