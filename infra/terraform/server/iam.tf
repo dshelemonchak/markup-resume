@@ -4,7 +4,7 @@ data "aws_caller_identity" "current" {}
 
 # Made by ../platform; looked up by name, so this root does not read the other one's state.
 data "aws_ecr_repository" "images" {
-  for_each = toset(["markup-resume-app", "markup-resume-web"])
+  for_each = toset(["markup-resume-app", "markup-resume-web", "markup-resume-server"])
 
   name = each.key
 }
