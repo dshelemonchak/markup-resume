@@ -38,6 +38,14 @@ jobs:
       - name: Database tests
         run: docker compose run --rm --user root dev pnpm test:db
 
+  # The Java server: format check, unit and architecture tests, and Testcontainers tests against Postgres.
+  server:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Build and test
+        run: docker compose run --rm java ./mvnw -B -ntp verify
+
   # Terraform (ADR-0029): formatting and a validation of each root, with no AWS credentials and no state.
   terraform:
     runs-on: ubuntu-latest

@@ -67,13 +67,13 @@ data "aws_iam_policy_document" "deploy" {
     resources = ["*"]
   }
 
-  # Point the server at the new images (../server/parameters.tf), so a reboot starts the same version. Only these two
+  # Point the server at the new images (../server/parameters.tf), so a reboot starts the same version. Only these
   # parameters: the secrets stay out of reach.
   statement {
     sid     = "SetImageTags"
     actions = ["ssm:PutParameter"]
     resources = [
-      for name in ["APP_IMAGE", "WEB_IMAGE"] :
+      for name in ["APP_IMAGE", "WEB_IMAGE", "SERVER_IMAGE"] :
       "arn:aws:ssm:${var.region}:${data.aws_caller_identity.current.account_id}:parameter/markup-resume/${name}"
     ]
   }

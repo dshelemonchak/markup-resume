@@ -33,3 +33,6 @@ infra/terraform/**/*.tfstate.*
 infra/terraform/**/backend.hcl
 # Saved plans (terraform plan -out) can hold secret values in plain text.
 infra/terraform/**/tfplan
+
+# --- Java ---
+target/

@@ -81,7 +81,41 @@ services:
     ports:
       - '4200:4200'
 
+  # The Java server's toolbox: docker compose run --rm java ./mvnw verify. Testcontainers starts its own Postgres
+  # through the host's Docker socket.
+  java:
+    image: eclipse-temurin:25-jdk
+    profiles: [java]
+    working_dir: /workspace/server
+    volumes:
+      - .:/workspace
+      - java-m2:/root/.m2
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      TESTCONTAINERS_HOST_OVERRIDE: host.docker.internal
+    extra_hosts:
+      - host.docker.internal:host-gateway
+
+  # The Java server on the same database as app: docker compose up app-java, then http://localhost:3001/api/health.
+  app-java:
+    build:
+      context: .
+      target: server
+    image: markup-resume:server
+    profiles: [java]
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/markup
+      SPRING_DATASOURCE_USERNAME: markup
+      SPRING_DATASOURCE_PASSWORD: markup
+    ports:
+      - '127.0.0.1:3001:8080'
+    depends_on:
+      db:
+        condition: service_healthy
+
 volumes:
+  java-m2:
+    name: markup-resume-java-m2
   db-data:
     name: markup-resume-db
     labels:

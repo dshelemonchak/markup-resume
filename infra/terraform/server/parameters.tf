@@ -20,6 +20,7 @@ locals {
     OWNER_GITHUB_ID      = "String"
     APP_IMAGE            = "String"
     WEB_IMAGE            = "String"
+    SERVER_IMAGE         = "String"
   }
 }
 
