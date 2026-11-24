@@ -23,6 +23,13 @@ services:
       APP_ORIGIN: https://localhost
       MCP_URL: https://localhost/mcp
       ALLOWED_GITHUB_IDS: ${OWNER_GITHUB_ID:-0}
+  server:
+    build:
+      context: .
+      target: server
+    image: markup-resume:server
+    environment:
+      SPRING_DATASOURCE_PASSWORD: local
   web:
     build:
       context: .

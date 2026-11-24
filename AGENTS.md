@@ -16,6 +16,8 @@ shows them live, and PDF export is checked against the rendered page. See `READM
   - Layer boundaries are enforced by ESLint (`eslint-plugin-boundaries`).
 - `packages/web` — Angular 22: standalone, zoneless, signals; Transloco i18n.
 - `packages/styles` — templates (`templates/<name>/`), Inter fonts, contact icons.
+- `server` — the Java 25 / Spring Boot backend that replaces `packages/app` route by route, on the same database
+  (`server/README.md`). Layers as in `packages/app`, enforced by ArchUnit.
 
 ## Commands
 
@@ -23,6 +25,7 @@ All tooling runs in Docker; run commands in the `dev` container from the reposit
 
 - `docker compose exec dev pnpm check` — lint, format check, typecheck, i18n keys, unit tests (the CI gate).
 - `docker compose exec dev pnpm test:db` — Postgres tests (`*.db.test.ts`); needs the `db` service.
+- `docker compose run --rm java ./mvnw verify` — the Java server's checks (Spotless, unit, ArchUnit, Testcontainers).
 - `docker compose exec dev pnpm format` — Prettier.
 - `docker compose exec dev pnpm --filter @markup-resume/app db:types` — regenerate
   `database-types.generated.ts` after a schema change (needs `db`).
@@ -47,8 +50,8 @@ them; ask if a check needs one.
   an earlier version of a template gets the latest one with the same major version, so minor and patch changes
   must stay compatible; a breaking change takes a new major.
 - **SVG:** separate `.svg` files only, never `data:` URIs.
-- **Database:** schema changes are new Kysely migrations in `adapters/postgres-storage/migrations/`
-  (`YYYY-MM-DD-description.ts`), applied at app startup; never edit an applied one.
+- **Database:** schema changes are new Flyway migrations in `server/src/main/resources/db/migration/`
+  (`V<n>__description.sql`); the Kysely migrations of `packages/app` are frozen. Never edit an applied one.
 - **Validation:** every CV write goes through `validateResumeDocument` (domain); storage accepts only its
   `CanonicalResumeHtml` output.
 

@@ -9,6 +9,7 @@ on:
     # Only what ends up in the images or on the server: docs, Terraform and the other workflows do not deploy.
     paths:
       - packages/**
+      - server/**
       - package.json
       - pnpm-lock.yaml
       - pnpm-workspace.yaml
@@ -81,6 +82,7 @@ jobs:
           }
           push runtime markup-resume-app
           push web markup-resume-web
+          push server markup-resume-server
 
       - name: Point the server at the new images
         run: |
@@ -88,6 +90,8 @@ jobs:
             --value "$REGISTRY/markup-resume-app:$GITHUB_SHA" >/dev/null
           aws ssm put-parameter --overwrite --name /markup-resume/WEB_IMAGE \
             --value "$REGISTRY/markup-resume-web:$GITHUB_SHA" >/dev/null
+          aws ssm put-parameter --overwrite --name /markup-resume/SERVER_IMAGE \
+            --value "$REGISTRY/markup-resume-server:$GITHUB_SHA" >/dev/null
 
       - name: Restart the server with them
         run: |

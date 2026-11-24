@@ -79,3 +79,26 @@ CMD ["node", "src/main.ts"]
 FROM caddy:2.10-alpine AS web
 COPY deploy/Caddyfile /etc/caddy/Caddyfile
 COPY --from=build /workspace/packages/web/dist/web/browser /srv
+
+# The Java server, which replaces the app route by route: built with the Maven Wrapper, run on a JRE.
+FROM eclipse-temurin:25-jdk AS server-build
+WORKDIR /server
+COPY server/.mvn .mvn
+COPY server/mvnw server/pom.xml ./
+RUN --mount=type=cache,target=/root/.m2 ./mvnw -B -ntp dependency:go-offline
+COPY server/src src
+RUN --mount=type=cache,target=/root/.m2 ./mvnw -B -ntp package -DskipTests \
+ && cp target/markup-resume-server-*.jar /server/server.jar
+
+FROM eclipse-temurin:25-jre AS server
+# curl for the container healthcheck.
+RUN apt-get update \
+ && apt-get install -y --no-install-recommends curl \
+ && rm -rf /var/lib/apt/lists/* \
+ && useradd --system --uid 10001 server
+# The heap follows the container's memory limit (compose.prod.yaml).
+ENV JAVA_TOOL_OPTIONS=-XX:MaxRAMPercentage=75
+COPY --from=server-build /server/server.jar /opt/server/server.jar
+USER server
+EXPOSE 8080
+CMD ["java", "-jar", "/opt/server/server.jar"]

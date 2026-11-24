@@ -8,7 +8,16 @@ import tseslint from 'typescript-eslint';
 
 export default defineConfig(
   {
-    ignores: ['**/dist/', '**/.angular/', '**/coverage/', '.pnpm-store/', 'data/', 'reference/', 'docs/'],
+    ignores: [
+      '**/dist/',
+      '**/target/',
+      '**/.angular/',
+      '**/coverage/',
+      '.pnpm-store/',
+      'data/',
+      'reference/',
+      'docs/',
+    ],
   },
 
   // TypeScript everywhere, with type information.

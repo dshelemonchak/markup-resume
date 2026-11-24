@@ -1,6 +1,6 @@
-# The two production images (ADR-0029): the app, and Caddy with the built UI.
+# The production images (ADR-0029): the app, Caddy with the built UI, and the Java server that replaces the app.
 locals {
-  repositories = toset(["markup-resume-app", "markup-resume-web"])
+  repositories = toset(["markup-resume-app", "markup-resume-web", "markup-resume-server"])
 }
 
 resource "aws_ecr_repository" "images" {

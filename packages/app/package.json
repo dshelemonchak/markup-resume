@@ -13,7 +13,7 @@
     "seed": "node src/seed.ts",
     "import:files": "node src/import-files.ts",
     "claim:local-resumes": "node src/claim-local-resumes.ts",
-    "db:types": "kysely-codegen --dialect postgres --out-file src/adapters/postgres-storage/database-types.generated.ts --exclude-pattern 'kysely_*' && prettier --write src/adapters/postgres-storage/database-types.generated.ts",
+    "db:types": "kysely-codegen --dialect postgres --out-file src/adapters/postgres-storage/database-types.generated.ts --exclude-pattern '{kysely_*,flyway_*}' && prettier --write src/adapters/postgres-storage/database-types.generated.ts",
     "typecheck": "tsc --noEmit",
     "test": "vitest run --passWithNoTests --exclude '**/*.db.test.ts'",
     "test:db": "vitest run .db.test"

@@ -1,0 +1,16 @@
+server:
+  port: ${PORT:8080}
+
+spring:
+  application:
+    name: markup-resume-server
+  # Set from the environment: SPRING_DATASOURCE_URL, SPRING_DATASOURCE_USERNAME, SPRING_DATASOURCE_PASSWORD.
+  datasource:
+    url: jdbc:postgresql://localhost:5433/markup
+    username: markup
+    password: markup
+  flyway:
+    # The database Node built gets V1 recorded as applied instead of run (see V1__node_schema.sql).
+    baseline-on-migrate: true
+    baseline-version: 1
+    baseline-description: node schema
