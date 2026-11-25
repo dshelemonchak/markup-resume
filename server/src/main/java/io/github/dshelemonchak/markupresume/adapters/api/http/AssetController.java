@@ -33,9 +33,10 @@ class AssetController {
     private final Path iconsDir;
 
     AssetController(
-            @Value("${markup.assets.fonts-dir}") Path fontsDir, @Value("${markup.assets.icons-dir}") Path iconsDir) {
-        this.fontsDir = fontsDir;
-        this.iconsDir = iconsDir;
+            @Value("${markup.assets.fonts-dir}") String fontsDir,
+            @Value("${markup.assets.icons-dir}") String iconsDir) {
+        this.fontsDir = Path.of(fontsDir);
+        this.iconsDir = Path.of(iconsDir);
     }
 
     @GetMapping("/api/v1/fonts/{file}")
