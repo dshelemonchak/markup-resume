@@ -97,8 +97,13 @@ RUN apt-get update \
  && rm -rf /var/lib/apt/lists/* \
  && useradd --system --uid 10001 server
 # The heap follows the container's memory limit (compose.prod.yaml).
-ENV JAVA_TOOL_OPTIONS=-XX:MaxRAMPercentage=75
+ENV JAVA_TOOL_OPTIONS=-XX:MaxRAMPercentage=75 \
+    MARKUP_ASSETS_FONTS_DIR=/opt/server/assets/fonts \
+    MARKUP_ASSETS_ICONS_DIR=/opt/server/assets/icons
 COPY --from=server-build /server/server.jar /opt/server/server.jar
+# The style library's fonts and icons, which the server answers by URL (ADR-0007).
+COPY packages/styles/fonts/inter /opt/server/assets/fonts
+COPY packages/styles/icons /opt/server/assets/icons
 USER server
 EXPOSE 8080
 CMD ["java", "-jar", "/opt/server/server.jar"]

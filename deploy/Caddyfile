@@ -3,6 +3,12 @@
 {$SITE_ADDRESS} {
 	encode zstd gzip
 
+	# The Java server, which takes over the app's routes one by one (server/README.md).
+	@server path /api/v1/fonts/* /api/v1/icons/*
+	handle @server {
+		reverse_proxy server:8080
+	}
+
 	# The app: the API, sign-in, the OAuth server, its discovery documents and MCP.
 	@app path /api/* /auth/* /oauth/* /.well-known/* /mcp /mcp/*
 	handle @app {
