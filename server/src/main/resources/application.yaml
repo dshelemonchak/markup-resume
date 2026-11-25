@@ -14,3 +14,10 @@ spring:
     baseline-on-migrate: true
     baseline-version: 1
     baseline-description: node schema
+
+# The style library's fonts and icons (ADR-0007), relative to the working directory; a deployment that keeps them
+# elsewhere sets MARKUP_ASSETS_FONTS_DIR and MARKUP_ASSETS_ICONS_DIR.
+markup:
+  assets:
+    fonts-dir: ../packages/styles/fonts/inter
+    icons-dir: ../packages/styles/icons
