@@ -54,6 +54,14 @@ class AssetControllerTest {
     }
 
     @Test
+    void refusesANameThatClimbsOutOfTheFolder() {
+        assertThat(mvc.get().uri("/api/v1/icons/..%2Femail.svg"))
+                .hasStatus(HttpStatus.NOT_FOUND)
+                .bodyJson()
+                .isEqualTo("{\"error\":\"not-found\"}");
+    }
+
+    @Test
     void answersNotFoundForAFileThatIsNotThere() {
         assertThat(mvc.get().uri("/api/v1/icons/missing.svg"))
                 .hasStatus(HttpStatus.NOT_FOUND)
