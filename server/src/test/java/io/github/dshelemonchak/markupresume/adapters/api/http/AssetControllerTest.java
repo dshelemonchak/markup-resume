@@ -6,6 +6,8 @@ import io.github.dshelemonchak.markupresume.adapters.storage.postgres.DatabaseRe
 import java.nio.file.Files;
 import java.nio.file.Path;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.http.HttpStatus;
@@ -51,6 +53,18 @@ class AssetControllerTest {
                 .hasStatus(HttpStatus.NOT_FOUND)
                 .bodyJson()
                 .isEqualTo("{\"error\":\"not-found\"}");
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"../email.svg", "..%2Femail.svg", "icons/email.svg", "/email.svg", "email.txt", ".svg"})
+    void takesNoNameButAPlainAssetFile(String file) {
+        assertThat(AssetController.assetType(file)).isEmpty();
+    }
+
+    @Test
+    void readsTheTypeFromTheName() {
+        assertThat(AssetController.assetType("email.svg")).contains(MediaType.valueOf("image/svg+xml"));
+        assertThat(AssetController.assetType("inter-latin-400-normal.woff2")).contains(MediaType.valueOf("font/woff2"));
     }
 
     @Test
