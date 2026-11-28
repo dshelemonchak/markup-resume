@@ -5,6 +5,7 @@ import java.nio.file.Files;
 import java.nio.file.NoSuchFileException;
 import java.nio.file.Path;
 import java.util.Map;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import org.springframework.beans.factory.annotation.Value;
@@ -49,10 +50,15 @@ class AssetController {
         return serveAsset(iconsDir, file);
     }
 
+    static Optional<MediaType> assetType(String file) {
+        Matcher name = ASSET_NAME.matcher(file);
+        return name.matches() ? Optional.of(ASSET_TYPES.get(name.group(1))) : Optional.empty();
+    }
+
     /** A file from an asset folder, or 404 for a name that is not a plain asset file or does not exist. */
     private static ResponseEntity<Object> serveAsset(Path dir, String file) throws IOException {
-        Matcher name = ASSET_NAME.matcher(file);
-        if (!name.matches()) {
+        Optional<MediaType> type = assetType(file);
+        if (type.isEmpty()) {
             return notFound();
         }
         byte[] body;
@@ -62,7 +68,7 @@ class AssetController {
             return notFound();
         }
         return ResponseEntity.ok()
-                .contentType(ASSET_TYPES.get(name.group(1)))
+                .contentType(type.get())
                 // An SVG opened on its own is a document; it gets no scripts and no access to the app.
                 .header("Content-Security-Policy", "sandbox")
                 .cacheControl(CacheControl.noCache())
